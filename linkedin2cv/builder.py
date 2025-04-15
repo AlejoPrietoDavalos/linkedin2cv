@@ -19,25 +19,34 @@ class BuilderCV:
     def __init__(
             self,
             *,
-            path_folder: Path,
+            folder_name: str,
             colors_cv: ColorsCV,
             sizes_cv: SizesCV,
-            path_photo: Path = None,
+            path_data: Path = Path("data"),
+            photo_name: Optional[str] = None,
             page_size: Tuple[float, float] = A4,
             photo_circle: bool = True
     ):
-        self.path_folder: Path = path_folder
+        self.path_data = path_data
+        self.path_folder: Path = self.path_data / folder_name
         self.data: LinkedinData = load_linkedin_data(path_folder=self.path_folder)
         self.colors_cv = colors_cv
         self.sizes_cv = sizes_cv
-        self.path_photo: Optional[Path] = path_photo
+
+        self.path_photo = self._get_path_photo(photo_name=photo_name)
+
         self.page_size = page_size
         self.photo_circle = photo_circle
 
         self.page_width, self.page_height = A4
-        self.path_pdf: Path = self.path_folder / f"{self.path_folder.stem}.pdf"
+        self.path_pdf: Path = self.path_data / f"{self.path_folder.stem}.pdf"
         self.c = Canvas(str(self.path_pdf), pagesize=page_size)
         self.styles = self._load_styles()
+
+    def _get_path_photo(self, *, photo_name: Optional[str]) -> Optional[Path]:
+        if photo_name is not None:
+            return self.path_data / photo_name
+        return None
 
     def _load_styles(self) -> None:
         styles = getSampleStyleSheet()
