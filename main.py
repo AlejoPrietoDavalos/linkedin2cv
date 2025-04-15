@@ -16,7 +16,7 @@ def load_font():
 def main(*, folder_name: str, photo_name: Optional[str] = None):
     AGE = 30
     URL_LINKEDIN = "https://www.linkedin.com/in/alejoprietodavalos/"
-    URL_GITHUB = "https://github.com/AlejoPrietoDavalos"
+    URL_GITHUB = "https://github.com/AlejoPrietoDavalos/"
     URL_WEB = "https://alejoprietodavalos.github.io/"
     colors_cv = ColorsCV()
     sizes_cv = SizesCV()

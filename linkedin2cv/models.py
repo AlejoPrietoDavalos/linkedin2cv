@@ -139,7 +139,7 @@ class SizesCV:
             *,
             margin: int = 5,
             margin_left: int = 5,
-            column_left_width: int = 60,
+            column_left_width: int = 65,
             photo_size: int = 30
     ):
         self.margin = margin * mm

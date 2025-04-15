@@ -6,7 +6,7 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Frame, Spacer, KeepTogether
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.enums import TA_LEFT, TA_JUSTIFY
 
 from linkedin2cv.models import load_linkedin_data, LinkedinData, ColorsCV, SizesCV
 
@@ -71,7 +71,7 @@ class BuilderCV:
         styles.add(ParagraphStyle(
             name="SubHeader",
             fontName="HackNerdFont",
-            fontSize=12,
+            fontSize=6,
             leading=16,
             alignment=TA_LEFT,
             textColor=self.colors_cv.text,
@@ -92,6 +92,15 @@ class BuilderCV:
             fontSize=7,
             leading=12,
             textColor=self.colors_cv.text,
+        ))
+
+        styles.add(ParagraphStyle(
+            name="SidebarText",
+            fontName="HackNerdFont",
+            fontSize=6,
+            leading=10,
+            textColor=self.colors_cv.text,
+            alignment=TA_LEFT,
         ))
         return styles
 
@@ -129,28 +138,50 @@ class BuilderCV:
 
     def draw_header(self) -> None:
         x = self.sizes_cv.margin_left + self.sizes_cv.column_left_wifth + 10 * mm
-        frame_height = 80
-        y = self.page_height - self.sizes_cv.margin - frame_height
+        max_width = self.page_width - x - self.sizes_cv.margin
 
-        frame = Frame(
+        # Nombre
+        name_height = 50
+        name_y = self.page_height - self.sizes_cv.margin - name_height
+        name_frame = Frame(
             x1=x,
-            y1=y,
-            width=self.page_width - x - self.sizes_cv.margin,
-            height=frame_height,
+            y1=name_y,
+            width=max_width,
+            height=name_height,
             showBoundary=0
         )
-
         name = Paragraph(self.full_name, self.styles["Header"])
-        info = [
-            f"Edad: {self.age}",
-            f"Mi página web: <a href='{self.url_website}'>{self.url_website}</a>",
-            f"GitHub: {self.url_github}",
-            f"LinkedIn: {self.url_linkedin}"
-        ]
-        info_paragraphs = [Paragraph(i, self.styles["SubHeader"]) for i in info]
+        name_frame.addFromList([name], self.c)
 
-        flow = [name, Spacer(1, 6)] + info_paragraphs
-        frame.addFromList(flow, self.c)
+        # Info debajo del nombre
+        info = []
+        if self.age:
+            info.append(f"Edad: {self.age}")
+        if self.url_website:
+            info.append(f"Mi página web: <a href='{self.url_website}'>{self.url_website}</a>")
+        if self.url_github:
+            info.append(f"GitHub: <a href='{self.url_github}'>{self.url_github}</a>")
+        if self.url_linkedin:
+            info.append(f"LinkedIn: <a href='{self.url_linkedin}'>{self.url_linkedin}</a>")
+
+        # Reducimos el leading (espaciado entre líneas)
+        style_subheader = ParagraphStyle(
+            name="SubHeaderCompact",
+            parent=self.styles["SubHeader"],
+            leading=10,  # más compacto
+            spaceAfter=2,
+        )
+        info_paragraphs = [Paragraph(i, style_subheader) for i in info]
+
+        # Subimos el bloque
+        info_frame = Frame(
+            x1=x,
+            y1=name_y - 42,  # estaba -60, ahora más arriba
+            width=max_width,
+            height=40,  # ajustado también
+            showBoundary=0
+        )
+        info_frame.addFromList(info_paragraphs, self.c)
 
     def draw_sidebar(self) -> None:
         self.c.setFillColor(self.colors_cv.primary)
@@ -159,19 +190,20 @@ class BuilderCV:
             self.page_height, fill=True, stroke=0
         )
 
-        stack_text = Paragraph(self.data.profile.summary, self.styles["JobDesc"])
+        stack_text = Paragraph(self.data.profile.summary, self.styles["SidebarText"])
 
         frame = Frame(
-            self.sizes_cv.margin_left + 5 * mm,
+            self.sizes_cv.margin_left + 1 * mm,
             self.sizes_cv.margin + 5 * mm,
-            self.sizes_cv.column_left_wifth - 10 * mm,
+            self.sizes_cv.column_left_wifth - 2 * mm,  # 1mm de margen izquierdo + 1mm derecho
             self.page_height - 2 * self.sizes_cv.margin - 10 * mm,
             showBoundary=0
         )
         frame.addFromList([stack_text], self.c)
 
     def draw_positions(self) -> None:
-        x = self.sizes_cv.margin + self.sizes_cv.column_left_wifth + 10 * mm
+        LEN_SIDEBAR_TO_BODY_TEXT = 2
+        x = self.sizes_cv.margin + self.sizes_cv.column_left_wifth + LEN_SIDEBAR_TO_BODY_TEXT * mm
         width = self.page_width - x - self.sizes_cv.margin
         y_start = self.page_height - self.sizes_cv.margin - 100
         bottom_margin = self.sizes_cv.margin
