@@ -30,9 +30,8 @@ class BuilderCV:
             colors_cv: ColorsCV,
             sizes_cv: SizesCV,
             age: int,
-            url_linkedin: str,
-            url_github: Optional[str] = None,
             url_website: Optional[str] = None,
+            url_github: Optional[str] = None,
             path_data: Path = Path("data"),
             photo_name: Optional[str] = None,
             page_size: Tuple[float, float] = A4,
@@ -43,9 +42,8 @@ class BuilderCV:
         self.colors_cv = colors_cv
         self.sizes_cv = sizes_cv
         self.age = age
-        self.url_linkedin = url_linkedin
-        self.url_github = url_github
         self.url_website = url_website
+        self.url_github = url_github
         self.page_width, self.page_height = page_size
         self.photo_circle = photo_circle
 
@@ -97,35 +95,40 @@ class BuilderCV:
             if self.photo_circle:
                 self.c.restoreState()
 
-    def draw_header(self):
-        x = self.sizes_cv.margin_left + self.sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
-        max_width = self.page_width - x - self.sizes_cv.margin
-
-        name_y = self.page_height - self.sizes_cv.margin - NAME_HEIGHT
-        name_frame = Frame(x, name_y, max_width, NAME_HEIGHT, showBoundary=0)
-        name_frame.addFromList([Paragraph(self.full_name, self.styles["Header"])], self.c)
-
-        info = []
-        if self.age:
-            info.append(f"Edad: {self.age}")
-        if self.url_website:
-            info.append(f"Mi página web: <a href='{self.url_website}'>{self.url_website}</a>")
-        if self.url_github:
-            info.append(f"GitHub: <a href='{self.url_github}'>{self.url_github}</a>")
-        if self.url_linkedin:
-            info.append(f"LinkedIn: <a href='{self.url_linkedin}'>{self.url_linkedin}</a>")
-
-        style_subheader = ParagraphStyle(name="SubHeaderCompact", parent=self.styles["SubHeader"], leading=10, spaceAfter=2)
-        info_paragraphs = [Paragraph(i, style_subheader) for i in info]
-
-        Frame(x, name_y - INFO_BLOCK_Y_OFFSET, max_width, INFO_BLOCK_HEIGHT, showBoundary=0).addFromList(info_paragraphs, self.c)
-
     def draw_sidebar(self):
         self.c.setFillColor(self.colors_cv.primary)
         self.c.rect(self.sizes_cv.margin_left, 0, self.sizes_cv.column_left_wifth, self.page_height, fill=True, stroke=0)
+
         photo_bottom = self.page_height - self.sizes_cv.photo_size - PHOTO_TOP_PADDING
         sidebar_text_bottom = self.sizes_cv.margin + 5 * mm
         sidebar_height = photo_bottom - sidebar_text_bottom
+
+        content = []
+
+        # Nombre completo, más chico
+        name_style = ParagraphStyle(name="SidebarName", fontName=FONT, fontSize=10, leading=12,
+                                    textColor=self.colors_cv.accent, alignment=TA_LEFT)
+        content.append(Paragraph(self.full_name, name_style))
+        content.append(Spacer(1, 4))
+
+        # Info personal (edad, links)
+        info_lines = []
+        if self.age:
+            info_lines.append(f"Edad: {self.age}")
+        if self.url_website:
+            info_lines.append(f"Mi página web: <a href='{self.url_website}'>{self.url_website}</a>")
+        if self.url_github:
+            info_lines.append(f"GitHub: <a href='{self.url_github}'>{self.url_github}</a>")
+
+        style_links = ParagraphStyle(name="SidebarLinks", fontName=FONT, fontSize=6, leading=9,
+                                    textColor=self.colors_cv.text, alignment=TA_LEFT)
+        for line in info_lines:
+            content.append(Paragraph(line, style_links))
+            content.append(Spacer(1, 2))
+
+        # Summary del perfil
+        content.append(Spacer(1, 6))
+        content.append(Paragraph(self.data.profile.summary, self.styles["SidebarText"]))
 
         frame = Frame(
             self.sizes_cv.margin_left + FRAME_MARGIN_LEFT,
@@ -135,56 +138,56 @@ class BuilderCV:
             showBoundary=0
         )
 
-        frame.addFromList([Paragraph(self.data.profile.summary, self.styles["SidebarText"])], self.c)
+        frame.addFromList(content, self.c)
 
     def draw_positions(self):
         x = self.sizes_cv.margin + self.sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
         width = self.page_width - x - self.sizes_cv.margin
-        y_start = self.page_height - self.sizes_cv.margin - 100
+        y_start = self.page_height - self.sizes_cv.margin - 0
         bottom_margin = self.sizes_cv.margin
         usable_height = y_start - bottom_margin
         current_y = 0
 
         story = []
-        first_page = True
+        is_first_page = True
 
-        def flush_story():
+        def flush_story(is_first: bool):
             nonlocal current_y, story
-            self.draw_background()
-            if first_page:
-                self.draw_sidebar()
-                self.draw_photo()
-                self.draw_header()
+            if not is_first:
+                self.c.showPage()
+                self.draw_background()
+
             Frame(x, bottom_margin, width, usable_height, showBoundary=0).addFromList(story, self.c)
-            self.c.showPage()
-            current_y = 0
             story.clear()
+            current_y = 0
 
         for p in self.data.positions:
             title = f"{p.title} — {p.company_name} ({p.started_on} - {p.finished_on or 'Presente'})"
             para_title = Paragraph(title, self.styles["JobTitle"])
             para_desc = Paragraph(p.description.replace("\n", "<br/>"), self.styles["JobDesc"])
             spacer = Spacer(1, SPACER_HEIGHT)
+
             h_title = para_title.wrap(width, usable_height)[1]
             h_desc = para_desc.wrap(width, usable_height)[1]
             h_spacer = spacer.wrap(width, usable_height)[1]
             total_height = h_title + h_desc + h_spacer
 
             if current_y + total_height > usable_height:
-                flush_story()
-                first_page = False
+                flush_story(is_first_page)
+                is_first_page = False
 
             story.extend([para_title, para_desc, spacer])
             current_y += total_height
 
         if story:
-            self.draw_background()
+            if not is_first_page:
+                self.c.showPage()
+                self.draw_background()
             Frame(x, bottom_margin, width, usable_height, showBoundary=0).addFromList(story, self.c)
 
     def build_and_save(self):
         self.draw_background()
         self.draw_sidebar()
         self.draw_photo()
-        self.draw_header()
         self.draw_positions()
         self.c.save()

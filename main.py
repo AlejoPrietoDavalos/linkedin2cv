@@ -5,19 +5,21 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 from linkedin2cv.builder import BuilderCV
-from linkedin2cv.models import ColorsCV, SizesCV
+from linkedin2cv.models import LinkedinData, ColorsCV, SizesCV
 
 
 def load_font():
     path_font = Path("fonts") / "HackNerdFont-Regular.ttf"
     pdfmetrics.registerFont(TTFont("HackNerdFont", str(path_font)))
 
+def extra_process_data(*, data: LinkedinData) -> LinkedinData:
+    data.positions = data.positions[:-1]
+    return data
 
 def main(*, folder_name: str, photo_name: Optional[str] = None):
     AGE = 30
-    URL_LINKEDIN = "https://www.linkedin.com/in/alejoprietodavalos/"
-    URL_GITHUB = "https://github.com/AlejoPrietoDavalos/"
-    URL_WEB = "https://alejoprietodavalos.github.io/"
+    URL_WEB = "alejoprietodavalos.github.io/"
+    URL_GITHUB = "github.com/AlejoPrietoDavalos/"
     colors_cv = ColorsCV()
     sizes_cv = SizesCV()
     builder_cv = BuilderCV(
@@ -25,17 +27,15 @@ def main(*, folder_name: str, photo_name: Optional[str] = None):
         colors_cv=colors_cv,
         sizes_cv=sizes_cv,
         age=AGE,
-        url_linkedin=URL_LINKEDIN,
-        url_github=URL_GITHUB,
         url_website=URL_WEB,
+        url_github=URL_GITHUB,
         photo_name=photo_name,
         photo_circle=True
     )
 
-    #builder_cv.data.profile.summary = builder_cv.data.profile.summary.replace(
-    #    "➤Mi página web➤ https://alejoprietodavalos.github.io/ <br/>", ""
-    #)
-
+    # --> Se hace un procesamiento especial si necesitás
+    # --> customizar como vienen los datos de linkedin.
+    builder_cv.data = extra_process_data(data=builder_cv.data)
     builder_cv.build_and_save()
 
 
@@ -43,6 +43,6 @@ def main(*, folder_name: str, photo_name: Optional[str] = None):
 if __name__ == "__main__":
     load_font()
     main(
-        folder_name="Basic_LinkedInDataExport_04-14-2025",
+        folder_name="Basic_LinkedInDataExport_04-16-2025",
         photo_name="img_profile.png"
     )
