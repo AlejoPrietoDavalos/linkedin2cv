@@ -5,7 +5,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 
 from linkedin2cv.builder import BuilderCV
-from linkedin2cv.models import LinkedinData, ColorsCV, SizesCV
+from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 
@@ -54,17 +54,17 @@ def main(*, folder_name: str, photo_name: Optional[str] = None):
     AGE = 30
     URL_WEB = "alejoprietodavalos.github.io/"
     URL_GITHUB = "github.com/AlejoPrietoDavalos/"
-    colors_cv = ColorsCV()
+    colors_cv = StyleCV()
     sizes_cv = SizesCV()
     builder_cv = BuilderCV(
         folder_name=folder_name,
-        colors_cv=colors_cv,
+        style_cv=colors_cv,
         sizes_cv=sizes_cv,
         age=AGE,
         url_website=URL_WEB,
         url_github=URL_GITHUB,
         photo_name=photo_name,
-        photo_circle=True
+        is_photo_circle=True
     )
 
     # --> Se hace un procesamiento especial si necesitás

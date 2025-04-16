@@ -16,6 +16,9 @@ class Profile(BaseModel):
     headline: str
     summary: str
 
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"
 
 class Position(BaseModel):
     company_name: str
@@ -31,7 +34,7 @@ class Position(BaseModel):
 
     @property
     def text_sub_title(self) -> str:
-        return f"{self.company_name} - ({self.started_on} - {self.finished_on or ACTUALIDAD})"
+        return f"{self.company_name} ({self.started_on} ~ {self.finished_on or ACTUALIDAD})"
 
 
 class Education(BaseModel):
@@ -82,8 +85,11 @@ def load_linkedin_data(*, path_folder: Path) -> LinkedinData:
         educations=load_educations(path_folder=path_folder)
     )
 
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, StyleSheet1
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
+FONT = "HackNerdFont"
 
-class ColorsCV:
+class StyleCV:
     def __init__(
             self,
             *,
@@ -98,6 +104,20 @@ class ColorsCV:
         self.text: Color = colors.HexColor(text)
         self.background: Color = colors.HexColor(background)
         self.sidebar_text: Color = colors.HexColor(sidebar_text)
+
+    def get_styles(self) -> StyleSheet1:
+        styles = getSampleStyleSheet()
+        styles.add(ParagraphStyle(name="Header", fontName=FONT, fontSize=25, leading=24, alignment=TA_LEFT, textColor=self.accent))
+        styles.add(ParagraphStyle(name="SubHeader", fontName=FONT, fontSize=6, leading=16, alignment=TA_LEFT, textColor=self.sidebar_text))
+        styles.add(ParagraphStyle(name="JobTitle", fontName=FONT, fontSize=11, leading=14, textColor=self.accent, spaceAfter=4))
+        styles.add(ParagraphStyle(name="JobSubTitle", fontName=FONT, fontSize=8, leading=14, textColor=self.accent, spaceAfter=4))
+        styles.add(ParagraphStyle(name="JobDesc", fontName=FONT, fontSize=7, leading=12, textColor=self.text))
+        styles.add(ParagraphStyle(name="SidebarName", fontName=FONT, fontSize=12, leading=12, textColor=self.sidebar_text, alignment=TA_CENTER))
+        styles.add(ParagraphStyle(name="SidebarHeadline", fontName=FONT, fontSize=8, leading=10,textColor=self.sidebar_text, alignment=TA_CENTER, spaceAfter=4))
+        styles.add(ParagraphStyle(name="SidebarText", fontName=FONT, fontSize=6, leading=10, textColor=self.sidebar_text, alignment=TA_LEFT))
+        styles.add(ParagraphStyle(name="SidebarLinks", fontName=FONT, fontSize=6, leading=9, textColor=self.sidebar_text, alignment=TA_LEFT))
+        return styles
+
 
 
 class SizesCV:
