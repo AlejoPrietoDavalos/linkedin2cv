@@ -7,6 +7,8 @@ from reportlab.lib import colors
 from reportlab.lib.colors import Color
 from reportlab.lib.units import mm
 
+ACTUALIDAD = "Actualidad"
+
 
 class Profile(BaseModel):
     first_name: str
@@ -22,6 +24,14 @@ class Position(BaseModel):
     location: Optional[str]
     started_on: str
     finished_on: Optional[str]
+
+    @property
+    def text_title(self) -> str:
+        return self.title
+
+    @property
+    def text_sub_title(self) -> str:
+        return f"{self.company_name} - ({self.started_on} - {self.finished_on or ACTUALIDAD})"
 
 
 class Education(BaseModel):
@@ -77,15 +87,17 @@ class ColorsCV:
     def __init__(
             self,
             *,
-            primary: str = "#2F2F2F",
-            accent: str = "#9292ac",
-            text: str = "#ccd5e3",
-            background: str = "#4A4A4A",
+            sidebar_panel: str = "#4d4d4d",
+            accent: str = "#2F2F2F",#"#b4ceed",
+            text: str = "#4A4A4A",
+            background: str = "#dddddd",
+            sidebar_text: str = "#dddddd",
     ):
-        self.primary: Color = colors.HexColor(primary)
+        self.sidebar_panel: Color = colors.HexColor(sidebar_panel)
         self.accent: Color = colors.HexColor(accent)
         self.text: Color = colors.HexColor(text)
         self.background: Color = colors.HexColor(background)
+        self.sidebar_text: Color = colors.HexColor(sidebar_text)
 
 
 class SizesCV:
@@ -94,7 +106,7 @@ class SizesCV:
             *,
             margin: int = 5,
             margin_left: int = 5,
-            column_left_width: int = 69,
+            column_left_width: int = 70,
             photo_size: int = 30
     ):
         self.margin = margin * mm
