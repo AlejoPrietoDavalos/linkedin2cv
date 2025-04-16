@@ -31,6 +31,11 @@ def main(*, folder_name: str, photo_name: Optional[str] = None):
         photo_name=photo_name,
         photo_circle=True
     )
+
+    #builder_cv.data.profile.summary = builder_cv.data.profile.summary.replace(
+    #    "➤Mi página web➤ https://alejoprietodavalos.github.io/ <br/>", ""
+    #)
+
     builder_cv.build_and_save()
 
 
