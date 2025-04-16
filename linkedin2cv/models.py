@@ -123,10 +123,10 @@ class ColorsCV:
     def __init__(
             self,
             *,
-            primary: str = "#4A4A4A",
-            accent: str = "#7fabeb",
+            primary: str = "#2F2F2F",
+            accent: str = "#9292ac",
             text: str = "#ccd5e3",
-            background: str = "#2F2F2F",
+            background: str = "#4A4A4A",
     ):
         self.primary: Color = colors.HexColor(primary)
         self.accent: Color = colors.HexColor(accent)
@@ -139,7 +139,7 @@ class SizesCV:
             *,
             margin: int = 5,
             margin_left: int = 5,
-            column_left_width: int = 65,
+            column_left_width: int = 70,
             photo_size: int = 30
     ):
         self.margin = margin * mm

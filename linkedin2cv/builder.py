@@ -1,14 +1,25 @@
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple
 from pathlib import Path
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.platypus import Paragraph, Frame, Spacer, KeepTogether
+from reportlab.platypus import Paragraph, Frame, Spacer
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.enums import TA_LEFT, TA_JUSTIFY
 
 from linkedin2cv.models import load_linkedin_data, LinkedinData, ColorsCV, SizesCV
+
+FONT = "HackNerdFont"
+SIDEBAR_TO_BODY_GAP = 2 * mm
+PHOTO_TOP_PADDING = 10 * mm
+PHOTO_CENTER_OFFSET = 2 * mm        # TODO: No lo uso.
+NAME_HEIGHT = 50
+INFO_BLOCK_Y_OFFSET = 42
+INFO_BLOCK_HEIGHT = 40
+SPACER_HEIGHT = 6
+FRAME_MARGIN_LEFT = 1 * mm
+FRAME_MARGIN_RIGHT = 1 * mm
 
 
 class BuilderCV:
@@ -27,8 +38,7 @@ class BuilderCV:
             page_size: Tuple[float, float] = A4,
             photo_circle: bool = True
     ):
-        self.path_data = path_data
-        self.path_folder: Path = self.path_data / folder_name
+        self.path_folder = path_data / folder_name
         self.data: LinkedinData = load_linkedin_data(path_folder=self.path_folder)
         self.colors_cv = colors_cv
         self.sizes_cv = sizes_cv
@@ -36,14 +46,11 @@ class BuilderCV:
         self.url_linkedin = url_linkedin
         self.url_github = url_github
         self.url_website = url_website
-
-        self.path_photo = self._get_path_photo(photo_name=photo_name)
-
-        self.page_size = page_size
+        self.page_width, self.page_height = page_size
         self.photo_circle = photo_circle
 
-        self.page_width, self.page_height = A4
-        self.path_pdf: Path = self.path_data / f"{self.path_folder.stem}.pdf"
+        self.path_photo = path_data / photo_name if photo_name else None
+        self.path_pdf = path_data / f"{self.path_folder.stem}.pdf"
         self.c = Canvas(str(self.path_pdf), pagesize=page_size)
         self.styles = self._load_styles()
 
@@ -51,109 +58,53 @@ class BuilderCV:
     def full_name(self) -> str:
         return f"{self.data.profile.first_name} {self.data.profile.last_name}"
 
-    def _get_path_photo(self, *, photo_name: Optional[str]) -> Optional[Path]:
-        if photo_name is not None:
-            return self.path_data / photo_name
-        return None
-
-    def _load_styles(self) -> None:
+    def _load_styles(self):
         styles = getSampleStyleSheet()
-
-        styles.add(ParagraphStyle(
-            name="Header",
-            fontName="HackNerdFont",
-            fontSize=25,
-            leading=24,
-            alignment=TA_LEFT,
-            textColor=self.colors_cv.accent,
-        ))
-
-        styles.add(ParagraphStyle(
-            name="SubHeader",
-            fontName="HackNerdFont",
-            fontSize=6,
-            leading=16,
-            alignment=TA_LEFT,
-            textColor=self.colors_cv.text,
-        ))
-
-        styles.add(ParagraphStyle(
-            name="JobTitle",
-            fontName="HackNerdFont",
-            fontSize=11,
-            leading=14,
-            textColor=self.colors_cv.accent,
-            spaceAfter=4,
-        ))
-
-        styles.add(ParagraphStyle(
-            name="JobDesc",
-            fontName="HackNerdFont",
-            fontSize=7,
-            leading=12,
-            textColor=self.colors_cv.text,
-        ))
-
-        styles.add(ParagraphStyle(
-            name="SidebarText",
-            fontName="HackNerdFont",
-            fontSize=6,
-            leading=10,
-            textColor=self.colors_cv.text,
-            alignment=TA_LEFT,
-        ))
+        styles.add(ParagraphStyle(name="Header", fontName=FONT, fontSize=25, leading=24,
+                                  alignment=TA_LEFT, textColor=self.colors_cv.accent))
+        styles.add(ParagraphStyle(name="SubHeader", fontName=FONT, fontSize=6, leading=16,
+                                  alignment=TA_LEFT, textColor=self.colors_cv.text))
+        styles.add(ParagraphStyle(name="JobTitle", fontName=FONT, fontSize=11, leading=14,
+                                  textColor=self.colors_cv.accent, spaceAfter=4))
+        styles.add(ParagraphStyle(name="JobDesc", fontName=FONT, fontSize=7, leading=12,
+                                  textColor=self.colors_cv.text))
+        styles.add(ParagraphStyle(name="SidebarText", fontName=FONT, fontSize=6, leading=10,
+                                  textColor=self.colors_cv.text, alignment=TA_LEFT))
         return styles
 
-    def draw_background(self) -> None:
+    def draw_background(self):
         self.c.setFillColor(self.colors_cv.background)
         self.c.rect(0, 0, self.page_width, self.page_height, fill=True, stroke=0)
 
-    def draw_photo(self) -> None:
-        if self.path_photo is not None and self.path_photo.exists():
+    def draw_photo(self):
+        if self.path_photo and self.path_photo.exists():
             x = self.sizes_cv.margin_left + (self.sizes_cv.column_left_wifth - self.sizes_cv.photo_size) / 2
-            y = self.page_height - self.sizes_cv.photo_size - 10 * mm  # Subimos la imagen
+            y = self.page_height - self.sizes_cv.photo_size - PHOTO_TOP_PADDING
 
             if self.photo_circle:
                 radius = self.sizes_cv.photo_size / 2
                 center_x = x + radius
                 center_y = y + radius
-
                 self.c.saveState()
-                p = self.c.beginPath()
-                p.circle(center_x, center_y, radius)
-                self.c.clipPath(p, stroke=0)
+                path = self.c.beginPath()
+                path.circle(center_x, center_y, radius)
+                self.c.clipPath(path, stroke=0)
 
-            self.c.drawImage(
-                str(self.path_photo),
-                x,
-                y,
-                width=self.sizes_cv.photo_size,
-                height=self.sizes_cv.photo_size,
-                preserveAspectRatio=True,
-                mask='auto'
-            )
+            self.c.drawImage(str(self.path_photo), x, y,
+                             width=self.sizes_cv.photo_size, height=self.sizes_cv.photo_size,
+                             preserveAspectRatio=True, mask='auto')
 
             if self.photo_circle:
                 self.c.restoreState()
 
-    def draw_header(self) -> None:
-        x = self.sizes_cv.margin_left + self.sizes_cv.column_left_wifth + 10 * mm
+    def draw_header(self):
+        x = self.sizes_cv.margin_left + self.sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
         max_width = self.page_width - x - self.sizes_cv.margin
 
-        # Nombre
-        name_height = 50
-        name_y = self.page_height - self.sizes_cv.margin - name_height
-        name_frame = Frame(
-            x1=x,
-            y1=name_y,
-            width=max_width,
-            height=name_height,
-            showBoundary=0
-        )
-        name = Paragraph(self.full_name, self.styles["Header"])
-        name_frame.addFromList([name], self.c)
+        name_y = self.page_height - self.sizes_cv.margin - NAME_HEIGHT
+        name_frame = Frame(x, name_y, max_width, NAME_HEIGHT, showBoundary=0)
+        name_frame.addFromList([Paragraph(self.full_name, self.styles["Header"])], self.c)
 
-        # Info debajo del nombre
         info = []
         if self.age:
             info.append(f"Edad: {self.age}")
@@ -164,54 +115,37 @@ class BuilderCV:
         if self.url_linkedin:
             info.append(f"LinkedIn: <a href='{self.url_linkedin}'>{self.url_linkedin}</a>")
 
-        # Reducimos el leading (espaciado entre líneas)
-        style_subheader = ParagraphStyle(
-            name="SubHeaderCompact",
-            parent=self.styles["SubHeader"],
-            leading=10,  # más compacto
-            spaceAfter=2,
-        )
+        style_subheader = ParagraphStyle(name="SubHeaderCompact", parent=self.styles["SubHeader"], leading=10, spaceAfter=2)
         info_paragraphs = [Paragraph(i, style_subheader) for i in info]
 
-        # Subimos el bloque
-        info_frame = Frame(
-            x1=x,
-            y1=name_y - 42,  # estaba -60, ahora más arriba
-            width=max_width,
-            height=40,  # ajustado también
-            showBoundary=0
-        )
-        info_frame.addFromList(info_paragraphs, self.c)
+        Frame(x, name_y - INFO_BLOCK_Y_OFFSET, max_width, INFO_BLOCK_HEIGHT, showBoundary=0).addFromList(info_paragraphs, self.c)
 
-    def draw_sidebar(self) -> None:
+    def draw_sidebar(self):
         self.c.setFillColor(self.colors_cv.primary)
-        self.c.rect(
-            self.sizes_cv.margin_left, 0, self.sizes_cv.column_left_wifth,
-            self.page_height, fill=True, stroke=0
-        )
-
-        stack_text = Paragraph(self.data.profile.summary, self.styles["SidebarText"])
+        self.c.rect(self.sizes_cv.margin_left, 0, self.sizes_cv.column_left_wifth, self.page_height, fill=True, stroke=0)
+        photo_bottom = self.page_height - self.sizes_cv.photo_size - PHOTO_TOP_PADDING
+        sidebar_text_bottom = self.sizes_cv.margin + 5 * mm
+        sidebar_height = photo_bottom - sidebar_text_bottom
 
         frame = Frame(
-            self.sizes_cv.margin_left + 1 * mm,
-            self.sizes_cv.margin + 5 * mm,
-            self.sizes_cv.column_left_wifth - 2 * mm,  # 1mm de margen izquierdo + 1mm derecho
-            self.page_height - 2 * self.sizes_cv.margin - 10 * mm,
+            self.sizes_cv.margin_left + FRAME_MARGIN_LEFT,
+            sidebar_text_bottom,
+            self.sizes_cv.column_left_wifth - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT,
+            sidebar_height,
             showBoundary=0
         )
-        frame.addFromList([stack_text], self.c)
 
-    def draw_positions(self) -> None:
-        LEN_SIDEBAR_TO_BODY_TEXT = 2
-        x = self.sizes_cv.margin + self.sizes_cv.column_left_wifth + LEN_SIDEBAR_TO_BODY_TEXT * mm
+        frame.addFromList([Paragraph(self.data.profile.summary, self.styles["SidebarText"])], self.c)
+
+    def draw_positions(self):
+        x = self.sizes_cv.margin + self.sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
         width = self.page_width - x - self.sizes_cv.margin
         y_start = self.page_height - self.sizes_cv.margin - 100
         bottom_margin = self.sizes_cv.margin
-
         usable_height = y_start - bottom_margin
         current_y = 0
 
-        story: List = []
+        story = []
         first_page = True
 
         def flush_story():
@@ -221,13 +155,7 @@ class BuilderCV:
                 self.draw_sidebar()
                 self.draw_photo()
                 self.draw_header()
-
-            frame = Frame(
-                x, bottom_margin,
-                width, usable_height,
-                showBoundary=0
-            )
-            frame.addFromList(story, self.c)
+            Frame(x, bottom_margin, width, usable_height, showBoundary=0).addFromList(story, self.c)
             self.c.showPage()
             current_y = 0
             story.clear()
@@ -236,9 +164,7 @@ class BuilderCV:
             title = f"{p.title} — {p.company_name} ({p.started_on} - {p.finished_on or 'Presente'})"
             para_title = Paragraph(title, self.styles["JobTitle"])
             para_desc = Paragraph(p.description.replace("\n", "<br/>"), self.styles["JobDesc"])
-            spacer = Spacer(1, 6)
-
-            # Calcular altura total sin KeepTogether
+            spacer = Spacer(1, SPACER_HEIGHT)
             h_title = para_title.wrap(width, usable_height)[1]
             h_desc = para_desc.wrap(width, usable_height)[1]
             h_spacer = spacer.wrap(width, usable_height)[1]
@@ -253,21 +179,12 @@ class BuilderCV:
 
         if story:
             self.draw_background()
-            frame = Frame(x, bottom_margin, width, usable_height, showBoundary=0)
-            frame.addFromList(story, self.c)
+            Frame(x, bottom_margin, width, usable_height, showBoundary=0).addFromList(story, self.c)
 
-    def build(self):
+    def build_and_save(self):
         self.draw_background()
         self.draw_sidebar()
         self.draw_photo()
         self.draw_header()
         self.draw_positions()
-
-    def save(self) -> None:
-        """ Guarda el PDF en el output específicado."""
         self.c.save()
-
-    def build_and_save(self) -> None:
-        self.build()
-        self.save()
-
