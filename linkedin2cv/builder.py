@@ -17,6 +17,7 @@ class BuilderCV:
             style_cv: StyleCV,
             sizes_cv: SizesCV,
             age: int,
+            location: str,
             url_website: Optional[str] = None,
             url_github: Optional[str] = None,
             path_data: Path = Path("data"),
@@ -31,6 +32,7 @@ class BuilderCV:
         self.style_cv = style_cv
         self.sizes_cv = sizes_cv
         self.age = age
+        self.location = location
         self.url_website = url_website
         self.url_github = url_github
         self.page_width, self.page_height = page_size
@@ -66,6 +68,7 @@ class BuilderCV:
             style_cv=self.style_cv,
             styles=self.styles,
             age=self.age,
+            location=self.location,
             page_height=self.page_height,
             url_website=self.url_website,
             url_github=self.url_github

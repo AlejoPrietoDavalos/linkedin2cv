@@ -52,6 +52,7 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
 
 def main(*, folder_name: str, photo_name: Optional[str] = None):
     AGE = 30
+    LOCATION = "Buenos Aires, Argentina"
     URL_WEB = "alejoprietodavalos.github.io/"
     URL_GITHUB = "github.com/AlejoPrietoDavalos/"
     colors_cv = StyleCV()
@@ -61,6 +62,7 @@ def main(*, folder_name: str, photo_name: Optional[str] = None):
         style_cv=colors_cv,
         sizes_cv=sizes_cv,
         age=AGE,
+        location=LOCATION,
         url_website=URL_WEB,
         url_github=URL_GITHUB,
         photo_name=photo_name,

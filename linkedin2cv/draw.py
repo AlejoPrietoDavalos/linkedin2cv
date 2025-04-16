@@ -68,6 +68,7 @@ def _draw_sidebar(
         style_cv: StyleCV,
         styles: StyleSheet1,
         age: int,
+        location: str,
         page_height: int,
         url_website: Optional[str] = None,
         url_github: Optional[str] = None,
@@ -89,10 +90,12 @@ def _draw_sidebar(
     info_lines = []
     if age:
         info_lines.append(f"<b>Edad:</b> {age}")
+    if location:
+        info_lines.append(f"<b>Ubicación:</b> {location}")
     if url_website:
-        info_lines.append(f"<b>Mi página web:</b> <a href='{url_website}'>{url_website}</a>")
+        info_lines.append(f"<br/><b>➤➤ Mi página web ➤➤</b> <a href='{url_website}'>{url_website}</a>")
     if url_github:
-        info_lines.append(f"<b>GitHub:</b> <a href='{url_github}'>{url_github}</a>")
+        info_lines.append(f"<b>➤➤ GitHub ➤➤</b> <a href='{url_github}'>{url_github}</a>")
 
     for line in info_lines:
         content.append(Paragraph(line, styles["SidebarLinks"]))
