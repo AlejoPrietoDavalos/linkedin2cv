@@ -26,12 +26,12 @@ FRAME_MARGIN_LEFT = 1 * mm
 FRAME_MARGIN_RIGHT = 1 * mm
 
 
-def _draw_background(*, c: Canvas, color: Color, page_width: int, page_height: int) -> None:
+def draw_background(*, c: Canvas, color: Color, page_width: int, page_height: int) -> None:
     c.setFillColor(color)
     c.rect(0, 0, page_width, page_height, fill=True, stroke=0)
 
 
-def _draw_photo(
+def draw_photo(
         *,
         c: Canvas,
         path_photo: Optional[Path],
@@ -60,7 +60,7 @@ def _draw_photo(
             c.restoreState()
 
 
-def _draw_sidebar(
+def draw_sidebar(
         *,
         c: Canvas,
         data: LinkedinData,
@@ -116,7 +116,7 @@ def _draw_sidebar(
     frame.addFromList(content, c)
 
 
-def _draw_positions(
+def draw_positions(
         *,
         c: Canvas,
         data: LinkedinData,
@@ -126,7 +126,7 @@ def _draw_positions(
         path_python_icon: Path,
         page_width: int,
         page_height: int
-) -> None:
+) -> list[tuple[float, float, float, float]]:
     class IconTitle(Flowable):
         def __init__(self, img_path: Path, text: str, style: ParagraphStyle, img_size: float):
             super().__init__()
@@ -144,9 +144,6 @@ def _draw_positions(
             self._height = max(text_h, self.img_size)
             return text_w + self.img_size + DIST_PYTHON_ICON_TO_TITLE, self._height
 
-        def getSpaceAfter(self):
-            return 0
-
         def draw(self):
             y_img = (self._height - self.img_size) / 2
             self.canv.drawImage(
@@ -156,64 +153,51 @@ def _draw_positions(
             )
             self.p.drawOn(self.canv, self.img_size + DIST_PYTHON_ICON_TO_TITLE, (self._height - self._p_height) / 2)
 
-    class Block:
-        def __init__(self, elements: list, height: float):
-            self.elements = elements
-            self.height = height
-
     x = sizes_cv.margin + sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
     width = page_width - x - sizes_cv.margin
     y_start = page_height - sizes_cv.margin
-    bottom_margin = sizes_cv.margin
-    usable_height = y_start - bottom_margin
+    usable_height = y_start - sizes_cv.margin
 
-    blocks: list[Block] = []
     icon_size = LEN_PYTHON_ICON * mm
+    elements: list[Flowable] = []
+    lines_to_draw: list[tuple[float, float, float, float]] = []  # Lista para las líneas
 
     for position in data.positions:
-        para_title = IconTitle(path_python_icon, position.text_title, styles["JobTitle"], icon_size)
-        para_sub_title = Paragraph(f"➤ {position.text_sub_title}", styles["JobSubTitle"])
-        para_desc = Paragraph(position.description or "Sin descripción", styles["JobDesc"])
-        spacer = Spacer(1, SPACER_HEIGHT)
+        elements.append(IconTitle(path_python_icon, position.text_title, styles["JobTitle"], icon_size))
+        elements.append(Paragraph(f"➤ {position.text_sub_title}", styles["JobSubTitle"]))
+        elements.append(Paragraph(position.description or "Sin descripción", styles["JobDesc"]))
+        elements.append(Spacer(1, SPACER_HEIGHT))
 
-        h_title = para_title.wrap(width, usable_height)[1]
-        h_sub_title = para_sub_title.wrap(width, usable_height)[1]
-        h_desc = para_desc.wrap(width, usable_height)[1]
-        h_spacer = spacer.wrap(width, usable_height)[1]
-        total_height = h_title + h_sub_title + h_desc + h_spacer
+    frame = Frame(x, sizes_cv.margin, width, usable_height, showBoundary=0)
 
-        blocks.append(Block([para_title, para_sub_title, para_desc, spacer], total_height))
+    while elements:
+        frame.addFromList(elements, c)
+        if elements:  # Si quedan elementos sin dibujar, ir a nueva página
+            c.showPage()
+            draw_background(c=c, color=style_cv.background, page_width=page_width, page_height=page_height)
+            draw_sidebar(
+                c=c,
+                data=data,
+                sizes_cv=sizes_cv,
+                style_cv=style_cv,
+                styles=styles,
+                age=0,
+                location="",
+                page_height=page_height
+            )
+            frame = Frame(x, sizes_cv.margin, width, usable_height, showBoundary=0)
 
-    pages: list[list[Block]] = []
-    current_page: list[Block] = []
-    current_height = 0
+        # Dibujar las líneas de separación después de agregar contenido a la página
+        y_cursor = y_start  # Inicia al principio de la página
+        for i, block in enumerate(elements):
+            line_y = y_cursor - block.height
+            lines_to_draw.append((
+                x + DIST_LINE_SPACING_LEFT,
+                line_y,
+                page_width - sizes_cv.margin - DIST_LINE_SPACING_RIGHT,
+                line_y
+            ))
+            y_cursor -= block.height + LINE_THICKNESS  # Ajustar la posición de las líneas
 
-    for block in blocks:
-        if current_height + block.height > usable_height:
-            pages.append(current_page)
-            current_page = []
-            current_height = 0
-        current_page.append(block)
-        current_height += block.height
-    if current_page:
-        pages.append(current_page)
+    return lines_to_draw  # Retorna las líneas que se deben dibujar
 
-    for page_num, blocks_in_page in enumerate(pages):
-        y_cursor = y_start
-        for i, block in enumerate(blocks_in_page):
-            frame = Frame(x, y_cursor - block.height, width, block.height)
-            frame.addFromList(block.elements, c)
-
-            y_cursor -= block.height
-
-            if i < len(blocks_in_page) - 1:
-                # Dibuja la línea solo entre los bloques, no dentro de ellos
-                c.setStrokeColor(style_cv.accent)
-                c.setLineWidth(LINE_THICKNESS)
-                c.line(
-                    x + DIST_LINE_SPACING_LEFT,
-                    y_cursor,
-                    page_width - sizes_cv.margin - DIST_LINE_SPACING_RIGHT,
-                    y_cursor
-                )
-                y_cursor -= LINE_THICKNESS  # Ajusta la posición después de dibujar la línea
