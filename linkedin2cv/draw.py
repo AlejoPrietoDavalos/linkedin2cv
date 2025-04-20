@@ -163,16 +163,38 @@ def draw_positions(
     lines_to_draw: list[tuple[float, float, float, float]] = []  # Lista para las líneas
 
     for position in data.positions:
-        elements.append(IconTitle(path_python_icon, position.text_title, styles["JobTitle"], icon_size))
-        elements.append(Paragraph(f"➤ {position.text_sub_title}", styles["JobSubTitle"]))
+        elements.append(IconTitle(path_python_icon, f"<b>{position.text_title}</b>", styles["JobTitle"], icon_size))
+        elements.append(Paragraph(f"<b>➤➤ {position.text_sub_title}</b>", styles["JobSubTitle"]))
         elements.append(Paragraph(position.description or "Sin descripción", styles["JobDesc"]))
         elements.append(Spacer(1, SPACER_HEIGHT))
 
     frame = Frame(x, sizes_cv.margin, width, usable_height, showBoundary=0)
 
     while elements:
+        # Dibujar las líneas de separación después de agregar contenido a la página.
+        # Inicia al principio de la página.
+        y_cursor = y_start
+        for block in elements:
+            _, h = block.wrap(width, usable_height)
+            line_y = y_cursor - h
+            lines_to_draw.append((
+                x + DIST_LINE_SPACING_LEFT,
+                line_y,
+                page_width - sizes_cv.margin - DIST_LINE_SPACING_RIGHT,
+                line_y
+            ))
+            y_cursor -= h + LINE_THICKNESS
+
+
+
+
+
+
+
         frame.addFromList(elements, c)
-        if elements:  # Si quedan elementos sin dibujar, ir a nueva página
+
+        # Si quedan elementos sin dibujar, ir a nueva página.
+        if elements:
             c.showPage()
             draw_background(c=c, color=style_cv.background, page_width=page_width, page_height=page_height)
             draw_sidebar(
@@ -187,17 +209,6 @@ def draw_positions(
             )
             frame = Frame(x, sizes_cv.margin, width, usable_height, showBoundary=0)
 
-        # Dibujar las líneas de separación después de agregar contenido a la página
-        y_cursor = y_start  # Inicia al principio de la página
-        for i, block in enumerate(elements):
-            line_y = y_cursor - block.height
-            lines_to_draw.append((
-                x + DIST_LINE_SPACING_LEFT,
-                line_y,
-                page_width - sizes_cv.margin - DIST_LINE_SPACING_RIGHT,
-                line_y
-            ))
-            y_cursor -= block.height + LINE_THICKNESS  # Ajustar la posición de las líneas
-
-    return lines_to_draw  # Retorna las líneas que se deben dibujar
+    # ----> Retorna las líneas que se deben dibujar.
+    return lines_to_draw
 

@@ -16,6 +16,32 @@ from io import BytesIO
 from PyPDF2 import PdfReader, PdfWriter
 
 
+from pathlib import Path
+from typing import Tuple
+
+import fitz
+
+def add_line_to_pdf(
+    page: fitz.Page,
+    start: Tuple[float, float],
+    end: Tuple[float, float],
+    color: Tuple[float, float, float] = (0, 0, 0),
+    width: float = 1.0
+) -> None:
+    """
+    Draws a line on a given PDF page.
+
+    Args:
+        page (fitz.Page): The PDF page to modify.
+        start (Tuple[float, float]): Starting point (x0, y0).
+        end (Tuple[float, float]): Ending point (x1, y1).
+        color (Tuple[float, float, float], optional): RGB color values (0-1).
+        width (float, optional): Line width in points.
+    """
+    page.draw_line(p1=start, p2=end, color=color, width=width)
+
+
+
 # Función para crear una imagen con líneas
 def create_image_with_lines(lines: list[tuple[float, float, float, float]], width: int, height: int) -> Image:
     # Crear una imagen en blanco
@@ -144,40 +170,18 @@ class BuilderCV:
         self.draw_sidebar()
         self.draw_photo()
         self.draw_positions()
+        print(f"lines_to_draw: {self.lines_to_draw}")
 
         # Guardar el PDF sin las líneas
         self.c.save()
 
-        # Crear un nuevo Canvas para dibujar las líneas
-        output_pdf_path = self.path_data / f"{self.path_folder.stem}_with_lines.pdf"
-        c_lines = Canvas(str(output_pdf_path), pagesize=(self.page_width, self.page_height))
-
+        doc = fitz.open(self.path_pdf)
+        page = doc[0]
+        for line_to_draw in self.lines_to_draw:
+            x1, y1, x2, y2 = line_to_draw
+            add_line_to_pdf(page, start=(x1, y1), end=(x2, y2), color=(1, 0, 0))  # red line
+        doc.save("asd.pdf")
+        doc.close()
         # Crear la imagen con las líneas
-        image_with_lines = create_image_with_lines(self.lines_to_draw, self.page_width, self.page_height)
-
-        # Convertir la imagen con las líneas en PDF
-        img_byte_array = BytesIO()
-        image_with_lines.save(img_byte_array, format='PDF')
-        img_byte_array.seek(0)
-
-        # Leer el PDF base y el PDF con las líneas
-        with open(self.path_pdf, "rb") as base_pdf_file:
-            base_pdf_reader = PdfReader(base_pdf_file)
-            base_pdf_writer = PdfWriter()
-
-            # Copiar las páginas del PDF base
-            for page_num in range(len(base_pdf_reader.pages)):
-                page = base_pdf_reader.pages[page_num]
-                base_pdf_writer.add_page(page)
-
-            # Leer el PDF con las líneas
-            img_pdf_reader = PdfReader(img_byte_array)
-
-            # Fusionar la imagen con las líneas con el PDF base
-            base_pdf_writer.pages[0].merge_page(img_pdf_reader.pages[0])
-
-            # Guardar el archivo final con líneas
-            with open(output_pdf_path, "wb") as final_output_file:
-                base_pdf_writer.write(final_output_file)
-
-        print(f"PDF con líneas guardado en: {output_pdf_path}")
+        #print(self.lines_to_draw)
+        #image_with_lines = create_image_with_lines(self.lines_to_draw, self.page_width, self.page_height)
