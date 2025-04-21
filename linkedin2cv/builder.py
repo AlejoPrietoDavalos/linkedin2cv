@@ -1,30 +1,22 @@
 from typing import Optional, Tuple
 from pathlib import Path
-import shutil
+from PIL import Image, ImageDraw
+from io import BytesIO
 
+import PyPDF2
+import fitz
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import StyleSheet1
-from reportlab.lib.colors import Color
 
 from linkedin2cv.models import load_linkedin_data, LinkedinData, StyleCV, SizesCV
-from linkedin2cv.draw import LINE_THICKNESS, draw_background, draw_photo, draw_sidebar, draw_positions
+from linkedin2cv.draw import draw_background, draw_photo, draw_sidebar, draw_positions
 
-from PIL import Image, ImageDraw
-import PyPDF2
-from io import BytesIO
-from PyPDF2 import PdfReader, PdfWriter
-
-
-from pathlib import Path
-from typing import Tuple
-
-import fitz
 
 def add_line_to_pdf(
     page: fitz.Page,
-    start: Tuple[float, float],
-    end: Tuple[float, float],
+    start: Tuple[float, float],         # FIXME: Cambiar a x1, y1, x2, y2.
+    end: Tuple[float, float],           # FIXME: Cambiar a x1, y1, x2, y2.
     color: Tuple[float, float, float] = (0, 0, 0),
     width: float = 1.0
 ) -> None:
@@ -117,6 +109,7 @@ class BuilderCV:
         self.path_pdf = self.path_data / f"{self.path_folder.stem}.pdf"
         self.c = Canvas(str(self.path_pdf), pagesize=page_size)
         self.styles: StyleSheet1 = self.style_cv.get_styles()
+        self.xi: int = None
 
     def add_line(self, x1, y1, x2, y2):
         self.lines_to_draw.append((x1, y1, x2, y2))
@@ -153,7 +146,7 @@ class BuilderCV:
         )
 
     def draw_positions(self):
-        self.lines_to_draw = draw_positions(
+        lines_to_draw, x_i = draw_positions(
             c=self.c,
             data=self.data,
             sizes_cv=self.sizes_cv,
@@ -163,25 +156,26 @@ class BuilderCV:
             page_width=self.page_width,
             page_height=self.page_height
         )
+        self.lines_to_draw = lines_to_draw
+        self.x_i = x_i  # Posición inicial del puesto. En x.
 
-    def build_and_save(self):
-        # Primero, generar el PDF base
+    def build_and_save(self) -> None:
         self.draw_background()
         self.draw_sidebar()
         self.draw_photo()
         self.draw_positions()
-        print(f"lines_to_draw: {self.lines_to_draw}")
-
-        # Guardar el PDF sin las líneas
         self.c.save()
+        #self.draw_lines()
+        self.draw_last_text()
 
+    def draw_last_text(self) -> None:
+        ...
+
+    def draw_lines(self) -> None:
         doc = fitz.open(self.path_pdf)
         page = doc[0]
         for line_to_draw in self.lines_to_draw:
             x1, y1, x2, y2 = line_to_draw
             add_line_to_pdf(page, start=(x1, y1), end=(x2, y2), color=(1, 0, 0))  # red line
-        doc.save("asd.pdf")
+        doc.save(self.path_pdf)
         doc.close()
-        # Crear la imagen con las líneas
-        #print(self.lines_to_draw)
-        #image_with_lines = create_image_with_lines(self.lines_to_draw, self.page_width, self.page_height)

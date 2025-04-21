@@ -8,6 +8,13 @@ from linkedin2cv.builder import BuilderCV
 from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
+FOLDER_NAME = "Basic_LinkedInDataExport_04-21-2025"
+PHOTO_NAME = "img_profile.png"
+AGE = 30
+LOCATION = "Buenos Aires, Argentina"
+URL_WEB = "alejoprietodavalos.github.io/"
+URL_GITHUB = "github.com/AlejoPrietoDavalos/"
+
 
 def load_font() -> None:
     HNF = "HackNerdFont"
@@ -15,11 +22,13 @@ def load_font() -> None:
     pdfmetrics.registerFont(TTFont(f"{HNF}", str(path_fonts / f"{HNF}-Regular.ttf")))
     pdfmetrics.registerFont(TTFont(f"{HNF}-Bold", str(path_fonts / f"{HNF}-Bold.ttf")))
     pdfmetrics.registerFont(TTFont(f"{HNF}-Italic", str(path_fonts / f"{HNF}-Italic.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}-BoldItalic", str(path_fonts / f"{HNF}-BoldItalic.ttf")))
     registerFontFamily(
         f"{HNF}",
         normal=f"{HNF}",
         bold=f"{HNF}-Bold",
-        italic=f"{HNF}-Italic"
+        italic=f"{HNF}-Italic",
+        boldItalic="HackNerdFont-BoldItalic"
     )
 
 
@@ -61,10 +70,6 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
 
 
 def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
-    AGE = 30
-    LOCATION = "Buenos Aires, Argentina"
-    URL_WEB = "alejoprietodavalos.github.io/"
-    URL_GITHUB = "github.com/AlejoPrietoDavalos/"
     colors_cv = StyleCV()
     sizes_cv = SizesCV()
     builder_cv = BuilderCV(
@@ -87,7 +92,4 @@ def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
 
 if __name__ == "__main__":
     load_font()
-    main(
-        folder_name="Basic_LinkedInDataExport_04-16-2025",
-        photo_name="img_profile.png"
-    )
+    main(folder_name=FOLDER_NAME, photo_name=PHOTO_NAME)

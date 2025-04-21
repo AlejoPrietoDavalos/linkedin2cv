@@ -55,10 +55,17 @@ class LinkedinData(BaseModel):
 def nan2none(v):
     return None if pd.isna(v) else v
 
+def format_value(v: Optional[str]) -> Optional[str]:
+    v = nan2none(v)
+    if isinstance(v, str):
+        v = v.replace(" ➣", "<br/>➣")
+        v = v.replace(" ●", "<br/><br/>●")
+        v = v.replace(" ■", "<br/>■")
+    return v
 
 def format_row_position(*, row: pd.Series) -> Dict[str, Any]:
     row_dict: Dict[str, Any] = row.to_dict()
-    return {k.lower().replace(" ", "_"): nan2none(v) for k, v in row_dict.items()}
+    return {k.lower().replace(" ", "_"): format_value(v) for k, v in row_dict.items()}
 
 
 def load_profile(*, path_folder: Path) -> Profile:
