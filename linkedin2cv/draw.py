@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List, Tuple
 from pathlib import Path
 
 from reportlab.lib.units import mm
@@ -19,7 +19,7 @@ LINE_THICKNESS = 0.5  # Grosor de la línea horizontal
 DIST_LINKS_TO_SUMMARY = 15
 LEN_PYTHON_ICON = 3
 
-SIDEBAR_TO_BODY_GAP = 0 * mm
+SIDEBAR_TO_BODY_GAP = 2 * mm
 PHOTO_TOP_PADDING = 10 * mm
 SPACER_HEIGHT = 6
 FRAME_MARGIN_LEFT = 1 * mm
@@ -117,98 +117,123 @@ def draw_sidebar(
 
 
 def draw_positions(
-        *,
-        c: Canvas,
-        data: LinkedinData,
-        sizes_cv: SizesCV,
-        style_cv: StyleCV,
-        styles: StyleSheet1,
-        path_python_icon: Path,
-        page_width: int,
-        page_height: int
-) -> list[tuple[float, float, float, float]]:
+    *,
+    c: Canvas,
+    data: LinkedinData,
+    sizes_cv: SizesCV,
+    style_cv: StyleCV,
+    styles: StyleSheet1,
+    path_python_icon: Path,
+    page_width: float,
+    page_height: float
+) -> List[Tuple[float, float, float, float]]:
     class IconTitle(Flowable):
-        def __init__(self, img_path: Path, text: str, style: ParagraphStyle, img_size: float):
+        def __init__(
+            self,
+            img_path: Path,
+            text: str,
+            style: ParagraphStyle,
+            img_size: float
+        ) -> None:
             super().__init__()
             self.img_path = img_path
-            self.text = text
-            self.style = style
+            self.p = Paragraph(text, style)
             self.img_size = img_size
-            self.p = Paragraph(self.text, self.style)
             self._height = 0
 
-        def wrap(self, availWidth, availHeight):
-            text_w, text_h = self.p.wrap(availWidth - self.img_size - DIST_PYTHON_ICON_TO_TITLE, availHeight)
-            self._p_width = text_w
-            self._p_height = text_h
+        def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
+            text_w, text_h = self.p.wrap(
+                availWidth - self.img_size - DIST_PYTHON_ICON_TO_TITLE,
+                availHeight
+            )
             self._height = max(text_h, self.img_size)
             return text_w + self.img_size + DIST_PYTHON_ICON_TO_TITLE, self._height
 
-        def draw(self):
+        def draw(self) -> None:
             y_img = (self._height - self.img_size) / 2
             self.canv.drawImage(
                 str(self.img_path), 0, y_img,
                 width=self.img_size, height=self.img_size,
-                preserveAspectRatio=True, mask='auto'
+                preserveAspectRatio=True, mask="auto"
             )
-            self.p.drawOn(self.canv, self.img_size + DIST_PYTHON_ICON_TO_TITLE, (self._height - self._p_height) / 2)
+            self.p.drawOn(
+                self.canv,
+                self.img_size + DIST_PYTHON_ICON_TO_TITLE,
+                (self._height - self.p.height) / 2
+            )
 
-    x = sizes_cv.margin + sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
+    x = sizes_cv.margin_left + sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
+    x_i = x + DIST_LINE_SPACING_LEFT
+    
     width = page_width - x - sizes_cv.margin
-    y_start = page_height - sizes_cv.margin
-    usable_height = y_start - sizes_cv.margin
+    y_cursor = page_height - sizes_cv.margin
+    usable_height = y_cursor - sizes_cv.margin
 
     icon_size = LEN_PYTHON_ICON * mm
-    elements: list[Flowable] = []
-    lines_to_draw: list[tuple[float, float, float, float]] = []  # Lista para las líneas
+    lines: List[Tuple[float, float, float, float]] = []
+    icon_ys: List[float] = []  # lista para coordenadas Y de iconos
 
-    for position in data.positions:
-        elements.append(IconTitle(path_python_icon, f"<b>{position.text_title}</b>", styles["JobTitle"], icon_size))
-        elements.append(Paragraph(f"<b>➤➤ {position.text_sub_title}</b>", styles["JobSubTitle"]))
-        elements.append(Paragraph(position.description or "Sin descripción", styles["JobDesc"]))
-        elements.append(Spacer(1, SPACER_HEIGHT))
+    for idx, position in enumerate(data.positions):
+        # 1) Crear flowable y medir altura del icono
+        icon = IconTitle(
+            path_python_icon,
+            f"<b>{position.text_title}</b>",
+            styles["JobTitle"],
+            icon_size
+        )
+        _, h_icon = icon.wrap(width, usable_height)
 
-    frame = Frame(x, sizes_cv.margin, width, usable_height, showBoundary=0)
+        # calcular la Y donde se dibujará el icono
+        y_icon = y_cursor - h_icon
+        icon_ys.append(y_icon)
 
-    while elements:
-        # Dibujar las líneas de separación después de agregar contenido a la página.
-        # Inicia al principio de la página.
-        y_cursor = y_start
-        for block in elements:
-            _, h = block.wrap(width, usable_height)
-            line_y = y_cursor - h
-            lines_to_draw.append((
-                x + DIST_LINE_SPACING_LEFT,
-                line_y,
-                page_width - sizes_cv.margin - DIST_LINE_SPACING_RIGHT,
-                line_y
-            ))
-            y_cursor -= h + LINE_THICKNESS
+        # medir subtítulo y descripción
+        subtitle = Paragraph(f"<b>➤➤ {position.text_sub_title}</b>", styles["JobSubTitle"])
+        _, h_sub = subtitle.wrap(width, usable_height)
+        desc = Paragraph(position.description or "Sin descripción", styles["JobDesc"])
+        _, h_desc = desc.wrap(width, usable_height)
 
+        # altura total del bloque
+        block_height = h_icon + h_sub + h_desc + SPACER_HEIGHT + LINE_THICKNESS
 
-
-
-
-
-
-        frame.addFromList(elements, c)
-
-        # Si quedan elementos sin dibujar, ir a nueva página.
-        if elements:
+        # 2) salto de página si no cabe el bloque
+        if y_cursor - block_height < sizes_cv.margin:
             c.showPage()
             draw_background(c=c, color=style_cv.background, page_width=page_width, page_height=page_height)
-            draw_sidebar(
-                c=c,
-                data=data,
-                sizes_cv=sizes_cv,
-                style_cv=style_cv,
-                styles=styles,
-                age=0,
-                location="",
-                page_height=page_height
-            )
-            frame = Frame(x, sizes_cv.margin, width, usable_height, showBoundary=0)
+            draw_sidebar(c=c, data=data, sizes_cv=sizes_cv, style_cv=style_cv, styles=styles,
+                         age=0, location="", page_height=page_height)
+            y_cursor = page_height - sizes_cv.margin
+            # recalcular Y del icono tras salto
+            y_icon = y_cursor - h_icon
+            icon_ys[-1] = y_icon
 
-    # ----> Retorna las líneas que se deben dibujar.
-    return lines_to_draw
+        # 3) dibujar icono y texto
+        icon.drawOn(c, x, y_icon)
+        y_cursor = y_icon - LINE_THICKNESS
+        subtitle.drawOn(c, x, y_cursor - h_sub)
+        y_cursor -= h_sub + LINE_THICKNESS
+        desc.drawOn(c, x, y_cursor - h_desc)
+        y_cursor -= h_desc + SPACER_HEIGHT
 
+        # 4) línea separadora (entre bloques)
+        if idx < len(data.positions) - 1:
+            #y_line = y_cursor + (SPACER_HEIGHT / 2)
+            y_line = y_icon
+            lines.append((
+                x + DIST_LINE_SPACING_LEFT,
+                y_line,
+                page_width - sizes_cv.margin - DIST_LINE_SPACING_RIGHT,
+                y_line
+            ))
+
+    final_text = Paragraph(
+        """<br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
+        <i><b>Curriculum generado/programado por mí a partir de datos extraídos de LinkedIn.</b></i>
+        </a>""",
+        styles["JobDesc"]
+    )
+    _, h_final = final_text.wrap(width, usable_height)
+    final_text.drawOn(c, x, y_cursor - h_final)
+    y_cursor -= h_final + SPACER_HEIGHT
+
+    return lines, x_i
