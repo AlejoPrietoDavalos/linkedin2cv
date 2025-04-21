@@ -1,5 +1,6 @@
 from typing import Optional, List, Tuple
 from pathlib import Path
+import re
 
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
@@ -9,6 +10,8 @@ from reportlab.lib.colors import Color
 
 from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
 
+TECH_STACK_LABEL = "● Stack tecnológico:"
+DIST_BETWEEN_TITLE_SIDEBAR_TO_TEXT = 5
 DIST_PYTHON_ICON_TO_TITLE = 4
 DIST_BETWEEN_LINKS = 1
 DIST_FULL_NAME_TO_HEADLINE = 6
@@ -16,14 +19,29 @@ DIST_HEADLINE_TO_LINKS = 4
 DIST_LINE_SPACING_LEFT = 3 * mm  # Espaciado desde la barra lateral (izquierda)
 DIST_LINE_SPACING_RIGHT = 3 * mm  # Espaciado desde el borde derecho
 LINE_THICKNESS = 0.5  # Grosor de la línea horizontal
-DIST_LINKS_TO_SUMMARY = 15
+DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 15
 LEN_PYTHON_ICON = 3
-
 SIDEBAR_TO_BODY_GAP = 2 * mm
 PHOTO_TOP_PADDING = 10 * mm
 SPACER_HEIGHT = 6
 FRAME_MARGIN_LEFT = 1 * mm
 FRAME_MARGIN_RIGHT = 1 * mm
+
+
+def clean_text(text: str) -> str:
+    """
+    Elimina los espacios en blanco y las etiquetas <br/> al principio y al final del texto.
+    """
+    # Eliminar espacios en blanco al principio y al final
+    cleaned_text = text.strip()
+    
+    # Eliminar etiquetas <br/> al principio y al final
+    cleaned_text = re.sub(r"^<br/>|<br/>$", "", cleaned_text)
+    
+    return cleaned_text
+
+def remove_https(url: str) -> str:
+    return url.replace('https://', '')
 
 
 def draw_background(*, c: Canvas, color: Color, page_width: int, page_height: int) -> None:
@@ -60,6 +78,13 @@ def draw_photo(
             c.restoreState()
 
 
+def draw_title_text_sidebar(*, title: str, text: str, styles: StyleSheet1) -> List[Paragraph | Spacer]:
+    return [
+        Paragraph(f"<b>{title}</b>", styles["SidebarTitle"]),
+        Spacer(1, DIST_BETWEEN_TITLE_SIDEBAR_TO_TEXT),
+        Paragraph(clean_text(text), styles["SidebarText"])
+    ]
+
 def draw_sidebar(
         *,
         c: Canvas,
@@ -93,17 +118,61 @@ def draw_sidebar(
     if location:
         info_lines.append(f"<b>Ubicación:</b> {location}")
     if url_website:
-        info_lines.append(f"<br/><b>➤➤ Mi página web ➤➤</b> <a href='{url_website}'>{url_website}</a>")
+        info_lines.append(f"<b>➤➤ Mi página web ➤➤</b> <a href='{url_website}'>{remove_https(url_website)}</a>")
     if url_github:
-        info_lines.append(f"<b>➤➤ GitHub ➤➤</b> <a href='{url_github}'>{url_github}</a>")
+        info_lines.append(f"<b>➤➤ GitHub ➤➤</b> <a href='{url_github}'>{remove_https(url_github)}</a>")
 
     for line in info_lines:
         content.append(Paragraph(line, styles["SidebarLinks"]))
         content.append(Spacer(1, DIST_BETWEEN_LINKS))
 
-    # Summary del perfil
-    content.append(Spacer(1, DIST_LINKS_TO_SUMMARY))
-    content.append(Paragraph(data.profile.summary, styles["SidebarText"]))
+    
+    # Verifico si TECH_STACK_LABEL está.
+    if TECH_STACK_LABEL not in data.profile.summary:
+        raise ValueError(f"El texto '{TECH_STACK_LABEL}' no está en summary.")
+
+
+
+    # Separo el resumen en dos partes.
+    # TODO: Poner en linkedin y splitearlo.
+    TEXT_SOBRE_MI = (
+        "Programo soluciones end-to-end en <b>Python</b>, soy resolutivo y me motivan mucho los desafíos."
+    )
+    TEXT_OBJETIVO_PROFESIONAL = (
+        "Poder aplicar <b>Python</b> donde sea posible, especialmente en <b>Ciencia de Datos</b>."
+    )
+    TEXT_PERSONAL_PROJECTS = (
+        "● Tool para músicos usando Machine Learning.<br/>"
+        "➣ Yo hago el backend y mi colega el frontend.<br/>"
+        "➣ Descomposición de instrumentos en pistas.<br/>"
+        "➣ Cálculo de tempo, análisis de espectrograma,...<br/><br/>"
+
+        "● Teledetección de barcos para pesca ilegal.<br/>"
+        "➣ Deep Learning para detección de objetos.<br/>"
+        "➣ Pausada por falta de hardware.<br/><br/>"
+
+        "● Chatbot de Whatsapp alimentado con data.<br/>"
+        "➣ El producto final servirá para cualquier cliente con mínima configuración e input estandarizado.<br/><br/>"
+
+        "● Automatizaciones para streamer.<br/>"
+        "➣ Scripting para resolver tareas repetitivas.<br/>"
+        "➣ Desarrollé un juego en Python con interacción.<br/>"
+    )
+    # TODO: Poner en linkedin y splitearlo.
+    summary_parts = data.profile.summary.split(TECH_STACK_LABEL)
+    summary_parts = [p.strip() for p in summary_parts]
+
+    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
+    content.extend(draw_title_text_sidebar(title="Sobre mi", text=TEXT_SOBRE_MI, styles=styles))
+    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
+    content.extend(draw_title_text_sidebar(title="Objetivo profesional", text=TEXT_OBJETIVO_PROFESIONAL, styles=styles))
+    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
+    content.extend(draw_title_text_sidebar(title="Resumen técnico", text=summary_parts[0], styles=styles))
+    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
+    content.extend(draw_title_text_sidebar(title="Proyectos personales", text=TEXT_PERSONAL_PROJECTS, styles=styles))
+    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
+    content.extend(draw_title_text_sidebar(title="Stack tecnológico", text=summary_parts[1], styles=styles))
+
 
     frame = Frame(
         sizes_cv.margin_left + FRAME_MARGIN_LEFT,
@@ -228,7 +297,7 @@ def draw_positions(
 
     final_text = Paragraph(
         """<br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
-        <i><b>Curriculum generado/programado por mí a partir de datos extraídos de LinkedIn.</b></i>
+        <i><b>Curriculum programado/generado por mí a partir de datos extraídos de LinkedIn.</b></i>
         </a>""",
         styles["JobDesc"]
     )
