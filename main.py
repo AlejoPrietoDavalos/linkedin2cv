@@ -9,25 +9,35 @@ from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 
-def load_font():
+def load_font() -> None:
+    HNF = "HackNerdFont"
     path_fonts = Path("fonts")
-    pdfmetrics.registerFont(TTFont("HackNerdFont", str(path_fonts / "HackNerdFont-Regular.ttf")))
-    pdfmetrics.registerFont(TTFont("HackNerdFont-Bold", str(path_fonts / "HackNerdFont-Bold.ttf")))
-    pdfmetrics.registerFont(TTFont("HackNerdFont-Italic", str(path_fonts / "HackNerdFont-Italic.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}", str(path_fonts / f"{HNF}-Regular.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}-Bold", str(path_fonts / f"{HNF}-Bold.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}-Italic", str(path_fonts / f"{HNF}-Italic.ttf")))
     registerFontFamily(
-        "HackNerdFont",
-        normal="HackNerdFont",
-        bold="HackNerdFont-Bold",
-        italic="HackNerdFont-Italic"
+        f"{HNF}",
+        normal=f"{HNF}",
+        bold=f"{HNF}-Bold",
+        italic=f"{HNF}-Italic"
     )
 
 
 def translate_date(date_str: Optional[str]) -> Optional[str]:
     """ Cambia la nomenclatura de linkedin de inglés a español."""
     month_map = {
-        "Jan": "Enero", "Feb": "Febrero", "Mar": "Marzo", "Apr": "Abril",
-        "May": "Mayo", "Jun": "Junio", "Jul": "Julio", "Aug": "Agosto",
-        "Sep": "Septiembre", "Oct": "Octubre", "Nov": "Noviembre", "Dec": "Diciembre"
+        "Jan": "Enero",
+        "Feb": "Febrero",
+        "Mar": "Marzo",
+        "Apr": "Abril",
+        "May": "Mayo",
+        "Jun": "Junio",
+        "Jul": "Julio",
+        "Aug": "Agosto",
+        "Sep": "Septiembre",
+        "Oct": "Octubre",
+        "Nov": "Noviembre",
+        "Dec": "Diciembre"
     }
     if not date_str:
         return None
@@ -50,7 +60,7 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
     return data
 
 
-def main(*, folder_name: str, photo_name: Optional[str] = None):
+def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
     AGE = 30
     LOCATION = "Buenos Aires, Argentina"
     URL_WEB = "alejoprietodavalos.github.io/"
