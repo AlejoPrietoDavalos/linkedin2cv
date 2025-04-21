@@ -1,5 +1,6 @@
 from typing import Optional
 from pathlib import Path
+import shutil
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -55,7 +56,9 @@ def translate_date(date_str: Optional[str]) -> Optional[str]:
         return f"{month_map[parts[0]]} {parts[1]}"
     return date_str
 
-
+import re
+def put_bold_in_brackets(text: str) -> str:
+    return re.sub(r"(\[[^\]]+\])", r"<b>\1</b>", text)
 
 def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> LinkedinData:
     # Saco experiencia dando clases.
@@ -66,6 +69,10 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
         for position in data.positions:
             position.started_on = translate_date(position.started_on)
             position.finished_on = translate_date(position.finished_on)
+    
+    data.positions[0].company_name = "Profesional independiente"
+    data.positions[0].description = put_bold_in_brackets(data.positions[0].description)
+
     return data
 
 
@@ -88,6 +95,8 @@ def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
     # --> customizar como vienen los datos de linkedin.
     builder_cv.data = extra_process_data(data=builder_cv.data)
     builder_cv.build_and_save()
+    shutil.copy(builder_cv.path_pdf, builder_cv.path_pdf.with_name(f'Curriculum - {builder_cv.data.profile.full_name}.pdf'))
+    
 
 
 if __name__ == "__main__":

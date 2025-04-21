@@ -14,7 +14,7 @@ TECH_STACK_LABEL = "● Stack tecnológico:"
 DIST_BETWEEN_TITLE_SIDEBAR_TO_TEXT = 5
 DIST_PYTHON_ICON_TO_TITLE = 4
 DIST_BETWEEN_LINKS = 1
-DIST_FULL_NAME_TO_HEADLINE = 6
+DIST_FULL_NAME_TO_HEADLINE = 8
 DIST_HEADLINE_TO_LINKS = 4
 DIST_LINE_SPACING_LEFT = 3 * mm  # Espaciado desde la barra lateral (izquierda)
 DIST_LINE_SPACING_RIGHT = 3 * mm  # Espaciado desde el borde derecho
@@ -136,14 +136,14 @@ def draw_sidebar(
     # Separo el resumen en dos partes.
     # TODO: Poner en linkedin y splitearlo.
     TEXT_SOBRE_MI = (
-        "Programo soluciones end-to-end en <b>Python</b>, soy resolutivo y me motivan mucho los desafíos."
+        "Programo soluciones end-to-end en <b>Python</b>, soy resolutivo y me motivan mucho los desafíos.<br/>"
+        "Tengo gran interés en colaborar en proyectos de datos junto a otros profesionales del sector."
     )
     TEXT_OBJETIVO_PROFESIONAL = (
         "Poder aplicar <b>Python</b> donde sea posible, especialmente en <b>Ciencia de Datos</b>."
     )
     TEXT_PERSONAL_PROJECTS = (
         "● Tool para músicos usando Machine Learning.<br/>"
-        "➣ Yo hago el backend y mi colega el frontend.<br/>"
         "➣ Descomposición de instrumentos en pistas.<br/>"
         "➣ Cálculo de tempo, análisis de espectrograma,...<br/><br/>"
 
@@ -151,12 +151,12 @@ def draw_sidebar(
         "➣ Deep Learning para detección de objetos.<br/>"
         "➣ Pausada por falta de hardware.<br/><br/>"
 
-        "● Chatbot de Whatsapp alimentado con data.<br/>"
-        "➣ El producto final servirá para cualquier cliente con mínima configuración e input estandarizado.<br/><br/>"
+        "● Chatbot de Whatsapp con IA para restaurant.<br/>"
+        "➣ El producto final tomará el pedido del usuario.<br/><br/>"
 
         "● Automatizaciones para streamer.<br/>"
-        "➣ Scripting para resolver tareas repetitivas.<br/>"
         "➣ Desarrollé un juego en Python con interacción.<br/>"
+        "➣ Scripting para resolver tareas repetitivas.<br/>"
     )
     # TODO: Poner en linkedin y splitearlo.
     summary_parts = data.profile.summary.split(TECH_STACK_LABEL)
@@ -296,8 +296,8 @@ def draw_positions(
             ))
 
     final_text = Paragraph(
-        """<br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
-        <i><b>Curriculum programado/generado por mí a partir de datos extraídos de LinkedIn.</b></i>
+        """<br/><br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
+        <i><b>Curriculum programado/generado por mí a partir de los datos extraídos de LinkedIn.</b></i>
         </a>""",
         styles["JobDesc"]
     )
