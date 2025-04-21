@@ -12,8 +12,8 @@ FOLDER_NAME = "Basic_LinkedInDataExport_04-21-2025"
 PHOTO_NAME = "img_profile.png"
 AGE = 30
 LOCATION = "Buenos Aires, Argentina"
-URL_WEB = "alejoprietodavalos.github.io/"
-URL_GITHUB = "github.com/AlejoPrietoDavalos/"
+URL_WEB = "https://alejoprietodavalos.github.io/"
+URL_GITHUB = "https://github.com/AlejoPrietoDavalos/"
 
 
 def load_font() -> None:
