@@ -23,7 +23,7 @@ DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 15
 LEN_PYTHON_ICON = 3
 SIDEBAR_TO_BODY_GAP = 2 * mm
 PHOTO_TOP_PADDING = 10 * mm
-SPACER_HEIGHT = 6
+SPACER_HEIGHT = 15
 FRAME_MARGIN_LEFT = 1 * mm
 FRAME_MARGIN_RIGHT = 1 * mm
 
@@ -137,7 +137,7 @@ def draw_sidebar(
     # TODO: Poner en linkedin y splitearlo.
     TEXT_SOBRE_MI = (
         "Programo soluciones end-to-end en <b>Python</b>, soy resolutivo y me motivan mucho los desafíos.<br/>"
-        "Tengo gran interés en colaborar en proyectos de datos junto a otros profesionales del sector."
+        "Con gran interés en colaborar en proyectos de software/datos junto a otros profesionales."
     )
     TEXT_OBJETIVO_PROFESIONAL = (
         "Poder aplicar <b>Python</b> donde sea posible, especialmente en <b>Ciencia de Datos</b>."
@@ -296,7 +296,7 @@ def draw_positions(
             ))
 
     final_text = Paragraph(
-        """<br/><br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
+        """<br/><br/><br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
         <i><b>Curriculum programado/generado por mí a partir de los datos extraídos de LinkedIn.</b></i>
         </a>""",
         styles["JobDesc"]

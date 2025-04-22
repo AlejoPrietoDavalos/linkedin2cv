@@ -70,9 +70,9 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
             position.started_on = translate_date(position.started_on)
             position.finished_on = translate_date(position.finished_on)
     
-    data.positions[0].company_name = "Profesional independiente"
-    data.positions[0].description = put_bold_in_brackets(data.positions[0].description)
-
+    IDX_FREELANCE = 1   # Indice del trabajo freelance dentro del CV.
+    data.positions[IDX_FREELANCE].company_name = "Profesional independiente"
+    data.positions[IDX_FREELANCE].description = put_bold_in_brackets(data.positions[IDX_FREELANCE].description)
     return data
 
 
