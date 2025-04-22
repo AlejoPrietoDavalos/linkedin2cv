@@ -19,7 +19,7 @@ DIST_HEADLINE_TO_LINKS = 4
 DIST_LINE_SPACING_LEFT = 3 * mm  # Espaciado desde la barra lateral (izquierda)
 DIST_LINE_SPACING_RIGHT = 3 * mm  # Espaciado desde el borde derecho
 LINE_THICKNESS = 0.5  # Grosor de la línea horizontal
-DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 15
+DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 13
 LEN_PYTHON_ICON = 3
 SIDEBAR_TO_BODY_GAP = 2 * mm
 PHOTO_TOP_PADDING = 10 * mm
@@ -97,6 +97,7 @@ def draw_sidebar(
         page_height: int,
         url_website: Optional[str] = None,
         url_github: Optional[str] = None,
+        url_linkedin: Optional[str] = None,
 ) -> None:
     c.setFillColor(style_cv.sidebar_panel)
     c.rect(sizes_cv.margin_left, 0, sizes_cv.column_left_wifth, page_height, fill=True, stroke=0)
@@ -121,6 +122,8 @@ def draw_sidebar(
         info_lines.append(f"<b>➤➤ Mi página web ➤➤</b> <a href='{url_website}'>{remove_https(url_website)}</a>")
     if url_github:
         info_lines.append(f"<b>➤➤ GitHub ➤➤</b> <a href='{url_github}'>{remove_https(url_github)}</a>")
+    if url_linkedin:
+        info_lines.append(f"<b>➤➤ LinkedIn ➤➤</b> <a href='{url_linkedin}'>{remove_https(url_linkedin)}</a>")
 
     for line in info_lines:
         content.append(Paragraph(line, styles["SidebarLinks"]))

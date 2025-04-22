@@ -1,5 +1,5 @@
 ## Curriculum Automático a partir de los datos de Linkedin.
-![example](plots/example.png)
+![Example output](plots/example.png)
 
 
 ## Como usar

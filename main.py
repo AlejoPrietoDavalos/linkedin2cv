@@ -1,6 +1,7 @@
 from typing import Optional
 from pathlib import Path
 import shutil
+import re
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -15,6 +16,7 @@ AGE = 30
 LOCATION = "Buenos Aires, Argentina"
 URL_WEB = "https://alejoprietodavalos.github.io/"
 URL_GITHUB = "https://github.com/AlejoPrietoDavalos/"
+URL_LINKEDIN = "https://linkedin.com/in/alejoprietodavalos/"
 
 
 def load_font() -> None:
@@ -56,7 +58,7 @@ def translate_date(date_str: Optional[str]) -> Optional[str]:
         return f"{month_map[parts[0]]} {parts[1]}"
     return date_str
 
-import re
+
 def put_bold_in_brackets(text: str) -> str:
     return re.sub(r"(\[[^\]]+\])", r"<b>\1</b>", text)
 
@@ -87,6 +89,7 @@ def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
         location=LOCATION,
         url_website=URL_WEB,
         url_github=URL_GITHUB,
+        url_linkedin=URL_LINKEDIN,
         photo_name=photo_name,
         is_photo_circle=True
     )

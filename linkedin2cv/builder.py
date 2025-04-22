@@ -86,6 +86,7 @@ class BuilderCV:
             location: str,
             url_website: Optional[str] = None,
             url_github: Optional[str] = None,
+            url_linkedin: Optional[str] = None,
             path_data: Path = Path("data"),
             photo_name: Optional[str] = None,
             page_size: Tuple[float, float] = A4,
@@ -101,6 +102,7 @@ class BuilderCV:
         self.location = location
         self.url_website = url_website
         self.url_github = url_github
+        self.url_linkedin = url_linkedin
         self.page_width, self.page_height = page_size
         self.is_photo_circle = is_photo_circle
         self.lines_to_draw = []  # Lista de tuplas (x1, y1, x2, y2)
@@ -142,7 +144,8 @@ class BuilderCV:
             location=self.location,
             page_height=self.page_height,
             url_website=self.url_website,
-            url_github=self.url_github
+            url_github=self.url_github,
+            url_linkedin=self.url_linkedin
         )
 
     def draw_positions(self):
