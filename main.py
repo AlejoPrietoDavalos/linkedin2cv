@@ -62,6 +62,23 @@ def translate_date(date_str: Optional[str]) -> Optional[str]:
 def put_bold_in_brackets(text: str) -> str:
     return re.sub(r"(\[[^\]]+\])", r"<b>\1</b>", text)
 
+def move_bracketed_to_end(text: str) -> str:
+    def replacer(line: str) -> str:
+        matches = re.findall(r"\[[^\]]+\]", line)
+        line_clean = re.sub(r"\[[^\]]+\]", "", line).strip()
+        if not matches:
+            return line
+        bracketed = " ".join(matches)
+        if "<br" in line:
+            return re.sub(r"(.*?)(<br\s*/?>)", rf"\1 {bracketed}\2", line_clean + "<br/>")
+        return f"{line_clean} {bracketed}"
+    
+    lines = text.split("<br/>")
+    processed = [replacer(line) for line in lines if line.strip()]
+    processed = [txt if not txt.startswith("●") else f"<br/>{txt}" for txt in processed]
+    return "<br/>".join(processed)
+
+
 def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> LinkedinData:
     # Saco experiencia dando clases.
     data.positions = data.positions[:-1]
@@ -74,7 +91,9 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
     
     IDX_FREELANCE = 1   # Indice del trabajo freelance dentro del CV.
     data.positions[IDX_FREELANCE].company_name = "Profesional independiente"
-    data.positions[IDX_FREELANCE].description = put_bold_in_brackets(data.positions[IDX_FREELANCE].description)
+    desc = move_bracketed_to_end(data.positions[IDX_FREELANCE].description)
+    desc = put_bold_in_brackets(desc)
+    data.positions[IDX_FREELANCE].description = desc
     return data
 
 

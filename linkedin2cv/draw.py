@@ -19,7 +19,7 @@ DIST_HEADLINE_TO_LINKS = 4
 DIST_LINE_SPACING_LEFT = 3 * mm  # Espaciado desde la barra lateral (izquierda)
 DIST_LINE_SPACING_RIGHT = 3 * mm  # Espaciado desde el borde derecho
 LINE_THICKNESS = 0.5  # Grosor de la línea horizontal
-DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 13
+DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 11
 LEN_PYTHON_ICON = 3
 SIDEBAR_TO_BODY_GAP = 2 * mm
 PHOTO_TOP_PADDING = 10 * mm
@@ -143,21 +143,21 @@ def draw_sidebar(
         "Con gran interés en colaborar en proyectos de software/datos junto a otros profesionales."
     )
     TEXT_OBJETIVO_PROFESIONAL = (
-        "Poder aplicar <b>Python</b> donde sea posible, especialmente en <b>Ciencia de Datos</b>."
+        "Poder aplicar <b>Python</b> en todo, siempre dispuesto a aprender nuevas tecnologías, especialmente en <b>Ciencia de Datos</b>."
     )
     TEXT_PERSONAL_PROJECTS = (
         "● Tool para músicos usando Machine Learning.<br/>"
         "➣ Descomposición de instrumentos en pistas.<br/>"
-        "➣ Cálculo de tempo, análisis de espectrograma,...<br/><br/>"
+        "➣ Cálculo de tempo, análisis de espectrograma.<br/><br/>"
 
         "● Teledetección de barcos para pesca ilegal.<br/>"
-        "➣ Deep Learning para detección de objetos.<br/>"
-        "➣ Pausada por falta de hardware.<br/><br/>"
+        "➣ Análisis de imágenes satelitales SAR.<br/>"
+        "➣ Deep Learning para detección de objetos.<br/><br/>"
 
         "● Chatbot de Whatsapp con IA para restaurant.<br/>"
         "➣ El producto final tomará el pedido del usuario.<br/><br/>"
 
-        "● Automatizaciones para streamer.<br/>"
+        "● Automatizaciones para streaming.<br/>"
         "➣ Desarrollé un juego en Python con interacción.<br/>"
         "➣ Scripting para resolver tareas repetitivas.<br/>"
     )
@@ -299,7 +299,7 @@ def draw_positions(
             ))
 
     final_text = Paragraph(
-        """<br/><br/><br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
+        """<br/><br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
         <i><b>Curriculum programado/generado por mí a partir de los datos extraídos de LinkedIn.</b></i>
         </a>""",
         styles["JobDesc"]
