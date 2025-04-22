@@ -16,10 +16,10 @@ DIST_PYTHON_ICON_TO_TITLE = 4
 DIST_BETWEEN_LINKS = 1
 DIST_FULL_NAME_TO_HEADLINE = 8
 DIST_HEADLINE_TO_LINKS = 4
-DIST_LINE_SPACING_LEFT = 3 * mm  # Espaciado desde la barra lateral (izquierda)
-DIST_LINE_SPACING_RIGHT = 3 * mm  # Espaciado desde el borde derecho
-LINE_THICKNESS = 0.5  # Grosor de la línea horizontal
-DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 11
+DIST_LINE_SPACING_LEFT = 3 * mm     # Espaciado desde la barra lateral (izquierda)
+DIST_LINE_SPACING_RIGHT = 3 * mm    # Espaciado desde el borde derecho
+LINE_THICKNESS = 0.5                # Grosor de la línea horizontal
+DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 9
 LEN_PYTHON_ICON = 3
 SIDEBAR_TO_BODY_GAP = 2 * mm
 PHOTO_TOP_PADDING = 10 * mm
@@ -94,6 +94,7 @@ def draw_sidebar(
         styles: StyleSheet1,
         age: int,
         location: str,
+        mail: str,
         page_height: int,
         url_website: Optional[str] = None,
         url_github: Optional[str] = None,
@@ -118,6 +119,9 @@ def draw_sidebar(
         info_lines.append(f"<b>Edad:</b> {age}")
     if location:
         info_lines.append(f"<b>Ubicación:</b> {location}")
+    
+    info_lines.append(f"<b>Mail:</b> {mail}")
+
     if url_website:
         info_lines.append(f"<b>➤➤ Mi página web ➤➤</b> <a href='{url_website}'>{remove_https(url_website)}</a>")
     if url_github:

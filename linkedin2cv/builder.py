@@ -84,6 +84,7 @@ class BuilderCV:
             sizes_cv: SizesCV,
             age: int,
             location: str,
+            mail: str,
             url_website: Optional[str] = None,
             url_github: Optional[str] = None,
             url_linkedin: Optional[str] = None,
@@ -100,6 +101,7 @@ class BuilderCV:
         self.sizes_cv = sizes_cv
         self.age = age
         self.location = location
+        self.mail = mail
         self.url_website = url_website
         self.url_github = url_github
         self.url_linkedin = url_linkedin
@@ -142,6 +144,7 @@ class BuilderCV:
             styles=self.styles,
             age=self.age,
             location=self.location,
+            mail=self.mail,
             page_height=self.page_height,
             url_website=self.url_website,
             url_github=self.url_github,
