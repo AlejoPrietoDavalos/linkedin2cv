@@ -12,6 +12,7 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from linkedin2cv.builder import BuilderCV
 from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
 
+# ----------> FIXME: Deshardcodear, poner un .json
 FOLDER_NAME = "Basic_LinkedInDataExport_04-21-2025"
 PHOTO_NAME = "img_profile.png"
 AGE = 30
@@ -20,6 +21,7 @@ MAIL = "alejoprietodavalos@gmail.com"
 URL_WEB = "https://alejoprietodavalos.github.io/"
 URL_GITHUB = "https://github.com/AlejoPrietoDavalos/"
 URL_LINKEDIN = "https://linkedin.com/in/alejoprietodavalos/"
+# ----------> FIXME: Deshardcodear, poner un .json
 
 
 def load_font() -> None:
