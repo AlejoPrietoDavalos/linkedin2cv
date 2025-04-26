@@ -1,6 +1,10 @@
 ## Curriculum Automático a partir de los datos de Linkedin.
 ![Example output](plots/photo.png)
 
+---
+
+<img src="plots/files.png" alt="LinkedIn data files" style="max-width: 300px; width: 100%; height: auto;">
+<p style="width: 100%"><em><b>Figura 1:</b> Muestra de los datos extraídos de LinkedIn.</em></p>
 
 ## Como usar
 1. Exportar la data de tu perfil en Linkedin.
