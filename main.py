@@ -2,13 +2,15 @@ from typing import Optional
 from pathlib import Path
 import shutil
 import re
+import subprocess
+import os
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 from linkedin2cv.builder import BuilderCV
 from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
-from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 FOLDER_NAME = "Basic_LinkedInDataExport_04-21-2025"
 PHOTO_NAME = "img_profile.png"
@@ -98,6 +100,24 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
     return data
 
 
+def comprimir_pdf_con_ghostscript(path_pdf: str) -> None:
+    temp_path = path_pdf.replace(".pdf", "_temp.pdf")
+    subprocess.run([
+        "gs",
+        "-sDEVICE=pdfwrite",
+        "-dCompatibilityLevel=1.4",
+        "-dPDFSETTINGS=/printer",  # Mejor calidad, ideal para imágenes
+        "-dNOPAUSE",
+        "-dQUIET",
+        "-dBATCH",
+        "-dDownsampleColorImages=true",  # Habilitar submuestreo de imágenes
+        "-dColorImageResolution=300",  # Resolución de imágenes (ajusta según lo necesites)
+        f"-sOutputFile={temp_path}",
+        path_pdf
+    ], check=True)
+    os.replace(temp_path, path_pdf)
+
+
 def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
     colors_cv = StyleCV()
     sizes_cv = SizesCV()
@@ -115,12 +135,13 @@ def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
         is_photo_circle=True
     )
 
-    # --> Se hace un procesamiento especial si necesitás
-    # --> customizar como vienen los datos de linkedin.
     builder_cv.data = extra_process_data(data=builder_cv.data)
     builder_cv.build_and_save()
-    shutil.copy(builder_cv.path_pdf, builder_cv.path_pdf.with_name(f'Curriculum - {builder_cv.data.profile.full_name}.pdf'))
-    
+
+    path_pdf_final = builder_cv.path_pdf.with_name(f'Curriculum - {builder_cv.data.profile.full_name}.pdf')
+    shutil.copy(builder_cv.path_pdf, path_pdf_final)
+
+    comprimir_pdf_con_ghostscript(str(path_pdf_final))
 
 
 if __name__ == "__main__":
