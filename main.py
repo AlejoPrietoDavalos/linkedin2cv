@@ -94,7 +94,8 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
             position.started_on = translate_date(position.started_on)
             position.finished_on = translate_date(position.finished_on)
     
-    IDX_FREELANCE = 1   # Indice del trabajo freelance dentro del CV.
+    # Indice del trabajo freelance dentro del CV.
+    IDX_FREELANCE = 1
     data.positions[IDX_FREELANCE].company_name = "Profesional independiente"
     desc = move_bracketed_to_end(data.positions[IDX_FREELANCE].description)
     desc = put_bold_in_brackets(desc)
@@ -102,7 +103,8 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
     return data
 
 
-def comprimir_pdf_con_ghostscript(path_pdf: str) -> None:
+def compress_pdf_with_ghostscript(path_pdf: str) -> None:
+    """ TODO: Revisar, lo programó ChatGPT."""
     temp_path = path_pdf.replace(".pdf", "_temp.pdf")
     subprocess.run([
         "gs",
@@ -143,7 +145,7 @@ def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
     path_pdf_final = builder_cv.path_pdf.with_name(f'Curriculum - {builder_cv.data.profile.full_name}.pdf')
     shutil.copy(builder_cv.path_pdf, path_pdf_final)
 
-    comprimir_pdf_con_ghostscript(str(path_pdf_final))
+    compress_pdf_with_ghostscript(str(path_pdf_final))
 
 
 if __name__ == "__main__":
