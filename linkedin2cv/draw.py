@@ -96,7 +96,8 @@ def draw_sidebar(
         location: str,
         mail: str,
         page_height: int,
-        url_website: Optional[str] = None,
+        url_website_es: Optional[str] = None,
+        url_website_en: Optional[str] = None,
         url_github: Optional[str] = None,
         url_linkedin: Optional[str] = None,
 ) -> None:
@@ -122,12 +123,20 @@ def draw_sidebar(
     
     info_lines.append(f"<b>Mail:</b> {mail}")
 
-    if url_website:
-        info_lines.append(f"<b>➤➤ Mi página web ➤➤</b> <a href='{url_website}'>{remove_https(url_website)}</a>")
+    if url_website_es and url_website_en:
+        info_lines.append(
+            f"<b>➤➤ Mi página web ➤➤</b>"
+            f"<a href='{url_website_es}'> Español</a> - "
+            f"<a href='{url_website_en}'> Inglés</a>"
+        )
+    else:
+        raise ValueError(f"Falta una url - {url_website_es} - {url_website_en}")
+
+
     if url_github:
-        info_lines.append(f"<b>➤➤ GitHub ➤➤</b> <a href='{url_github}'>{remove_https(url_github)}</a>")
+        info_lines.append(f"<b><a href='{url_github}'>➤➤ GitHub</a></b>")
     if url_linkedin:
-        info_lines.append(f"<b>➤➤ LinkedIn ➤➤</b> <a href='{url_linkedin}'>{remove_https(url_linkedin)}</a>")
+        info_lines.append(f"<b><a href='{url_linkedin}'>➤➤ LinkedIn</a></b>")
 
     for line in info_lines:
         content.append(Paragraph(line, styles["SidebarLinks"]))

@@ -85,7 +85,8 @@ class BuilderCV:
             age: int,
             location: str,
             mail: str,
-            url_website: Optional[str] = None,
+            url_website_es: Optional[str] = None,
+            url_website_en: Optional[str] = None,
             url_github: Optional[str] = None,
             url_linkedin: Optional[str] = None,
             path_data: Path = Path("data"),
@@ -102,7 +103,8 @@ class BuilderCV:
         self.age = age
         self.location = location
         self.mail = mail
-        self.url_website = url_website
+        self.url_website_es = url_website_es
+        self.url_website_en = url_website_en
         self.url_github = url_github
         self.url_linkedin = url_linkedin
         self.page_width, self.page_height = page_size
@@ -146,7 +148,8 @@ class BuilderCV:
             location=self.location,
             mail=self.mail,
             page_height=self.page_height,
-            url_website=self.url_website,
+            url_website_es=self.url_website_es,
+            url_website_en=self.url_website_en,
             url_github=self.url_github,
             url_linkedin=self.url_linkedin
         )
