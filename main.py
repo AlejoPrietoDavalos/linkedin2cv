@@ -1,10 +1,13 @@
 from typing import Optional
+from dotenv import load_dotenv
 from pathlib import Path
 import shutil
 import re
 import subprocess
 import os
+import json
 
+from pydantic import BaseModel, EmailStr
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
@@ -12,20 +15,26 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from linkedin2cv.builder import BuilderCV
 from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
 
-# ----------> FIXME: Deshardcodear, poner un .json
-FOLDER_NAME = "Basic_LinkedInDataExport_04-21-2025"
-PHOTO_NAME = "img_profile.png"
-AGE = 30
-LOCATION = "Buenos Aires, Argentina"
-MAIL = "alejoprietodavalos@gmail.com"
-URL_WEBSITE_ES = "https://alejoprietodavalos.github.io/portfolio-es/"
-URL_WEBSITE_EN = "https://alejoprietodavalos.github.io/portfolio-en/"
-URL_GITHUB = "https://github.com/AlejoPrietoDavalos/"
-URL_LINKEDIN = "https://linkedin.com/in/alejoprietodavalos/"
-# ----------> FIXME: Deshardcodear, poner un .json
+load_dotenv()
 
 
-def load_font() -> None:
+class ExtraData(BaseModel):
+    folder_linkedin_data: str
+    photo_name: str
+    age: int
+    location: str
+    email: EmailStr
+    url_web_es: Optional[str] = None    # TODO: Hacer algo con los opcionales.
+    url_web_en: Optional[str] = None    # TODO: Hacer algo con los opcionales.
+    url_github: Optional[str] = None    # TODO: Hacer algo con los opcionales.
+    url_linkedin: Optional[str] = None  # TODO: Hacer algo con los opcionales.
+
+    def save_json(self, *, path_json: Path) -> None:
+        with open(path_json, "w") as f:
+            json.dump(path_json)
+
+
+def load_fonts() -> None:
     HNF = "HackNerdFont"
     path_fonts = Path("fonts")
     pdfmetrics.registerFont(TTFont(f"{HNF}", str(path_fonts / f"{HNF}-Regular.ttf")))
@@ -37,7 +46,7 @@ def load_font() -> None:
         normal=f"{HNF}",
         bold=f"{HNF}-Bold",
         italic=f"{HNF}-Italic",
-        boldItalic="HackNerdFont-BoldItalic"
+        boldItalic=f"{HNF}-BoldItalic"
     )
 
 
@@ -123,21 +132,21 @@ def compress_pdf_with_ghostscript(path_pdf: str) -> None:
     os.replace(temp_path, path_pdf)
 
 
-def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
+def main(*, extra_data: ExtraData) -> None:
     colors_cv = StyleCV()
     sizes_cv = SizesCV()
     builder_cv = BuilderCV(
-        folder_name=folder_name,
+        folder_name=extra_data.folder_linkedin_data,
         style_cv=colors_cv,
         sizes_cv=sizes_cv,
-        age=AGE,
-        location=LOCATION,
-        mail=MAIL,
-        url_website_es=URL_WEBSITE_ES,
-        url_website_en=URL_WEBSITE_EN,
-        url_github=URL_GITHUB,
-        url_linkedin=URL_LINKEDIN,
-        photo_name=photo_name,
+        age=extra_data.age,
+        location=extra_data.location,
+        mail=extra_data.email,
+        url_website_es=extra_data.url_web_es,
+        url_website_en=extra_data.url_web_en,
+        url_github=extra_data.url_github,
+        url_linkedin=extra_data.url_linkedin,
+        photo_name=extra_data.photo_name,
         is_photo_circle=True
     )
 
@@ -151,5 +160,17 @@ def main(*, folder_name: str, photo_name: Optional[str] = None) -> None:
 
 
 if __name__ == "__main__":
-    load_font()
-    main(folder_name=FOLDER_NAME, photo_name=PHOTO_NAME)
+    load_fonts()
+
+    extra_data = ExtraData(
+        folder_linkedin_data=os.getenv("FOLDER_DATA"),
+        photo_name=os.getenv("PHOTO_NAME"),
+        age=os.getenv("AGE"),
+        location=os.getenv("LOCATION"),
+        email=os.getenv("EMAIL"),
+        url_web_es=os.getenv("URL_WEB_ES"),
+        url_web_en=os.getenv("URL_WEB_EN"),
+        url_github=os.getenv("URL_GITHUB"),
+        url_linkedin=os.getenv("URL_LINKEDIN"),
+    )
+    main(extra_data=extra_data)

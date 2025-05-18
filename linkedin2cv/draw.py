@@ -2,6 +2,7 @@ from typing import Optional, List, Tuple
 from pathlib import Path
 import re
 
+from pydantic import BaseModel, Field
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Frame, Spacer, Flowable
@@ -148,46 +149,62 @@ def draw_sidebar(
         raise ValueError(f"El texto '{TECH_STACK_LABEL}' no está en summary.")
 
 
-
-    # Separo el resumen en dos partes.
-    # TODO: Poner en linkedin y splitearlo.
-    TEXT_SOBRE_MI = (
-        "Programo soluciones end-to-end en <b>Python</b>, soy resolutivo y me motivan mucho los desafíos.<br/>"
-        "Con gran interés en colaborar en proyectos de software/datos junto a otros profesionales."
-    )
-    TEXT_OBJETIVO_PROFESIONAL = (
-        "Poder aplicar <b>Python</b> en todo, siempre dispuesto a aprender nuevas tecnologías, especialmente en <b>Ciencia de Datos</b>."
-    )
-    TEXT_PERSONAL_PROJECTS = (
-        "● Tool para músicos usando Machine Learning.<br/>"
-        "➣ Descomposición de instrumentos en pistas.<br/>"
-        "➣ Cálculo de tempo, análisis de espectrograma.<br/><br/>"
-
-        "● Teledetección de barcos para pesca ilegal.<br/>"
-        "➣ Análisis de imágenes satelitales SAR.<br/>"
-        "➣ Deep Learning para detección de objetos.<br/><br/>"
-
-        "● Chatbot de Whatsapp con IA para restaurant.<br/>"
-        "➣ El producto final tomará el pedido del usuario.<br/><br/>"
-
-        "● Automatizaciones para streaming.<br/>"
-        "➣ Desarrollé un juego en Python con interacción.<br/>"
-        "➣ Scripting para resolver tareas repetitivas.<br/>"
-    )
     # TODO: Poner en linkedin y splitearlo.
     summary_parts = data.profile.summary.split(TECH_STACK_LABEL)
     summary_parts = [p.strip() for p in summary_parts]
 
-    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
-    content.extend(draw_title_text_sidebar(title="Sobre mi", text=TEXT_SOBRE_MI, styles=styles))
-    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
-    content.extend(draw_title_text_sidebar(title="Objetivo profesional", text=TEXT_OBJETIVO_PROFESIONAL, styles=styles))
-    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
-    content.extend(draw_title_text_sidebar(title="Resumen técnico", text=summary_parts[0], styles=styles))
-    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
-    content.extend(draw_title_text_sidebar(title="Proyectos personales", text=TEXT_PERSONAL_PROJECTS, styles=styles))
-    content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
-    content.extend(draw_title_text_sidebar(title="Stack tecnológico", text=summary_parts[1], styles=styles))
+
+    class SectionSidebar(BaseModel):
+        title: str
+        text: str
+    
+    class SectionsSidebar(BaseModel):
+        sections: List[SectionSidebar] = Field(default_factory=list)
+
+    sections = SectionsSidebar()
+    sections.sections.append(SectionSidebar(
+        title="Sobre mi",
+        text=(
+            "Programo soluciones end-to-end en <b>Python</b>, soy resolutivo y me motivan mucho los desafíos.<br/>"
+            "Con gran interés en colaborar en proyectos de software/datos junto a otros profesionales."
+        )
+    ))
+    sections.sections.append(SectionSidebar(
+        title="Objetivo profesional",
+        text="Poder aplicar <b>Python</b> en todo, siempre dispuesto a aprender nuevas tecnologías, especialmente en <b>Ciencia de Datos</b>."
+    ))
+    sections.sections.append(SectionSidebar(
+        title="Resumen técnico",
+        text=summary_parts[0]
+    ))
+    sections.sections.append(SectionSidebar(
+        title="Proyectos personales",
+        text=(
+            "● Tool para músicos usando Machine Learning.<br/>"
+            "➣ Descomposición de instrumentos en pistas.<br/>"
+            "➣ Cálculo de tempo, análisis de espectrograma.<br/><br/>"
+
+            "● Teledetección de barcos para pesca ilegal.<br/>"
+            "➣ Análisis de imágenes satelitales SAR.<br/>"
+            "➣ Deep Learning para detección de objetos.<br/><br/>"
+
+            "● Chatbot de Whatsapp con IA para restaurant.<br/>"
+            "➣ El producto final tomará el pedido del usuario.<br/><br/>"
+
+            "● Automatizaciones para streaming.<br/>"
+            "➣ Desarrollé un juego en Python con interacción.<br/>"
+            "➣ Scripting para resolver tareas repetitivas.<br/>"
+        )
+    ))
+    sections.sections.append(SectionSidebar(
+        title="Stack tecnológico",
+        text=summary_parts[1]
+    ))
+
+
+    for section in sections.sections:
+        content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
+        content.extend(draw_title_text_sidebar(title=section.title, text=section.text, styles=styles))
 
 
     frame = Frame(
@@ -312,7 +329,7 @@ def draw_positions(
             ))
 
     final_text = Paragraph(
-        """<br/><br/><br/><br/><br/><a href="https://github.com/AlejoPrietoDavalos/linkedin2cv">
+        """<br/><br/><br/><br/><br/><a href="https://alejoprietodavalos.github.io/portfolio-es/posts/linkedin-to-cv/">
         <i><b>Curriculum programado/generado por mí a partir de los datos extraídos de LinkedIn.</b></i>
         </a>""",
         styles["JobDesc"]

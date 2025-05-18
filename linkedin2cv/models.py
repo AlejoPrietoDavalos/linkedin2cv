@@ -120,7 +120,7 @@ class StyleCV:
         styles.add(ParagraphStyle(name="JobSubTitle", fontName=FONT, fontSize=8, leading=14, textColor=self.accent, spaceAfter=4))
         styles.add(ParagraphStyle(name="JobDesc", fontName=FONT, fontSize=7, leading=12, textColor=self.text))
         styles.add(ParagraphStyle(name="SidebarName", fontName=FONT, fontSize=15, leading=12, textColor=self.sidebar_text, alignment=TA_CENTER))
-        styles.add(ParagraphStyle(name="SidebarHeadline", fontName=FONT, fontSize=8, leading=10,textColor=self.sidebar_text, alignment=TA_CENTER, spaceAfter=4))
+        styles.add(ParagraphStyle(name="SidebarHeadline", fontName=FONT, fontSize=7, leading=10,textColor=self.sidebar_text, alignment=TA_CENTER, spaceAfter=4))
         styles.add(ParagraphStyle(name="SidebarTitle", fontName=FONT, fontSize=10, leading=10, textColor=self.sidebar_text, alignment=TA_LEFT))
         styles.add(ParagraphStyle(name="SidebarText", fontName=FONT, fontSize=6, leading=10, textColor=self.sidebar_text, alignment=TA_LEFT))
         styles.add(ParagraphStyle(name="SidebarLinks", fontName=FONT, fontSize=6, leading=9, textColor=self.sidebar_text, alignment=TA_LEFT))
