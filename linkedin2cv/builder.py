@@ -1,5 +1,4 @@
 from typing import Optional, Tuple
-from pathlib import Path
 from PIL import Image, ImageDraw
 from io import BytesIO
 
@@ -81,7 +80,7 @@ class BuilderCV:
 
         self.sizes_cv = sizes_cv or SizesCV()
 
-        self.data: LinkedinData = load_linkedin_data(path_folder=PATH_FOLDER_DATA)
+        self.data: LinkedinData = load_linkedin_data()
         self.page_width, self.page_height = self.cfg_builder.page_size
         self.is_photo_circle = self.cfg_builder.is_photo_circle
         self.lines_to_draw = []
