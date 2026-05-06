@@ -1,5 +1,6 @@
 pandas==2.2.3
 pydantic==2.11.3
+pydantic-settings==2.14.0
 pydantic[email]
 reportlab==4.3.1
 python-dotenv==1.1.0
