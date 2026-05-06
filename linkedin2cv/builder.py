@@ -5,7 +5,6 @@ from io import BytesIO
 
 import PyPDF2
 import fitz
-from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import StyleSheet1
 
@@ -15,11 +14,11 @@ from linkedin2cv.models import (
     StyleCV,
     SizesCV,
     BuilderCVConfig,
+    PersonalInformation,
 )
 from linkedin2cv.draw import DrawCVService
 from linkedin2cv.constants import (
     PATH_DATA_DIR,
-    PATH_ASSETS_DIR,
     PATH_FOLDER_DATA,
     PATH_PHOTO,
     PATH_PYTHON_ICON,
@@ -69,64 +68,27 @@ class BuilderCV:
     def __init__(
         self,
         *,
+        personal_information: PersonalInformation,
         style_cv: Optional[StyleCV] = None,
         sizes_cv: Optional[SizesCV] = None,
-        age: Optional[int] = None,
-        location: Optional[str] = None,
-        mail: Optional[str] = None,
-        url_website_es: Optional[str] = None,
-        url_website_en: Optional[str] = None,
-        url_github: Optional[str] = None,
-        url_linkedin: Optional[str] = None,
-        page_size: Tuple[float, float] = A4,
-        is_photo_circle: bool = True,
-        drawer: Optional[DrawCVService] = None,
-        config: Optional[BuilderCVConfig] = None,
+        draw_cv_service: Optional[DrawCVService] = None,
+        cfg_builder: Optional[BuilderCVConfig] = None,
     ):
-        if config is not None:
-            age = config.age
-            location = config.location
-            mail = config.mail
-            url_website_es = config.url_website_es
-            url_website_en = config.url_website_en
-            url_github = config.url_github
-            url_linkedin = config.url_linkedin
-            page_size = config.page_size
-            is_photo_circle = config.is_photo_circle
-            if sizes_cv is None:
-                sizes_cv = SizesCV(
-                    margin=config.margin_mm,
-                    margin_left=config.margin_left_mm,
-                    column_left_width=config.column_left_width_mm,
-                    photo_size=config.photo_size_mm,
-                )
-
-        if age is None or location is None or mail is None:
-            raise ValueError("age, location y mail son requeridos")
-
-        self.path_data = PATH_DATA_DIR
-        self.path_assets = PATH_ASSETS_DIR
-        self.path_python_icon = PATH_PYTHON_ICON
-        self.path_folder = PATH_FOLDER_DATA
-        self.data: LinkedinData = load_linkedin_data(path_folder=self.path_folder)
+        self.personal_information = personal_information
         self.style_cv = style_cv or StyleCV()
+        self.draw_cv_service = draw_cv_service or DrawCVService()
+        self.cfg_builder = cfg_builder or BuilderCVConfig()
+
         self.sizes_cv = sizes_cv or SizesCV()
-        self.drawer = drawer or DrawCVService()
-        self.age = age
-        self.location = location
-        self.mail = mail
-        self.url_website_es = url_website_es
-        self.url_website_en = url_website_en
-        self.url_github = url_github
-        self.url_linkedin = url_linkedin
-        self.page_width, self.page_height = page_size
-        self.is_photo_circle = is_photo_circle
+
+        self.data: LinkedinData = load_linkedin_data(path_folder=PATH_FOLDER_DATA)
+        self.page_width, self.page_height = self.cfg_builder.page_size
+        self.is_photo_circle = self.cfg_builder.is_photo_circle
         self.lines_to_draw = []
-        self.path_photo = PATH_PHOTO
-        if not self.path_photo.exists():
-            raise FileNotFoundError(f"No existe la foto de perfil: {self.path_photo}")
-        self.path_pdf = self.path_data / f"{self.path_folder.stem}{PDF_EXTENSION}"
-        self.c = Canvas(str(self.path_pdf), pagesize=page_size)
+        if not PATH_PHOTO.exists():
+            raise FileNotFoundError(f"No existe la foto de perfil: {PATH_PHOTO}")
+        self.path_pdf = PATH_DATA_DIR / f"{PATH_FOLDER_DATA.stem}{PDF_EXTENSION}"
+        self.c = Canvas(str(self.path_pdf), pagesize=self.cfg_builder.page_size)
         self.styles: StyleSheet1 = self.style_cv.get_styles()
         self.xi: int = None
 
@@ -134,51 +96,51 @@ class BuilderCV:
         self.lines_to_draw.append((x1, y1, x2, y2))
 
     def build_and_save(self) -> None:
-        self.drawer.draw_background(
+        self.draw_cv_service.draw_background(
             c=self.c,
             color=self.style_cv.background,
             page_width=self.page_width,
             page_height=self.page_height,
         )
-        self.drawer.draw_sidebar(
+        self.draw_cv_service.draw_sidebar(
             c=self.c,
             data=self.data,
             sizes_cv=self.sizes_cv,
             style_cv=self.style_cv,
             styles=self.styles,
-            age=self.age,
-            location=self.location,
-            mail=self.mail,
+            age=self.personal_information.age,
+            location=self.personal_information.location,
+            mail=str(self.personal_information.email),
             page_height=self.page_height,
-            url_website_es=self.url_website_es,
-            url_website_en=self.url_website_en,
-            url_github=self.url_github,
-            url_linkedin=self.url_linkedin,
+            url_website_es=self.personal_information.url_web_es,
+            url_website_en=self.personal_information.url_web_en,
+            url_github=self.personal_information.url_github,
+            url_linkedin=self.personal_information.url_linkedin,
         )
-        self.drawer.draw_photo(
+        self.draw_cv_service.draw_photo(
             c=self.c,
-            path_photo=self.path_photo,
+            path_photo=PATH_PHOTO,
             sizes_cv=self.sizes_cv,
             page_height=self.page_height,
             is_photo_circle=self.is_photo_circle,
         )
-        lines_to_draw, x_i = self.drawer.draw_positions(
+        lines_to_draw, x_i = self.draw_cv_service.draw_positions(
             c=self.c,
             data=self.data,
             sizes_cv=self.sizes_cv,
             style_cv=self.style_cv,
             styles=self.styles,
-            path_python_icon=self.path_python_icon,
+            path_python_icon=PATH_PYTHON_ICON,
             page_width=self.page_width,
             page_height=self.page_height,
             sidebar_args={
-                "age": self.age,
-                "location": self.location,
-                "mail": self.mail,
-                "url_website_es": self.url_website_es,
-                "url_website_en": self.url_website_en,
-                "url_github": self.url_github,
-                "url_linkedin": self.url_linkedin,
+                "age": self.personal_information.age,
+                "location": self.personal_information.location,
+                "mail": str(self.personal_information.email),
+                "url_website_es": self.personal_information.url_web_es,
+                "url_website_en": self.personal_information.url_web_en,
+                "url_github": self.personal_information.url_github,
+                "url_linkedin": self.personal_information.url_linkedin,
             },
         )
         self.lines_to_draw = lines_to_draw

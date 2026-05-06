@@ -1,7 +1,7 @@
-from typing import Optional, Tuple
+from typing import Tuple
 
 from pydantic import BaseModel, Field
-from linkedin2cv.hardcoded_config import SUMMARY_TECH_STACK_LABEL
+from reportlab.lib.pagesizes import A4
 
 
 class StyleCVConfig(BaseModel):
@@ -13,23 +13,11 @@ class StyleCVConfig(BaseModel):
 
 
 class BuilderCVConfig(BaseModel):
-    age: int
-    location: str
-    mail: str
-    url_website_es: Optional[str] = None
-    url_website_en: Optional[str] = None
-    url_github: Optional[str] = None
-    url_linkedin: Optional[str] = None
-    page_size: Tuple[float, float] = (595.2755905511812, 841.8897637795277)
+    page_size: Tuple[float, float] = A4
     is_photo_circle: bool = True
-    margin_mm: int = 5
-    margin_left_mm: int = 5
-    column_left_width_mm: int = 70
-    photo_size_mm: int = 30
 
 
 class DrawCVConfig(BaseModel):
-    tech_stack_label: str = SUMMARY_TECH_STACK_LABEL
     dist_between_title_sidebar_to_text: int = 5
     dist_python_icon_to_title: int = 4
     dist_between_links: int = 1

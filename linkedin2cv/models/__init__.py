@@ -6,6 +6,7 @@ from linkedin2cv.models.config import (
     LinkedinDataToCVConfig,
 )
 from linkedin2cv.models.style import StyleCV, SizesCV
+from linkedin2cv.models.personal_information import PersonalInformation
 from linkedin2cv.models.loaders import (
     nan2none,
     format_value,
@@ -28,6 +29,7 @@ __all__ = [
     "LinkedinDataToCVConfig",
     "StyleCV",
     "SizesCV",
+    "PersonalInformation",
     "nan2none",
     "format_value",
     "format_row_position",

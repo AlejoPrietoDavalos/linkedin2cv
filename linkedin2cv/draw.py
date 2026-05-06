@@ -7,86 +7,95 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Frame, Spacer, Flowable
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
-from reportlab.lib.colors import Color
 
-from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
-
-TECH_STACK_LABEL = "● Stack tecnológico:"
-DIST_BETWEEN_TITLE_SIDEBAR_TO_TEXT = 5
-DIST_PYTHON_ICON_TO_TITLE = 4
-DIST_BETWEEN_LINKS = 1
-DIST_FULL_NAME_TO_HEADLINE = 8
-DIST_HEADLINE_TO_LINKS = 4
-DIST_LINE_SPACING_LEFT = 3 * mm     # Espaciado desde la barra lateral (izquierda)
-DIST_LINE_SPACING_RIGHT = 3 * mm    # Espaciado desde el borde derecho
-LINE_THICKNESS = 0.5                # Grosor de la línea horizontal
-DIST_BETWEEN_TITLE_TEXT_SIDEBAR = 9
-LEN_PYTHON_ICON = 3
-SIDEBAR_TO_BODY_GAP = 2 * mm
-PHOTO_TOP_PADDING = 10 * mm
-SPACER_HEIGHT = 15
-FRAME_MARGIN_LEFT = 1 * mm
-FRAME_MARGIN_RIGHT = 1 * mm
-
-
-def clean_text(text: str) -> str:
-    """
-    Elimina los espacios en blanco y las etiquetas <br/> al principio y al final del texto.
-    """
-    # Eliminar espacios en blanco al principio y al final
-    cleaned_text = text.strip()
-    
-    # Eliminar etiquetas <br/> al principio y al final
-    cleaned_text = re.sub(r"^<br/>|<br/>$", "", cleaned_text)
-    
-    return cleaned_text
-
-def remove_https(url: str) -> str:
-    return url.replace('https://', '')
+from linkedin2cv.models import LinkedinData, StyleCV, SizesCV, DrawCVConfig
+from linkedin2cv.hardcoded_config import (
+    SUMMARY_TECH_STACK_LABEL,
+    LABEL_AGE,
+    LABEL_GITHUB,
+    LABEL_LINKEDIN,
+    LABEL_LOCATION,
+    LABEL_MAIL,
+    SECTION_ABOUT_ME_TEXT,
+    SECTION_ABOUT_ME_TITLE,
+    SECTION_GOAL_TEXT,
+    SECTION_GOAL_TITLE,
+    SECTION_PROJECTS_TEXT,
+    SECTION_PROJECTS_TITLE,
+    SECTION_STACK_TITLE,
+    SECTION_TECH_SUMMARY_TITLE,
+    JOB_DESCRIPTION_FALLBACK,
+    JOB_SUBTITLE_PREFIX,
+    FINAL_CREDIT_TEXT,
+    FINAL_CREDIT_URL,
+    format_link_line,
+    format_sidebar_info_line,
+    format_website_line,
+)
 
 
-def draw_background(*, c: Canvas, color: Color, page_width: int, page_height: int) -> None:
-    c.setFillColor(color)
-    c.rect(0, 0, page_width, page_height, fill=True, stroke=0)
+class DrawCVService:
+    def __init__(self, config: Optional[DrawCVConfig] = None):
+        self.config = config or DrawCVConfig()
 
+    @staticmethod
+    def clean_text(text: str) -> str:
+        cleaned_text = text.strip()
+        cleaned_text = re.sub(r"^<br/>|<br/>$", "", cleaned_text)
+        return cleaned_text
 
-def draw_photo(
+    @staticmethod
+    def remove_https(url: str) -> str:
+        return url.replace("https://", "")
+
+    def draw_background(self, *, c: Canvas, color, page_width: int, page_height: int) -> None:
+        c.setFillColor(color)
+        c.rect(0, 0, page_width, page_height, fill=True, stroke=0)
+
+    def draw_photo(
+        self,
         *,
         c: Canvas,
         path_photo: Optional[Path],
         sizes_cv: SizesCV,
         page_height: int,
-        is_photo_circle: bool = True
-) -> None:
-    if path_photo and path_photo.exists():
-        x = sizes_cv.margin_left + (sizes_cv.column_left_wifth - sizes_cv.photo_size) / 2
-        y = page_height - sizes_cv.photo_size - PHOTO_TOP_PADDING
+        is_photo_circle: bool = True,
+    ) -> None:
+        if path_photo and path_photo.exists():
+            x = sizes_cv.margin_left + (sizes_cv.column_left_wifth - sizes_cv.photo_size) / 2
+            y = page_height - sizes_cv.photo_size - self.config.photo_top_padding_mm * mm
 
-        if is_photo_circle:
-            radius = sizes_cv.photo_size / 2
-            center_x = x + radius
-            center_y = y + radius
-            c.saveState()
-            path = c.beginPath()
-            path.circle(center_x, center_y, radius)
-            c.clipPath(path, stroke=0)
+            if is_photo_circle:
+                radius = sizes_cv.photo_size / 2
+                center_x = x + radius
+                center_y = y + radius
+                c.saveState()
+                path = c.beginPath()
+                path.circle(center_x, center_y, radius)
+                c.clipPath(path, stroke=0)
 
-        c.drawImage(str(path_photo), x, y,
-                            width=sizes_cv.photo_size, height=sizes_cv.photo_size,
-                            preserveAspectRatio=True, mask='auto')
+            c.drawImage(
+                str(path_photo),
+                x,
+                y,
+                width=sizes_cv.photo_size,
+                height=sizes_cv.photo_size,
+                preserveAspectRatio=True,
+                mask="auto",
+            )
 
-        if is_photo_circle:
-            c.restoreState()
+            if is_photo_circle:
+                c.restoreState()
 
+    def draw_title_text_sidebar(self, *, title: str, text: str, styles: StyleSheet1) -> List[Paragraph | Spacer]:
+        return [
+            Paragraph(f"<b>{title}</b>", styles["SidebarTitle"]),
+            Spacer(1, self.config.dist_between_title_sidebar_to_text),
+            Paragraph(self.clean_text(text), styles["SidebarText"]),
+        ]
 
-def draw_title_text_sidebar(*, title: str, text: str, styles: StyleSheet1) -> List[Paragraph | Spacer]:
-    return [
-        Paragraph(f"<b>{title}</b>", styles["SidebarTitle"]),
-        Spacer(1, DIST_BETWEEN_TITLE_SIDEBAR_TO_TEXT),
-        Paragraph(clean_text(text), styles["SidebarText"])
-    ]
-
-def draw_sidebar(
+    def draw_sidebar(
+        self,
         *,
         c: Canvas,
         data: LinkedinData,
@@ -101,241 +110,203 @@ def draw_sidebar(
         url_website_en: Optional[str] = None,
         url_github: Optional[str] = None,
         url_linkedin: Optional[str] = None,
-) -> None:
-    c.setFillColor(style_cv.sidebar_panel)
-    c.rect(sizes_cv.margin_left, 0, sizes_cv.column_left_wifth, page_height, fill=True, stroke=0)
+    ) -> None:
+        c.setFillColor(style_cv.sidebar_panel)
+        c.rect(sizes_cv.margin_left, 0, sizes_cv.column_left_wifth, page_height, fill=True, stroke=0)
 
-    photo_bottom = page_height - sizes_cv.photo_size - PHOTO_TOP_PADDING
-    sidebar_text_bottom = sizes_cv.margin + 5 * mm
-    sidebar_height = photo_bottom - sidebar_text_bottom
+        photo_bottom = page_height - sizes_cv.photo_size - self.config.photo_top_padding_mm * mm
+        sidebar_text_bottom = sizes_cv.margin + 5 * mm
+        sidebar_height = photo_bottom - sidebar_text_bottom
 
-    content = []
-    content.append(Paragraph(data.profile.full_name, styles["SidebarName"]))
-    content.append(Spacer(1, DIST_FULL_NAME_TO_HEADLINE))
-    content.append(Paragraph(data.profile.headline, styles["SidebarHeadline"]))
-    content.append(Spacer(1, DIST_HEADLINE_TO_LINKS))
+        content = []
+        content.append(Paragraph(data.profile.full_name, styles["SidebarName"]))
+        content.append(Spacer(1, self.config.dist_full_name_to_headline))
+        content.append(Paragraph(data.profile.headline, styles["SidebarHeadline"]))
+        content.append(Spacer(1, self.config.dist_headline_to_links))
 
-    # Info personal (edad, links)
-    info_lines = []
-    if age:
-        info_lines.append(f"<b>Edad:</b> {age}")
-    if location:
-        info_lines.append(f"<b>Ubicación:</b> {location}")
-    
-    info_lines.append(f"<b>Mail:</b> {mail}")
+        info_lines = []
+        if age:
+            info_lines.append(format_sidebar_info_line(LABEL_AGE, str(age)))
+        if location:
+            info_lines.append(format_sidebar_info_line(LABEL_LOCATION, location))
 
-    if url_website_es and url_website_en:
-        info_lines.append(
-            f"<b>➤➤ Mi página web ➤➤</b>"
-            f"<a href='{url_website_es}'> Español</a> - "
-            f"<a href='{url_website_en}'> Inglés</a>"
-        )
-    else:
-        raise ValueError(f"Falta una url - {url_website_es} - {url_website_en}")
+        info_lines.append(format_sidebar_info_line(LABEL_MAIL, mail))
 
+        if url_website_es and url_website_en:
+            info_lines.append(format_website_line(url_es=url_website_es, url_en=url_website_en))
+        else:
+            raise ValueError(f"Falta una url - {url_website_es} - {url_website_en}")
 
-    if url_github:
-        info_lines.append(f"<b><a href='{url_github}'>➤➤ GitHub</a></b>")
-    if url_linkedin:
-        info_lines.append(f"<b><a href='{url_linkedin}'>➤➤ LinkedIn</a></b>")
+        if url_github:
+            info_lines.append(format_link_line(label=LABEL_GITHUB, url=url_github))
+        if url_linkedin:
+            info_lines.append(format_link_line(label=LABEL_LINKEDIN, url=url_linkedin))
 
-    for line in info_lines:
-        content.append(Paragraph(line, styles["SidebarLinks"]))
-        content.append(Spacer(1, DIST_BETWEEN_LINKS))
+        for line in info_lines:
+            content.append(Paragraph(line, styles["SidebarLinks"]))
+            content.append(Spacer(1, self.config.dist_between_links))
 
-    
-    # Verifico si TECH_STACK_LABEL está.
-    if TECH_STACK_LABEL not in data.profile.summary:
-        raise ValueError(f"El texto '{TECH_STACK_LABEL}' no está en summary.")
+        if SUMMARY_TECH_STACK_LABEL not in data.profile.summary:
+            raise ValueError(f"El texto '{SUMMARY_TECH_STACK_LABEL}' no está en summary.")
 
+        summary_parts = data.profile.summary.split(SUMMARY_TECH_STACK_LABEL)
+        summary_parts = [p.strip() for p in summary_parts]
 
-    # TODO: Poner en linkedin y splitearlo.
-    summary_parts = data.profile.summary.split(TECH_STACK_LABEL)
-    summary_parts = [p.strip() for p in summary_parts]
+        class SectionSidebar(BaseModel):
+            title: str
+            text: str
 
+        class SectionsSidebar(BaseModel):
+            sections: List[SectionSidebar] = Field(default_factory=list)
 
-    class SectionSidebar(BaseModel):
-        title: str
-        text: str
-    
-    class SectionsSidebar(BaseModel):
-        sections: List[SectionSidebar] = Field(default_factory=list)
-
-    sections = SectionsSidebar()
-    sections.sections.append(SectionSidebar(
-        title="Sobre mi",
-        text=(
-            "Programo soluciones end-to-end en <b>Python</b>, soy resolutivo y me motivan mucho los desafíos.<br/>"
-            "Con gran interés en colaborar en proyectos de software/datos junto a otros profesionales."
-        )
-    ))
-    sections.sections.append(SectionSidebar(
-        title="Objetivo profesional",
-        text="Poder aplicar <b>Python</b> en todo, siempre dispuesto a aprender nuevas tecnologías, especialmente en <b>Ciencia de Datos</b>."
-    ))
-    sections.sections.append(SectionSidebar(
-        title="Resumen técnico",
-        text=summary_parts[0]
-    ))
-    sections.sections.append(SectionSidebar(
-        title="Proyectos personales",
-        text=(
-            "● Tool para músicos usando Machine Learning.<br/>"
-            "➣ Descomposición de instrumentos en pistas.<br/>"
-            "➣ Cálculo de tempo, análisis de espectrograma.<br/><br/>"
-
-            "● Teledetección de barcos para pesca ilegal.<br/>"
-            "➣ Análisis de imágenes satelitales SAR.<br/>"
-            "➣ Deep Learning para detección de objetos.<br/><br/>"
-
-            "● Chatbot de Whatsapp con IA para restaurant.<br/>"
-            "➣ El producto final tomará el pedido del usuario.<br/><br/>"
-
-            "● Automatizaciones para streaming.<br/>"
-            "➣ Desarrollé un juego en Python con interacción.<br/>"
-            "➣ Scripting para resolver tareas repetitivas.<br/>"
-        )
-    ))
-    sections.sections.append(SectionSidebar(
-        title="Stack tecnológico",
-        text=summary_parts[1]
-    ))
-
-
-    for section in sections.sections:
-        content.append(Spacer(1, DIST_BETWEEN_TITLE_TEXT_SIDEBAR))
-        content.extend(draw_title_text_sidebar(title=section.title, text=section.text, styles=styles))
-
-
-    frame = Frame(
-        sizes_cv.margin_left + FRAME_MARGIN_LEFT,
-        sidebar_text_bottom,
-        sizes_cv.column_left_wifth - FRAME_MARGIN_LEFT - FRAME_MARGIN_RIGHT,
-        sidebar_height,
-        showBoundary=0
-    )
-
-    frame.addFromList(content, c)
-
-
-def draw_positions(
-    *,
-    c: Canvas,
-    data: LinkedinData,
-    sizes_cv: SizesCV,
-    style_cv: StyleCV,
-    styles: StyleSheet1,
-    path_python_icon: Path,
-    page_width: float,
-    page_height: float
-) -> List[Tuple[float, float, float, float]]:
-    class IconTitle(Flowable):
-        def __init__(
-            self,
-            img_path: Path,
-            text: str,
-            style: ParagraphStyle,
-            img_size: float
-        ) -> None:
-            super().__init__()
-            self.img_path = img_path
-            self.p = Paragraph(text, style)
-            self.img_size = img_size
-            self._height = 0
-
-        def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
-            text_w, text_h = self.p.wrap(
-                availWidth - self.img_size - DIST_PYTHON_ICON_TO_TITLE,
-                availHeight
+        sections = SectionsSidebar()
+        sections.sections.append(
+            SectionSidebar(
+                title=SECTION_ABOUT_ME_TITLE,
+                text=SECTION_ABOUT_ME_TEXT,
             )
-            self._height = max(text_h, self.img_size)
-            return text_w + self.img_size + DIST_PYTHON_ICON_TO_TITLE, self._height
-
-        def draw(self) -> None:
-            y_img = (self._height - self.img_size) / 2
-            self.canv.drawImage(
-                str(self.img_path), 0, y_img,
-                width=self.img_size, height=self.img_size,
-                preserveAspectRatio=True, mask="auto"
-            )
-            self.p.drawOn(
-                self.canv,
-                self.img_size + DIST_PYTHON_ICON_TO_TITLE,
-                (self._height - self.p.height) / 2
-            )
-
-    x = sizes_cv.margin_left + sizes_cv.column_left_wifth + SIDEBAR_TO_BODY_GAP
-    x_i = x + DIST_LINE_SPACING_LEFT
-    
-    width = page_width - x - sizes_cv.margin
-    y_cursor = page_height - sizes_cv.margin
-    usable_height = y_cursor - sizes_cv.margin
-
-    icon_size = LEN_PYTHON_ICON * mm
-    lines: List[Tuple[float, float, float, float]] = []
-    icon_ys: List[float] = []  # lista para coordenadas Y de iconos
-
-    for idx, position in enumerate(data.positions):
-        # 1) Crear flowable y medir altura del icono
-        icon = IconTitle(
-            path_python_icon,
-            f"<b>{position.text_title}</b>",
-            styles["JobTitle"],
-            icon_size
         )
-        _, h_icon = icon.wrap(width, usable_height)
+        sections.sections.append(
+            SectionSidebar(
+                title=SECTION_GOAL_TITLE,
+                text=SECTION_GOAL_TEXT,
+            )
+        )
+        sections.sections.append(SectionSidebar(title=SECTION_TECH_SUMMARY_TITLE, text=summary_parts[0]))
+        sections.sections.append(
+            SectionSidebar(
+                title=SECTION_PROJECTS_TITLE,
+                text=SECTION_PROJECTS_TEXT,
+            )
+        )
+        sections.sections.append(SectionSidebar(title=SECTION_STACK_TITLE, text=summary_parts[1]))
 
-        # calcular la Y donde se dibujará el icono
-        y_icon = y_cursor - h_icon
-        icon_ys.append(y_icon)
+        for section in sections.sections:
+            content.append(Spacer(1, self.config.dist_between_title_text_sidebar))
+            content.extend(self.draw_title_text_sidebar(title=section.title, text=section.text, styles=styles))
 
-        # medir subtítulo y descripción
-        subtitle = Paragraph(f"<b>➤➤ {position.text_sub_title}</b>", styles["JobSubTitle"])
-        _, h_sub = subtitle.wrap(width, usable_height)
-        desc = Paragraph(position.description or "Sin descripción", styles["JobDesc"])
-        _, h_desc = desc.wrap(width, usable_height)
+        frame = Frame(
+            sizes_cv.margin_left + self.config.frame_margin_left_mm * mm,
+            sidebar_text_bottom,
+            sizes_cv.column_left_wifth - (self.config.frame_margin_left_mm + self.config.frame_margin_right_mm) * mm,
+            sidebar_height,
+            showBoundary=0,
+        )
 
-        # altura total del bloque
-        block_height = h_icon + h_sub + h_desc + SPACER_HEIGHT + LINE_THICKNESS
+        frame.addFromList(content, c)
 
-        # 2) salto de página si no cabe el bloque
-        if y_cursor - block_height < sizes_cv.margin:
-            c.showPage()
-            draw_background(c=c, color=style_cv.background, page_width=page_width, page_height=page_height)
-            draw_sidebar(c=c, data=data, sizes_cv=sizes_cv, style_cv=style_cv, styles=styles,
-                         age=0, location="", page_height=page_height)
-            y_cursor = page_height - sizes_cv.margin
-            # recalcular Y del icono tras salto
+    def draw_positions(
+        self,
+        *,
+        c: Canvas,
+        data: LinkedinData,
+        sizes_cv: SizesCV,
+        style_cv: StyleCV,
+        styles: StyleSheet1,
+        path_python_icon: Path,
+        page_width: float,
+        page_height: float,
+        sidebar_args: dict,
+    ) -> Tuple[List[Tuple[float, float, float, float]], float]:
+        class IconTitle(Flowable):
+            def __init__(self, img_path: Path, text: str, style: ParagraphStyle, img_size: float, icon_to_title_dist: float) -> None:
+                super().__init__()
+                self.img_path = img_path
+                self.p = Paragraph(text, style)
+                self.img_size = img_size
+                self._height = 0
+                self.icon_to_title_dist = icon_to_title_dist
+
+            def wrap(self, availWidth: float, availHeight: float) -> Tuple[float, float]:
+                text_w, text_h = self.p.wrap(
+                    availWidth - self.img_size - self.icon_to_title_dist,
+                    availHeight,
+                )
+                self._height = max(text_h, self.img_size)
+                return text_w + self.img_size + self.icon_to_title_dist, self._height
+
+            def draw(self) -> None:
+                y_img = (self._height - self.img_size) / 2
+                self.canv.drawImage(
+                    str(self.img_path),
+                    0,
+                    y_img,
+                    width=self.img_size,
+                    height=self.img_size,
+                    preserveAspectRatio=True,
+                    mask="auto",
+                )
+                self.p.drawOn(
+                    self.canv,
+                    self.img_size + self.icon_to_title_dist,
+                    (self._height - self.p.height) / 2,
+                )
+
+        cfg = self.config
+
+        x = sizes_cv.margin_left + sizes_cv.column_left_wifth + cfg.sidebar_to_body_gap_mm * mm
+        x_i = x + cfg.dist_line_spacing_left_mm * mm
+
+        width = page_width - x - sizes_cv.margin
+        y_cursor = page_height - sizes_cv.margin
+        usable_height = y_cursor - sizes_cv.margin
+
+        icon_size = cfg.len_python_icon_mm * mm
+        lines: List[Tuple[float, float, float, float]] = []
+
+        for idx, position in enumerate(data.positions):
+            icon = IconTitle(path_python_icon, f"<b>{position.text_title}</b>", styles["JobTitle"], icon_size, cfg.dist_python_icon_to_title)
+            _, h_icon = icon.wrap(width, usable_height)
+
             y_icon = y_cursor - h_icon
-            icon_ys[-1] = y_icon
 
-        # 3) dibujar icono y texto
-        icon.drawOn(c, x, y_icon)
-        y_cursor = y_icon - LINE_THICKNESS
-        subtitle.drawOn(c, x, y_cursor - h_sub)
-        y_cursor -= h_sub + LINE_THICKNESS
-        desc.drawOn(c, x, y_cursor - h_desc)
-        y_cursor -= h_desc + SPACER_HEIGHT
+            subtitle = Paragraph(f"<b>{JOB_SUBTITLE_PREFIX} {position.text_sub_title}</b>", styles["JobSubTitle"])
+            _, h_sub = subtitle.wrap(width, usable_height)
+            desc = Paragraph(position.description or JOB_DESCRIPTION_FALLBACK, styles["JobDesc"])
+            _, h_desc = desc.wrap(width, usable_height)
 
-        # 4) línea separadora (entre bloques)
-        if idx < len(data.positions) - 1:
-            #y_line = y_cursor + (SPACER_HEIGHT / 2)
-            y_line = y_icon
-            lines.append((
-                x + DIST_LINE_SPACING_LEFT,
-                y_line,
-                page_width - sizes_cv.margin - DIST_LINE_SPACING_RIGHT,
-                y_line
-            ))
+            block_height = h_icon + h_sub + h_desc + cfg.spacer_height + cfg.line_thickness
 
-    final_text = Paragraph(
-        """<br/><br/><br/><br/><br/><a href="https://alejoprietodavalos.github.io/portfolio-es/posts/linkedin-to-cv/">
-        <i><b>Curriculum programado/generado por mí a partir de los datos extraídos de LinkedIn.</b></i>
-        </a>""",
-        styles["JobDesc"]
-    )
-    _, h_final = final_text.wrap(width, usable_height)
-    final_text.drawOn(c, x, y_cursor - h_final)
-    y_cursor -= h_final + SPACER_HEIGHT
+            if y_cursor - block_height < sizes_cv.margin:
+                c.showPage()
+                self.draw_background(c=c, color=style_cv.background, page_width=page_width, page_height=page_height)
+                self.draw_sidebar(
+                    c=c,
+                    data=data,
+                    sizes_cv=sizes_cv,
+                    style_cv=style_cv,
+                    styles=styles,
+                    page_height=page_height,
+                    **sidebar_args,
+                )
+                y_cursor = page_height - sizes_cv.margin
+                y_icon = y_cursor - h_icon
 
-    return lines, x_i
+            icon.drawOn(c, x, y_icon)
+            y_cursor = y_icon - cfg.line_thickness
+            subtitle.drawOn(c, x, y_cursor - h_sub)
+            y_cursor -= h_sub + cfg.line_thickness
+            desc.drawOn(c, x, y_cursor - h_desc)
+            y_cursor -= h_desc + cfg.spacer_height
+
+            if idx < len(data.positions) - 1:
+                y_line = y_icon
+                lines.append(
+                    (
+                        x + cfg.dist_line_spacing_left_mm * mm,
+                        y_line,
+                        page_width - sizes_cv.margin - cfg.dist_line_spacing_right_mm * mm,
+                        y_line,
+                    )
+                )
+
+        final_text = Paragraph(
+            f"""<br/><br/><br/><br/><br/><a href="{FINAL_CREDIT_URL}">\
+            <i><b>{FINAL_CREDIT_TEXT}</b></i>\
+            </a>""",
+            styles["JobDesc"],
+        )
+        _, h_final = final_text.wrap(width, usable_height)
+        final_text.drawOn(c, x, y_cursor - h_final)
+
+        return lines, x_i

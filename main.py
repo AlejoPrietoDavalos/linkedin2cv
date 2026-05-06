@@ -1,46 +1,26 @@
 from typing import Optional
-from dotenv import load_dotenv
-from pathlib import Path
 import shutil
 import re
 import subprocess
-import os
-import json
 
-from pydantic import BaseModel, EmailStr
+from dotenv import load_dotenv
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
-from linkedin2cv.builder import BuilderCV
-from linkedin2cv.models import LinkedinData, StyleCV, SizesCV
-
 load_dotenv()
 
-
-class ExtraData(BaseModel):
-    folder_linkedin_data: str
-    photo_name: str
-    age: int
-    location: str
-    email: EmailStr
-    url_web_es: Optional[str] = None    # TODO: Hacer algo con los opcionales.
-    url_web_en: Optional[str] = None    # TODO: Hacer algo con los opcionales.
-    url_github: Optional[str] = None    # TODO: Hacer algo con los opcionales.
-    url_linkedin: Optional[str] = None  # TODO: Hacer algo con los opcionales.
-
-    def save_json(self, *, path_json: Path) -> None:
-        with open(path_json, "w") as f:
-            json.dump(path_json)
+from linkedin2cv.builder import BuilderCV
+from linkedin2cv.constants import PATH_FONTS
+from linkedin2cv.models import LinkedinData, PersonalInformation
 
 
 def load_fonts() -> None:
     HNF = "HackNerdFont"
-    path_fonts = Path("fonts")
-    pdfmetrics.registerFont(TTFont(f"{HNF}", str(path_fonts / f"{HNF}-Regular.ttf")))
-    pdfmetrics.registerFont(TTFont(f"{HNF}-Bold", str(path_fonts / f"{HNF}-Bold.ttf")))
-    pdfmetrics.registerFont(TTFont(f"{HNF}-Italic", str(path_fonts / f"{HNF}-Italic.ttf")))
-    pdfmetrics.registerFont(TTFont(f"{HNF}-BoldItalic", str(path_fonts / f"{HNF}-BoldItalic.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}", str(PATH_FONTS / f"{HNF}-Regular.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}-Bold", str(PATH_FONTS / f"{HNF}-Bold.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}-Italic", str(PATH_FONTS / f"{HNF}-Italic.ttf")))
+    pdfmetrics.registerFont(TTFont(f"{HNF}-BoldItalic", str(PATH_FONTS / f"{HNF}-BoldItalic.ttf")))
     registerFontFamily(
         f"{HNF}",
         normal=f"{HNF}",
@@ -115,6 +95,8 @@ def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> Linke
 
 def compress_pdf_with_ghostscript(path_pdf: str) -> None:
     """ TODO: Revisar, lo programó ChatGPT."""
+    raise_if_ghostscript_is_not_installed()
+
     temp_path = path_pdf.replace(".pdf", "_temp.pdf")
     subprocess.run([
         "gs",
@@ -132,22 +114,17 @@ def compress_pdf_with_ghostscript(path_pdf: str) -> None:
     os.replace(temp_path, path_pdf)
 
 
-def main(*, extra_data: ExtraData) -> None:
-    colors_cv = StyleCV()
-    sizes_cv = SizesCV()
+def raise_if_ghostscript_is_not_installed() -> None:
+    if shutil.which("gs") is None:
+        raise RuntimeError(
+            "Ghostscript ('gs') no está instalado. "
+            "Revisá el README.md para instrucciones de instalación."
+        )
+
+
+def main(*, personal_information: PersonalInformation) -> None:
     builder_cv = BuilderCV(
-        folder_name=extra_data.folder_linkedin_data,
-        style_cv=colors_cv,
-        sizes_cv=sizes_cv,
-        age=extra_data.age,
-        location=extra_data.location,
-        mail=extra_data.email,
-        url_website_es=extra_data.url_web_es,
-        url_website_en=extra_data.url_web_en,
-        url_github=extra_data.url_github,
-        url_linkedin=extra_data.url_linkedin,
-        photo_name=extra_data.photo_name,
-        is_photo_circle=True
+        personal_information=personal_information,
     )
 
     builder_cv.data = extra_process_data(data=builder_cv.data)
@@ -162,15 +139,5 @@ def main(*, extra_data: ExtraData) -> None:
 if __name__ == "__main__":
     load_fonts()
 
-    extra_data = ExtraData(
-        folder_linkedin_data=os.getenv("FOLDER_DATA"),
-        photo_name=os.getenv("PHOTO_NAME"),
-        age=os.getenv("AGE"),
-        location=os.getenv("LOCATION"),
-        email=os.getenv("EMAIL"),
-        url_web_es=os.getenv("URL_WEB_ES"),
-        url_web_en=os.getenv("URL_WEB_EN"),
-        url_github=os.getenv("URL_GITHUB"),
-        url_linkedin=os.getenv("URL_LINKEDIN"),
-    )
-    main(extra_data=extra_data)
+    personal_information = PersonalInformation.from_env()
+    main(personal_information=personal_information)
