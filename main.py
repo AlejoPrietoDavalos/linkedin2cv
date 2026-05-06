@@ -9,11 +9,11 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 
 load_dotenv()
 
-from linkedin2cv.builder import BuilderCV
+from src.app.drivers.builder import BuilderCV
+from src.app.drivers.ghostscript import GhostScript
 from linkedin2cv.constants import PATH_FONTS
-from linkedin2cv.models import LinkedinData, PersonalInformation
+from src.core.entities import LinkedinData, PersonalInformation
 from linkedin2cv.linkedin_csv_repository import LinkedinCSVRepository
-from linkedin2cv.src.ghostscript import GhostScript
 
 
 def load_fonts() -> None:
@@ -115,5 +115,5 @@ def main(*, personal_information: PersonalInformation) -> None:
 if __name__ == "__main__":
     load_fonts()
 
-    personal_information = PersonalInformation.from_env()
+    personal_information = PersonalInformation()
     main(personal_information=personal_information)

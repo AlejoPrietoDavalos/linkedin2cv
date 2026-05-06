@@ -6,7 +6,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, StyleSheet
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib.units import mm
 
-from linkedin2cv.models.config import StyleCVConfig
+from .config import StyleCVConfig
 
 FONT = "HackNerdFont"
 

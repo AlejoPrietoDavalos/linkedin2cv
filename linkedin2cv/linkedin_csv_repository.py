@@ -2,7 +2,7 @@ from typing import Optional, List, Dict, Any
 
 import pandas as pd
 
-from linkedin2cv.models.linkedin_data import Profile, Position, Education, LinkedinData
+from src.core.entities.linkedin_data import Profile, Position, Education, LinkedinData
 from linkedin2cv.constants import (
     PATH_LINKEDIN_PROFILE,
     PATH_LINKEDIN_POSITIONS,
@@ -19,14 +19,18 @@ def _read_dataframe(path_csv):
     return pd.read_csv(path_csv)
 
 
-def _format_value(v: Optional[str]) -> Optional[str]:
+def _format_key_position(key: str) -> str:
+    return key.lower().replace(" ", "_")
+
+
+def _format_value_position(v: Optional[str]) -> Optional[str]:
     v = _nan2none(v)
     return apply_visible_text_replacements(v)
 
 
 def _format_row_position(*, row: pd.Series) -> Dict[str, Any]:
     row_dict: Dict[str, Any] = row.to_dict()
-    return {k.lower().replace(" ", "_"): _format_value(v) for k, v in row_dict.items()}
+    return {_format_key_position(k): _format_value_position(v) for k, v in row_dict.items()}
 
 
 class LinkedinCSVRepository:

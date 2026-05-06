@@ -1,3 +1,5 @@
+"""Implementación del servicio de dibujo de CV."""
+
 from typing import Optional, List, Tuple
 from pathlib import Path
 import re
@@ -8,7 +10,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Frame, Spacer, Flowable
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
 
-from linkedin2cv.models import LinkedinData, StyleCV, SizesCV, DrawCVConfig
+from src.core.entities import LinkedinData, StyleCV, SizesCV, DrawCVConfig
 from linkedin2cv.constants import PATH_PYTHON_ICON
 from linkedin2cv.hardcoded_config import (
     SUMMARY_TECH_STACK_LABEL,
@@ -33,9 +35,12 @@ from linkedin2cv.hardcoded_config import (
     format_sidebar_info_line,
     format_website_line,
 )
+from src.core.drivers.draw import CoreDrawCVService
 
 
-class DrawCVService:
+class DrawCVService(CoreDrawCVService):
+    """Implementación del servicio de dibujo de CV."""
+    
     def __init__(self, config: Optional[DrawCVConfig] = None):
         self.config = config or DrawCVConfig()
 

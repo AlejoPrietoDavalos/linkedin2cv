@@ -6,8 +6,10 @@ import shutil
 from pathlib import Path
 from typing import Union
 
+from src.core.drivers.ghostscript import CoreGhostScript
 
-class GhostScript:
+
+class GhostScript(CoreGhostScript):
     """Compresión de PDFs mediante Ghostscript."""
     
     _GS_COMMAND = "gs"
@@ -47,4 +49,3 @@ class GhostScript:
             str(path_pdf)
         ], check=True)
         os.replace(path_tmp, path_pdf)
-

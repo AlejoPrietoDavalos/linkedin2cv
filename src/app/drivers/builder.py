@@ -1,3 +1,5 @@
+"""Implementación del constructor de CV."""
+
 from pathlib import Path
 from typing import Optional, Tuple
 from PIL import Image, ImageDraw
@@ -8,14 +10,14 @@ import fitz
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import StyleSheet1
 
-from linkedin2cv.models import (
+from src.core.entities import (
     LinkedinData,
     StyleCV,
     SizesCV,
     BuilderCVConfig,
     PersonalInformation,
 )
-from linkedin2cv.draw import DrawCVService
+from src.app.drivers.draw import DrawCVService
 from linkedin2cv.constants import (
     PATH_DATA_DIR,
     PATH_FOLDER_DATA,
@@ -23,6 +25,7 @@ from linkedin2cv.constants import (
     PATH_PYTHON_ICON,
     PDF_EXTENSION,
 )
+from src.core.drivers.builder import CoreBuilderCV
 
 
 def add_line_to_pdf(
@@ -63,7 +66,9 @@ def add_image_to_pdf(input_pdf_path: Path, output_pdf_path: Path, image: Image) 
             pdf_writer.write(output_file)
 
 
-class BuilderCV:
+class BuilderCV(CoreBuilderCV):
+    """Implementación del constructor de CV."""
+    
     def __init__(
         self,
         *,
