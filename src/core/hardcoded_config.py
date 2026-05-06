@@ -73,10 +73,3 @@ def format_position_subtitle(*, company_name: str, started_on: str) -> str:
     return f"{company_name} ({started_on})"
 
 
-def apply_visible_text_replacements(value: Optional[str]) -> Optional[str]:
-    if not isinstance(value, str):
-        return value
-    value = value.replace(*REPLACE_BULLET_ARROW)
-    value = value.replace(*REPLACE_BULLET_DOT)
-    value = value.replace(*REPLACE_BULLET_SQUARE)
-    return value

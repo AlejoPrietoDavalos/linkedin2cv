@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from pydantic import BaseModel
-from linkedin2cv.hardcoded_config import format_position_subtitle
+from src.core.hardcoded_config import format_position_subtitle
 
 
 class Profile(BaseModel):

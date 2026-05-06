@@ -18,7 +18,7 @@ from src.core.entities import (
     PersonalInformation,
 )
 from src.app.drivers.draw import DrawCVService
-from linkedin2cv.constants import (
+from src.core.constants import (
     PATH_DATA_DIR,
     PATH_FOLDER_DATA,
     PATH_PHOTO,

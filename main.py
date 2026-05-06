@@ -11,9 +11,9 @@ load_dotenv()
 
 from src.app.drivers.builder import BuilderCV
 from src.app.drivers.ghostscript import GhostScript
-from linkedin2cv.constants import PATH_FONTS
+from src.core.constants import PATH_FONTS
 from src.core.entities import LinkedinData, PersonalInformation
-from linkedin2cv.linkedin_csv_repository import LinkedinCSVRepository
+from src.app.drivers.linkedin_csv_repository import LinkedinCSVRepository
 
 
 def load_fonts() -> None:

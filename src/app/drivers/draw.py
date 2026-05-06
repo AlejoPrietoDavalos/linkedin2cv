@@ -11,8 +11,8 @@ from reportlab.platypus import Paragraph, Frame, Spacer, Flowable
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
 
 from src.core.entities import LinkedinData, StyleCV, SizesCV, DrawCVConfig
-from linkedin2cv.constants import PATH_PYTHON_ICON
-from linkedin2cv.hardcoded_config import (
+from src.core.constants import PATH_PYTHON_ICON
+from src.core.hardcoded_config import (
     SUMMARY_TECH_STACK_LABEL,
     LABEL_AGE,
     LABEL_GITHUB,
