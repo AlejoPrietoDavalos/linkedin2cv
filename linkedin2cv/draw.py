@@ -9,6 +9,7 @@ from reportlab.platypus import Paragraph, Frame, Spacer, Flowable
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
 
 from linkedin2cv.models import LinkedinData, StyleCV, SizesCV, DrawCVConfig
+from linkedin2cv.constants import PATH_PYTHON_ICON
 from linkedin2cv.hardcoded_config import (
     SUMMARY_TECH_STACK_LABEL,
     LABEL_AGE,
@@ -98,7 +99,7 @@ class DrawCVService:
         self,
         *,
         c: Canvas,
-        data: LinkedinData,
+        linkedin_data: LinkedinData,
         sizes_cv: SizesCV,
         style_cv: StyleCV,
         styles: StyleSheet1,
@@ -119,9 +120,9 @@ class DrawCVService:
         sidebar_height = photo_bottom - sidebar_text_bottom
 
         content = []
-        content.append(Paragraph(data.profile.full_name, styles["SidebarName"]))
+        content.append(Paragraph(linkedin_data.profile.full_name, styles["SidebarName"]))
         content.append(Spacer(1, self.config.dist_full_name_to_headline))
-        content.append(Paragraph(data.profile.headline, styles["SidebarHeadline"]))
+        content.append(Paragraph(linkedin_data.profile.headline, styles["SidebarHeadline"]))
         content.append(Spacer(1, self.config.dist_headline_to_links))
 
         info_lines = []
@@ -146,10 +147,10 @@ class DrawCVService:
             content.append(Paragraph(line, styles["SidebarLinks"]))
             content.append(Spacer(1, self.config.dist_between_links))
 
-        if SUMMARY_TECH_STACK_LABEL not in data.profile.summary:
+        if SUMMARY_TECH_STACK_LABEL not in linkedin_data.profile.summary:
             raise ValueError(f"El texto '{SUMMARY_TECH_STACK_LABEL}' no está en summary.")
 
-        summary_parts = data.profile.summary.split(SUMMARY_TECH_STACK_LABEL)
+        summary_parts = linkedin_data.profile.summary.split(SUMMARY_TECH_STACK_LABEL)
         summary_parts = [p.strip() for p in summary_parts]
 
         class SectionSidebar(BaseModel):
@@ -199,11 +200,10 @@ class DrawCVService:
         self,
         *,
         c: Canvas,
-        data: LinkedinData,
+        linkedin_data: LinkedinData,
         sizes_cv: SizesCV,
         style_cv: StyleCV,
         styles: StyleSheet1,
-        path_python_icon: Path,
         page_width: float,
         page_height: float,
         sidebar_args: dict,
@@ -254,8 +254,8 @@ class DrawCVService:
         icon_size = cfg.len_python_icon_mm * mm
         lines: List[Tuple[float, float, float, float]] = []
 
-        for idx, position in enumerate(data.positions):
-            icon = IconTitle(path_python_icon, f"<b>{position.text_title}</b>", styles["JobTitle"], icon_size, cfg.dist_python_icon_to_title)
+        for idx, position in enumerate(linkedin_data.positions):
+            icon = IconTitle(PATH_PYTHON_ICON, f"<b>{position.text_title}</b>", styles["JobTitle"], icon_size, cfg.dist_python_icon_to_title)
             _, h_icon = icon.wrap(width, usable_height)
 
             y_icon = y_cursor - h_icon
@@ -272,7 +272,7 @@ class DrawCVService:
                 self.draw_background(c=c, color=style_cv.background, page_width=page_width, page_height=page_height)
                 self.draw_sidebar(
                     c=c,
-                    data=data,
+                    linkedin_data=linkedin_data,
                     sizes_cv=sizes_cv,
                     style_cv=style_cv,
                     styles=styles,
@@ -289,7 +289,7 @@ class DrawCVService:
             desc.drawOn(c, x, y_cursor - h_desc)
             y_cursor -= h_desc + cfg.spacer_height
 
-            if idx < len(data.positions) - 1:
+            if idx < len(linkedin_data.positions) - 1:
                 y_line = y_icon
                 lines.append(
                     (

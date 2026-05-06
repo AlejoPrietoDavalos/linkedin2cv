@@ -46,6 +46,7 @@ SECTION_PROJECTS_TEXT = (
 SECTION_STACK_TITLE = "Stack tecnológico"
 
 JOB_SUBTITLE_PREFIX = "➤➤"
+LABEL_CURRENTLY = "Actualidad"
 JOB_DESCRIPTION_FALLBACK = "Sin descripción"
 
 FINAL_CREDIT_URL = "https://alejoprietodavalos.github.io/portfolio-es/posts/linkedin-to-cv/"
@@ -66,6 +67,10 @@ def format_website_line(*, url_es: str, url_en: str) -> str:
 
 def format_link_line(*, label: str, url: str) -> str:
     return f"<b><a href='{url}'>{label}</a></b>"
+
+
+def format_position_subtitle(*, company_name: str, started_on: str) -> str:
+    return f"{company_name} ({started_on})"
 
 
 def apply_visible_text_replacements(value: Optional[str]) -> Optional[str]:

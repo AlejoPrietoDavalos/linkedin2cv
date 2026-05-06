@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Optional, Tuple
 from PIL import Image, ImageDraw
 from io import BytesIO
@@ -8,7 +9,6 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import StyleSheet1
 
 from linkedin2cv.models import (
-    load_linkedin_data,
     LinkedinData,
     StyleCV,
     SizesCV,
@@ -68,6 +68,7 @@ class BuilderCV:
         self,
         *,
         personal_information: PersonalInformation,
+        linkedin_data: LinkedinData,
         style_cv: Optional[StyleCV] = None,
         sizes_cv: Optional[SizesCV] = None,
         draw_cv_service: Optional[DrawCVService] = None,
@@ -80,7 +81,7 @@ class BuilderCV:
 
         self.sizes_cv = sizes_cv or SizesCV()
 
-        self.data: LinkedinData = load_linkedin_data()
+        self.linkedin_data: LinkedinData = linkedin_data
         self.page_width, self.page_height = self.cfg_builder.page_size
         self.is_photo_circle = self.cfg_builder.is_photo_circle
         self.lines_to_draw = []
@@ -103,7 +104,7 @@ class BuilderCV:
         )
         self.draw_cv_service.draw_sidebar(
             c=self.c,
-            data=self.data,
+            linkedin_data=self.linkedin_data,
             sizes_cv=self.sizes_cv,
             style_cv=self.style_cv,
             styles=self.styles,
@@ -125,11 +126,10 @@ class BuilderCV:
         )
         lines_to_draw, x_i = self.draw_cv_service.draw_positions(
             c=self.c,
-            data=self.data,
+            linkedin_data=self.linkedin_data,
             sizes_cv=self.sizes_cv,
             style_cv=self.style_cv,
             styles=self.styles,
-            path_python_icon=PATH_PYTHON_ICON,
             page_width=self.page_width,
             page_height=self.page_height,
             sidebar_args={

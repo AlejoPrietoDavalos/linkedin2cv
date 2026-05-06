@@ -1,8 +1,7 @@
 from typing import Optional, List
 
 from pydantic import BaseModel
-
-ACTUALIDAD = "Actualidad"
+from linkedin2cv.hardcoded_config import format_position_subtitle
 
 
 class Profile(BaseModel):
@@ -22,7 +21,6 @@ class Position(BaseModel):
     description: str
     location: Optional[str]
     started_on: str
-    finished_on: Optional[str]
 
     @property
     def text_title(self) -> str:
@@ -30,7 +28,10 @@ class Position(BaseModel):
 
     @property
     def text_sub_title(self) -> str:
-        return f"{self.company_name} ({self.started_on} ~ {self.finished_on or ACTUALIDAD})"
+        return format_position_subtitle(
+            company_name=self.company_name,
+            started_on=self.started_on,
+        )
 
 
 class Education(BaseModel):

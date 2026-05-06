@@ -2,6 +2,7 @@ from typing import Optional
 import shutil
 import re
 import subprocess
+import os
 
 from dotenv import load_dotenv
 from reportlab.pdfbase import pdfmetrics
@@ -13,6 +14,7 @@ load_dotenv()
 from linkedin2cv.builder import BuilderCV
 from linkedin2cv.constants import PATH_FONTS
 from linkedin2cv.models import LinkedinData, PersonalInformation
+from linkedin2cv.linkedin_csv_repository import LinkedinCSVRepository
 
 
 def load_fonts() -> None:
@@ -74,23 +76,23 @@ def move_bracketed_to_end(text: str) -> str:
     return "<br/>".join(processed)
 
 
-def extra_process_data(*, data: LinkedinData,  in_spanish: bool = True) -> LinkedinData:
+def extra_process_data(*, linkedin_data: LinkedinData,  in_spanish: bool = True) -> LinkedinData:
+    """FIXME: Recontra hardcodeado"""
     # Saco experiencia dando clases.
-    data.positions = data.positions[:-1]
+    linkedin_data.positions = linkedin_data.positions[:-1]
 
     # Convierto las fechas a español.
     if in_spanish:
-        for position in data.positions:
+        for position in linkedin_data.positions:
             position.started_on = translate_date(position.started_on)
-            position.finished_on = translate_date(position.finished_on)
     
     # Indice del trabajo freelance dentro del CV.
     IDX_FREELANCE = 1
-    data.positions[IDX_FREELANCE].company_name = "Profesional independiente"
-    desc = move_bracketed_to_end(data.positions[IDX_FREELANCE].description)
+    linkedin_data.positions[IDX_FREELANCE].company_name = "Profesional independiente"
+    desc = move_bracketed_to_end(linkedin_data.positions[IDX_FREELANCE].description)
     desc = put_bold_in_brackets(desc)
-    data.positions[IDX_FREELANCE].description = desc
-    return data
+    linkedin_data.positions[IDX_FREELANCE].description = desc
+    return linkedin_data
 
 
 def compress_pdf_with_ghostscript(path_pdf: str) -> None:
@@ -123,14 +125,17 @@ def raise_if_ghostscript_is_not_installed() -> None:
 
 
 def main(*, personal_information: PersonalInformation) -> None:
+    linkedin_data_repository = LinkedinCSVRepository()
+    linkedin_data = linkedin_data_repository.load_linkedin_data()
+    linkedin_data = extra_process_data(linkedin_data=linkedin_data)
+
     builder_cv = BuilderCV(
         personal_information=personal_information,
+        linkedin_data=linkedin_data,
     )
-
-    builder_cv.data = extra_process_data(data=builder_cv.data)
     builder_cv.build_and_save()
 
-    path_pdf_final = builder_cv.path_pdf.with_name(f'Curriculum - {builder_cv.data.profile.full_name}.pdf')
+    path_pdf_final = builder_cv.path_pdf.with_name(f'Curriculum - {builder_cv.linkedin_data.profile.full_name}.pdf')
     shutil.copy(builder_cv.path_pdf, path_pdf_final)
 
     compress_pdf_with_ghostscript(str(path_pdf_final))
