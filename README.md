@@ -1,9 +1,9 @@
 ## Curriculum Automático a partir de los datos de Linkedin.
-![Example output](assets/photo.png)
+<img src="assets/photo_title.png" alt="Example output" style="max-width: 35%; height: auto;">
 
 ---
 
-<img src="plots/files.png" alt="LinkedIn data files" style="max-width: 300px; width: 100%; height: auto;">
+<img src="plots/files.png" alt="LinkedIn data files" style="max-width: 150px; width: 100%; height: auto;">
 <p style="width: 100%"><em><b>Figura 1:</b> Muestra de los datos extraídos de LinkedIn.</em></p>
 
 ## Quickstart
@@ -26,4 +26,21 @@ cp .env.example .env
 ```bash
 # El CV se guarda en `data/`.
 python3 main.py
+```
+
+Nota: si no tenés `ghostscript` (`gs`) instalado, el script genera el PDF igual y omite la compresión final.
+
+#### Instalar Ghostscript (opcional, para comprimir el PDF final)
+```bash
+# Ubuntu / Debian
+sudo apt update && sudo apt install -y ghostscript
+
+# Fedora
+sudo dnf install -y ghostscript
+
+# Arch Linux
+sudo pacman -S ghostscript
+
+# macOS (Homebrew)
+brew install ghostscript
 ```
