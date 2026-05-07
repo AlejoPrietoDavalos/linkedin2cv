@@ -4,7 +4,7 @@ import os
 PATH_DATA_DIR = Path("data")
 PATH_ASSETS_DIR = Path("assets")
 PATH_IMAGES_DIR = PATH_ASSETS_DIR / "images"
-PATH_FONTS = PATH_ASSETS_DIR / "fonts" / "hack_nerd_font"
+PATH_FONTS = PATH_ASSETS_DIR / "fonts"
 PATH_PLOTS_DIR = PATH_ASSETS_DIR / "plots"
 
 PATH_PYTHON_ICON = PATH_IMAGES_DIR / "python_icon.png"
