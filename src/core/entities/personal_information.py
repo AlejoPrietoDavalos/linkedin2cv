@@ -1,7 +1,7 @@
 from typing import Optional
 
-from pydantic import EmailStr
-from pydantic_settings import BaseSettings, ConfigDict
+from pydantic import ConfigDict, EmailStr
+from pydantic_settings import BaseSettings
 
 
 class PersonalInformation(BaseSettings):
