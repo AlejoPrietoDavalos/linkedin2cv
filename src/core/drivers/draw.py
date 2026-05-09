@@ -5,6 +5,7 @@ from reportlab.pdfgen.canvas import Canvas
 
 from src.core.entities import (
     BackgroundDrawCfg,
+    DrawCVConfig,
     DrawPositionsResult,
     PhotoDrawCfg,
     SidebarDrawCfg,
@@ -26,6 +27,7 @@ class CoreDrawCVService(ABC):
         *,
         c: Canvas,
         cfg: PhotoDrawCfg,
+        draw_config: DrawCVConfig,
     ) -> None:
         """Dibuja la foto de perfil."""
         pass
@@ -36,6 +38,7 @@ class CoreDrawCVService(ABC):
         *,
         c: Canvas,
         cfg: SidebarDrawCfg,
+        draw_config: DrawCVConfig,
     ) -> None:
         """Dibuja la barra lateral."""
         pass
@@ -46,6 +49,7 @@ class CoreDrawCVService(ABC):
         *,
         c: Canvas,
         cfg: PositionsDrawCfg,
+        draw_config: DrawCVConfig,
     ) -> DrawPositionsResult:
         """Dibuja las posiciones laborales."""
         pass

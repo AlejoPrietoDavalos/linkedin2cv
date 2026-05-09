@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 from reportlab.lib.styles import StyleSheet1
 from reportlab.lib.units import mm
 
@@ -22,7 +22,6 @@ class PhotoDrawCfg(BaseModel):
     sizes_cv: SizesCV
     page_height: float
     is_photo_circle: bool = True
-    draw_config: DrawCVConfig = Field(default_factory=DrawCVConfig)
 
 
 class SidebarDrawCfg(BaseModel):
@@ -34,7 +33,6 @@ class SidebarDrawCfg(BaseModel):
     style_cv: StyleCV
     styles: StyleSheet1
     page_height: float
-    draw_config: DrawCVConfig = Field(default_factory=DrawCVConfig)
 
 
 class PositionsDrawCfg(BaseModel):
@@ -45,31 +43,28 @@ class PositionsDrawCfg(BaseModel):
     styles: StyleSheet1
     page_width: float
     page_height: float
-    draw_config: DrawCVConfig = Field(default_factory=DrawCVConfig)
 
-    @property
-    def body_x(self) -> float:
-        return self.sizes_cv.margin_left_pt + self.sizes_cv.column_left_width_pt + self.draw_config.sidebar_to_body_gap_mm * mm
 
-    @property
-    def line_anchor_x(self) -> float:
-        return self.body_x + self.draw_config.dist_line_spacing_left_mm * mm
+class PositionsLayoutDTO(BaseModel):
+    body_x: float
+    line_anchor_x: float
+    body_width: float
+    body_start_y: float
+    usable_height: float
+    icon_size_pt: float
 
-    @property
-    def body_width(self) -> float:
-        return self.page_width - self.body_x - self.sizes_cv.margin_pt
-
-    @property
-    def body_start_y(self) -> float:
-        return self.page_height - self.sizes_cv.margin_pt
-
-    @property
-    def usable_height(self) -> float:
-        return self.body_start_y - self.sizes_cv.margin_pt
-
-    @property
-    def icon_size_pt(self) -> float:
-        return self.draw_config.len_python_icon_mm * mm
+    @classmethod
+    def from_positions_and_draw_config(cls, *, positions_cfg: PositionsDrawCfg, draw_config: DrawCVConfig) -> "PositionsLayoutDTO":
+        body_x = positions_cfg.sizes_cv.margin_left_pt + positions_cfg.sizes_cv.column_left_width_pt + draw_config.sidebar_to_body_gap_mm * mm
+        body_start_y = positions_cfg.page_height - positions_cfg.sizes_cv.margin_pt
+        return cls(
+            body_x=body_x,
+            line_anchor_x=body_x + draw_config.dist_line_spacing_left_mm * mm,
+            body_width=positions_cfg.page_width - body_x - positions_cfg.sizes_cv.margin_pt,
+            body_start_y=body_start_y,
+            usable_height=body_start_y - positions_cfg.sizes_cv.margin_pt,
+            icon_size_pt=draw_config.len_python_icon_mm * mm,
+        )
 
 
 class DividerLine(BaseModel):

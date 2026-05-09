@@ -11,6 +11,7 @@ from src.app.drivers.draw_cv._sidebar import SidebarDrawer
 from src.core.drivers.draw import CoreDrawCVService
 from src.core.entities import (
     BackgroundDrawCfg,
+    DrawCVConfig,
     DrawPositionsResult,
     PhotoDrawCfg,
     PositionsDrawCfg,
@@ -37,11 +38,11 @@ class DrawCVService(CoreDrawCVService):
     def draw_background(self, *, c: Canvas, cfg: BackgroundDrawCfg) -> None:
         self.background_drawer.draw_background(c=c, cfg=cfg)
 
-    def draw_photo(self, *, c: Canvas, cfg: PhotoDrawCfg) -> None:
-        self.sidebar_drawer.draw_photo(c=c, cfg=cfg)
+    def draw_photo(self, *, c: Canvas, cfg: PhotoDrawCfg, draw_config: DrawCVConfig) -> None:
+        self.sidebar_drawer.draw_photo(c=c, cfg=cfg, draw_config=draw_config)
 
-    def draw_sidebar(self, *, c: Canvas, cfg: SidebarDrawCfg) -> None:
-        self.sidebar_drawer.draw_sidebar(c=c, cfg=cfg)
+    def draw_sidebar(self, *, c: Canvas, cfg: SidebarDrawCfg, draw_config: DrawCVConfig) -> None:
+        self.sidebar_drawer.draw_sidebar(c=c, cfg=cfg, draw_config=draw_config)
 
-    def draw_positions(self, *, c: Canvas, cfg: PositionsDrawCfg) -> DrawPositionsResult:
-        return self.positions_drawer.draw_positions(c=c, cfg=cfg)
+    def draw_positions(self, *, c: Canvas, cfg: PositionsDrawCfg, draw_config: DrawCVConfig) -> DrawPositionsResult:
+        return self.positions_drawer.draw_positions(c=c, cfg=cfg, draw_config=draw_config)

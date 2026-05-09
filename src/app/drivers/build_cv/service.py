@@ -14,6 +14,7 @@ from src.core.drivers.builder import CoreBuilderCV
 from src.core.entities import (
     BackgroundDrawCfg,
     BuilderCVConfig,
+    DrawCVConfig,
     LinkedinData,
     PersonalInformation,
     PhotoDrawCfg,
@@ -54,6 +55,7 @@ class BuildCVService(CoreBuilderCV):
         style_cv = style_cv or StyleCV()
         sizes_cv = sizes_cv or SizesCV()
         cfg_builder = cfg_builder or BuilderCVConfig()
+        draw_config = DrawCVConfig()
         page_width, page_height = cfg_builder.page_size
         canvas = Canvas(str(path_pdf), pagesize=cfg_builder.page_size)
         styles: StyleSheet1 = style_cv.get_styles()
@@ -80,6 +82,7 @@ class BuildCVService(CoreBuilderCV):
                 styles=styles,
                 page_height=page_height,
             ),
+            draw_config=draw_config,
         )
         self.draw_cv_service.draw_photo(
             c=canvas,
@@ -89,6 +92,7 @@ class BuildCVService(CoreBuilderCV):
                 page_height=page_height,
                 is_photo_circle=cfg_builder.is_photo_circle,
             ),
+            draw_config=draw_config,
         )
         positions_result = self.draw_cv_service.draw_positions(
             c=canvas,
@@ -99,6 +103,7 @@ class BuildCVService(CoreBuilderCV):
                 page_width=page_width,
                 page_height=page_height,
             ),
+            draw_config=draw_config,
         )
         self.divider_lines = positions_result.divider_lines
         self.line_anchor_x = positions_result.line_anchor_x
