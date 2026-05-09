@@ -78,6 +78,14 @@ class DividerLine(BaseModel):
     x_end: float
     y_end: float
 
+    @property
+    def p1(self) -> tuple[float, float]:
+        return self.x_start, self.y_start
+
+    @property
+    def p2(self) -> tuple[float, float]:
+        return self.x_end, self.y_end
+
 
 class DrawPositionsResult(BaseModel):
     divider_lines: list[DividerLine]

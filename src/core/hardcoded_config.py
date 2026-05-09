@@ -84,3 +84,11 @@ def format_job_title_html(*, title: str) -> str:
 
 def format_job_subtitle_html(*, subtitle: str) -> str:
     return f"<b>{JOB_SUBTITLE_PREFIX} {subtitle}</b>"
+
+
+def format_full_name(*, first_name: str, last_name: str) -> str:
+    return f"{first_name} {last_name}"
+
+
+def format_full_name_inverted(*, first_name: str, last_name: str) -> str:
+    return f"{last_name}, {first_name}"

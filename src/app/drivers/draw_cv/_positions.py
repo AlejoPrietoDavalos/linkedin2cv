@@ -93,12 +93,7 @@ class PositionsDrawer:
         c: Canvas,
         cfg: PositionsDrawCfg,
     ) -> DrawPositionsResult:
-        x = cfg.body_x
-        x_i = cfg.line_anchor_x
-        width = cfg.body_width
         y_cursor = cfg.body_start_y
-        usable_height = cfg.usable_height
-        icon_size = cfg.icon_size_pt
         lines: list[DividerLine] = []
 
         for idx, position in enumerate(cfg.linkedin_data.positions):
@@ -106,26 +101,35 @@ class PositionsDrawer:
                 c=c,
                 cfg=cfg,
                 position_title=position.text_title,
-                x=x,
+                x=cfg.body_x,
                 y_cursor=y_cursor,
-                width=width,
-                usable_height=usable_height,
-                icon_size=icon_size,
+                width=cfg.body_width,
+                usable_height=cfg.usable_height,
+                icon_size=cfg.icon_size_pt,
             )
             y_cursor = self._draw_subtitle_and_description(
                 c=c,
                 cfg=cfg,
                 subtitle_text=position.text_sub_title,
                 description_text=position.description,
-                x=x,
+                x=cfg.body_x,
                 y_icon=y_icon,
-                width=width,
-                usable_height=usable_height,
+                width=cfg.body_width,
+                usable_height=cfg.usable_height,
             )
 
             if idx < len(cfg.linkedin_data.positions) - 1:
-                lines.append(self._build_divider_line(cfg=cfg, x=x, y_line=y_icon))
+                # FIXME: Estas líneas son el input que luego consume BuildCVService.draw_lines()
+                # para dibujar divisores con fitz sobre el PDF final.
+                lines.append(self._build_divider_line(cfg=cfg, x=cfg.body_x, y_line=y_icon))
 
-        self._draw_final_credit(c=c, cfg=cfg, x=x, y_cursor=y_cursor, width=width, usable_height=usable_height)
+        self._draw_final_credit(
+            c=c,
+            cfg=cfg,
+            x=cfg.body_x,
+            y_cursor=y_cursor,
+            width=cfg.body_width,
+            usable_height=cfg.usable_height,
+        )
 
-        return DrawPositionsResult(divider_lines=lines, line_anchor_x=x_i)
+        return DrawPositionsResult(divider_lines=lines, line_anchor_x=cfg.line_anchor_x)
