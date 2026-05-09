@@ -11,18 +11,21 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import StyleSheet1
 
 from src.core.entities import (
+    BackgroundDrawCfg,
     LinkedinData,
+    PhotoDrawCfg,
+    PositionsDrawCfg,
+    SidebarDrawCfg,
     StyleCV,
     SizesCV,
     BuilderCVConfig,
     PersonalInformation,
 )
-from src.app.drivers.draw import DrawCVService
+from src.app.drivers.draw_cv.service import DrawCVService
 from src.core.constants import (
     PATH_DATA_DIR,
     PATH_FOLDER_DATA,
     PATH_PHOTO,
-    PATH_PYTHON_ICON,
     PDF_EXTENSION,
 )
 from src.core.drivers.builder import CoreBuilderCV
@@ -103,52 +106,48 @@ class BuilderCV(CoreBuilderCV):
     def build_and_save(self) -> None:
         self.draw_cv_service.draw_background(
             c=self.c,
-            color=self.style_cv.background,
-            page_width=self.page_width,
-            page_height=self.page_height,
+            cfg=BackgroundDrawCfg(
+                color=(
+                    self.style_cv.background.red,
+                    self.style_cv.background.green,
+                    self.style_cv.background.blue,
+                ),
+                page_width=self.page_width,
+                page_height=self.page_height,
+            ),
         )
         self.draw_cv_service.draw_sidebar(
             c=self.c,
-            linkedin_data=self.linkedin_data,
-            sizes_cv=self.sizes_cv,
-            style_cv=self.style_cv,
-            styles=self.styles,
-            age=self.personal_information.age,
-            location=self.personal_information.location,
-            mail=str(self.personal_information.email),
-            page_height=self.page_height,
-            url_website_es=self.personal_information.url_web_es,
-            url_website_en=self.personal_information.url_web_en,
-            url_github=self.personal_information.url_github,
-            url_linkedin=self.personal_information.url_linkedin,
+            cfg=SidebarDrawCfg(
+                linkedin_data=self.linkedin_data,
+                personal_information=self.personal_information,
+                sizes_cv=self.sizes_cv,
+                style_cv=self.style_cv,
+                styles=self.styles,
+                page_height=self.page_height,
+            ),
         )
         self.draw_cv_service.draw_photo(
             c=self.c,
-            path_photo=PATH_PHOTO,
-            sizes_cv=self.sizes_cv,
-            page_height=self.page_height,
-            is_photo_circle=self.is_photo_circle,
+            cfg=PhotoDrawCfg(
+                path_photo=PATH_PHOTO,
+                sizes_cv=self.sizes_cv,
+                page_height=self.page_height,
+                is_photo_circle=self.is_photo_circle,
+            ),
         )
-        lines_to_draw, x_i = self.draw_cv_service.draw_positions(
+        positions_result = self.draw_cv_service.draw_positions(
             c=self.c,
-            linkedin_data=self.linkedin_data,
-            sizes_cv=self.sizes_cv,
-            style_cv=self.style_cv,
-            styles=self.styles,
-            page_width=self.page_width,
-            page_height=self.page_height,
-            sidebar_args={
-                "age": self.personal_information.age,
-                "location": self.personal_information.location,
-                "mail": str(self.personal_information.email),
-                "url_website_es": self.personal_information.url_web_es,
-                "url_website_en": self.personal_information.url_web_en,
-                "url_github": self.personal_information.url_github,
-                "url_linkedin": self.personal_information.url_linkedin,
-            },
+            cfg=PositionsDrawCfg(
+                linkedin_data=self.linkedin_data,
+                sizes_cv=self.sizes_cv,
+                styles=self.styles,
+                page_width=self.page_width,
+                page_height=self.page_height,
+            ),
         )
-        self.lines_to_draw = lines_to_draw
-        self.x_i = x_i
+        self.lines_to_draw = positions_result.divider_lines
+        self.x_i = positions_result.line_anchor_x
 
         self.c.save()
         self.draw_last_text()
@@ -160,7 +159,11 @@ class BuilderCV(CoreBuilderCV):
         doc = fitz.open(self.path_pdf)
         page = doc[0]
         for line_to_draw in self.lines_to_draw:
-            x1, y1, x2, y2 = line_to_draw
-            add_line_to_pdf(page, start=(x1, y1), end=(x2, y2), color=(1, 0, 0))
+            add_line_to_pdf(
+                page,
+                start=(line_to_draw.x_start, line_to_draw.y_start),
+                end=(line_to_draw.x_end, line_to_draw.y_end),
+                color=(1, 0, 0),
+            )
         doc.save(self.path_pdf)
         doc.close()

@@ -12,7 +12,7 @@ REPLACE_BULLET_SQUARE = (" ■", "<br/>■")
 LABEL_AGE = "Edad:"
 LABEL_LOCATION = "Ubicación:"
 LABEL_MAIL = "Mail:"
-LABEL_WEBSITE_HEADER = "➤➤ Mi página web ➤➤"
+LABEL_WEBSITE_HEADER = "➤➤ Porfolio de proyectos ➤➤"
 LABEL_WEBSITE_ES = " Español"
 LABEL_WEBSITE_EN = " Inglés"
 LABEL_GITHUB = "➤➤ GitHub"
@@ -69,7 +69,18 @@ def format_link_line(*, label: str, url: str) -> str:
     return f"<b><a href='{url}'>{label}</a></b>"
 
 
-def format_position_subtitle(*, company_name: str, started_on: str) -> str:
-    return f"{company_name} ({started_on})"
+def format_position_subtitle(*, company_name: str, started_on: str, finished_on: Optional[str]) -> str:
+    end_label = finished_on or LABEL_CURRENTLY
+    return f"{company_name} ({started_on} - {end_label})"
 
 
+def format_final_credit_html(*, url: str = FINAL_CREDIT_URL, text: str = FINAL_CREDIT_TEXT) -> str:
+    return f"""<br/><br/><br/><br/><br/><a href="{url}"><i><b>{text}</b></i></a>"""
+
+
+def format_job_title_html(*, title: str) -> str:
+    return f"<b>{title}</b>"
+
+
+def format_job_subtitle_html(*, subtitle: str) -> str:
+    return f"<b>{JOB_SUBTITLE_PREFIX} {subtitle}</b>"

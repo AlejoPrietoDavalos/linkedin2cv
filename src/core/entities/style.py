@@ -4,9 +4,7 @@ from reportlab.lib import colors
 from reportlab.lib.colors import Color
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, StyleSheet1
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
-from reportlab.lib.units import mm
-
-from .config import StyleCVConfig
+from src.core.entities.config import StyleCVConfig
 
 FONT = "HackNerdFont"
 
@@ -33,18 +31,3 @@ class StyleCV:
         styles.add(ParagraphStyle(name="SidebarText", fontName=FONT, fontSize=6, leading=10, textColor=self.sidebar_text, alignment=TA_LEFT))
         styles.add(ParagraphStyle(name="SidebarLinks", fontName=FONT, fontSize=6, leading=9, textColor=self.sidebar_text, alignment=TA_LEFT))
         return styles
-
-
-class SizesCV:
-    def __init__(
-        self,
-        *,
-        margin: int = 5,
-        margin_left: int = 5,
-        column_left_width: int = 70,
-        photo_size: int = 30,
-    ):
-        self.margin = margin * mm
-        self.margin_left = margin_left * mm
-        self.column_left_wifth = column_left_width * mm
-        self.photo_size = photo_size * mm

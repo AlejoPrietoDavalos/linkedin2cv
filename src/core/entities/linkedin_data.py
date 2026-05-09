@@ -21,6 +21,7 @@ class Position(BaseModel):
     description: str
     location: Optional[str]
     started_on: str
+    finished_on: Optional[str]
 
     @property
     def text_title(self) -> str:
@@ -31,6 +32,7 @@ class Position(BaseModel):
         return format_position_subtitle(
             company_name=self.company_name,
             started_on=self.started_on,
+            finished_on=self.finished_on,
         )
 
 

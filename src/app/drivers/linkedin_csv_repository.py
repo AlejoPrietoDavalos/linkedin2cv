@@ -79,6 +79,7 @@ class _HardcodedLinkedinDataProcessor:
             return
         for position in linkedin_data.positions:
             position.started_on = self._translate_date(position.started_on)
+            position.finished_on = self._translate_date(position.finished_on)
 
     def _apply_freelance_adjustments(self, linkedin_data: LinkedinData) -> None:
         IDX_FREELANCE = 1
