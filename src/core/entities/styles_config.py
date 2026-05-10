@@ -15,13 +15,13 @@ class ParagraphStyleParams(BaseModel):
     name: str
     font_size: float
     leading: float
-    text_color: tuple[float, float, float]
+    text_color: str
     alignment: Optional[Alignment] = None
     space_after: Optional[float] = None
 
 
 class StylesConfig(BaseModel):
     font_name: str
-    sidebar_panel: tuple[float, float, float]
-    background: tuple[float, float, float]
+    sidebar_panel: str
+    background: str
     paragraph_styles: list[ParagraphStyleParams]

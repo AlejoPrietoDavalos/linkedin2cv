@@ -10,7 +10,7 @@ from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.build_cv._pdf_line_drawer import PDFLineDrawer
 from src.app.drivers.draw_cv.service import DrawCVService
-from src.app.drivers.styles_repository import StylesRepository
+from src.app.drivers.styles_repository import StylesRepository, _hex_to_rgb
 from src.core.constants import PATH_PHOTO
 from src.core.drivers.builder import CoreBuilderCV
 from src.core.entities import (
@@ -66,7 +66,7 @@ class BuildCVService(CoreBuilderCV):
         self.draw_cv_service.draw_background(
             c=canvas,
             cfg=BackgroundDrawCfg(
-                color=styles_config.background,
+                color=_hex_to_rgb(styles_config.background),
                 page_width=page_width,
                 page_height=page_height,
             ),
@@ -79,7 +79,7 @@ class BuildCVService(CoreBuilderCV):
                 path_photo=PATH_PHOTO,
                 is_photo_circle=cfg_builder.is_photo_circle,
                 sizes_cv=sizes_cv,
-                sidebar_panel_color=styles_config.sidebar_panel,
+                sidebar_panel_color=_hex_to_rgb(styles_config.sidebar_panel),
                 styles=styles,
                 page_height=page_height,
             ),

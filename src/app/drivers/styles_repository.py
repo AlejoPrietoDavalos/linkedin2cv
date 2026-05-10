@@ -6,6 +6,14 @@ from src.core.constants import ensure_runtime_config_file
 from src.core.entities.styles_config import Alignment, StylesConfig
 
 
+def _hex_to_rgb(hex_color: str) -> tuple[float, float, float]:
+    hex_color = hex_color.lstrip("#")
+    r = int(hex_color[0:2], 16) / 255
+    g = int(hex_color[2:4], 16) / 255
+    b = int(hex_color[4:6], 16) / 255
+    return (r, g, b)
+
+
 class _ParagraphStyleKwargs(BaseModel):
     name: str
     fontName: str
@@ -36,7 +44,7 @@ class StylesRepository:
                 fontName=config.font_name,
                 fontSize=style.font_size,
                 leading=style.leading,
-                textColor=style.text_color,
+                textColor=_hex_to_rgb(style.text_color),
                 alignment=style.alignment,
                 spaceAfter=style.space_after,
             )

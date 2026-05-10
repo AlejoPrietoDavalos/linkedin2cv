@@ -1,17 +1,17 @@
 {
     "font_name": "HackNerdFont",
-    "sidebar_panel": [0.302, 0.302, 0.302],
-    "background": [0.867, 0.867, 0.867],
+    "sidebar_panel": "#4d4d4d",
+    "background": "#dddddd",
     "paragraph_styles": [
-        {"name": "Header", "font_size": 25, "leading": 24, "text_color": [0.184, 0.184, 0.184], "alignment": 0},
-        {"name": "SubHeader", "font_size": 6, "leading": 16, "text_color": [0.867, 0.867, 0.867], "alignment": 0},
-        {"name": "JobTitle", "font_size": 11, "leading": 14, "text_color": [0.184, 0.184, 0.184], "space_after": 4},
-        {"name": "JobSubTitle", "font_size": 8, "leading": 14, "text_color": [0.184, 0.184, 0.184], "space_after": 4},
-        {"name": "JobDesc", "font_size": 7, "leading": 12, "text_color": [0.290, 0.290, 0.290]},
-        {"name": "SidebarName", "font_size": 15, "leading": 12, "text_color": [0.867, 0.867, 0.867], "alignment": 1},
-        {"name": "SidebarHeadline", "font_size": 7, "leading": 10, "text_color": [0.867, 0.867, 0.867], "alignment": 1, "space_after": 4},
-        {"name": "SidebarTitle", "font_size": 10, "leading": 10, "text_color": [0.867, 0.867, 0.867], "alignment": 0},
-        {"name": "SidebarText", "font_size": 6, "leading": 10, "text_color": [0.867, 0.867, 0.867], "alignment": 0},
-        {"name": "SidebarLinks", "font_size": 6, "leading": 9, "text_color": [0.867, 0.867, 0.867], "alignment": 0}
+        {"name": "Header", "font_size": 25, "leading": 24, "text_color": "#2F2F2F", "alignment": 0},
+        {"name": "SubHeader", "font_size": 6, "leading": 16, "text_color": "#dddddd", "alignment": 0},
+        {"name": "JobTitle", "font_size": 11, "leading": 14, "text_color": "#2F2F2F", "space_after": 4},
+        {"name": "JobSubTitle", "font_size": 8, "leading": 14, "text_color": "#2F2F2F", "space_after": 4},
+        {"name": "JobDesc", "font_size": 7, "leading": 12, "text_color": "#4A4A4A"},
+        {"name": "SidebarName", "font_size": 15, "leading": 12, "text_color": "#dddddd", "alignment": 1},
+        {"name": "SidebarHeadline", "font_size": 7, "leading": 10, "text_color": "#dddddd", "alignment": 1, "space_after": 4},
+        {"name": "SidebarTitle", "font_size": 10, "leading": 10, "text_color": "#dddddd", "alignment": 0},
+        {"name": "SidebarText", "font_size": 6, "leading": 10, "text_color": "#dddddd", "alignment": 0},
+        {"name": "SidebarLinks", "font_size": 6, "leading": 9, "text_color": "#dddddd", "alignment": 0}
     ]
 }

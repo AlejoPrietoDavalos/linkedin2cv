@@ -1,5 +1,5 @@
 {
-  "jobs": [
-    {"company_name": "Some Work", "job_id": "some_work"}
-  ]
+    "jobs": [
+        {"company_name": "Some Work", "job_id": "some_work"}
+    ]
 }

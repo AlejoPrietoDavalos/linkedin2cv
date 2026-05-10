@@ -1,12 +1,12 @@
 {
-  "keywords": [
-    {
-      "keyword": "Python",
-      "formatter": "bold"
-    },
-    {
-      "keyword": "Ciencia de Datos",
-      "formatter": "bold"
-    }
-  ]
+    "keywords": [
+        {
+            "keyword": "Python",
+            "formatter": "bold"
+        },
+        {
+            "keyword": "Ciencia de Datos",
+            "formatter": "bold"
+        }
+    ]
 }
