@@ -54,7 +54,6 @@ SECTION_PROJECTS_TEXT = (
 
 JOB_SUBTITLE_PREFIX = "➤➤"
 LABEL_CURRENTLY = "Actualidad"
-JOB_DESCRIPTION_FALLBACK = "Sin descripción"
 
 FINAL_CREDIT_URL = "https://alejoprietodavalos.github.io/portfolio-es/posts/linkedin-to-cv/"
 FINAL_CREDIT_TEXT = "Curriculum programado/generado por mí a partir de los datos extraídos de LinkedIn."

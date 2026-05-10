@@ -6,7 +6,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph
 
-from src.app.drivers.draw_cv._image import ImageDrawer
+from src.app.drivers.draw_cv.reportlab_tools.image_drawer import ImageDrawer
 from src.core.entities import ImageDrawCfg, ImageTitleDrawCfg
 
 

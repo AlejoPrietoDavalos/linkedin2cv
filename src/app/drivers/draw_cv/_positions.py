@@ -9,7 +9,12 @@ from src.app.drivers.draw_cv._positions_tools import (
     PositionSubtitleDrawer,
     PositionTitleWithIconDrawer,
 )
-from src.core.entities import DrawCVConfig, DrawPositionsResult, PositionsDrawCfg, PositionsLayoutDTO
+from src.core.entities import (
+    DrawCVConfig,
+    DrawPositionsResult,
+    PositionsDrawCfg,
+    PositionsLayoutDTO
+)
 
 
 class PositionsDrawer:
@@ -55,7 +60,7 @@ class PositionsDrawer:
                 cfg=cfg,
                 draw_config=draw_config,
                 layout=layout,
-                subtitle_text=position.text_sub_title,
+                text=position.subtitle_html or position.text_sub_title,
                 y_cursor=y_icon - draw_config.line_thickness,
             )
             y_cursor = self.position_description_drawer.draw(
@@ -63,7 +68,7 @@ class PositionsDrawer:
                 cfg=cfg,
                 draw_config=draw_config,
                 layout=layout,
-                description_text=position.description,
+                text=position.description,
                 y_cursor=y_cursor,
             )
 

@@ -1,7 +1,7 @@
 from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
 
-from src.app.drivers.draw_cv._image import ImageDrawer
+from src.app.drivers.draw_cv.reportlab_tools import ImageDrawer
 from src.core.entities import DrawCVConfig, ImageDrawCfg, SidebarDrawCfg
 
 

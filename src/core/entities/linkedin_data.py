@@ -27,6 +27,8 @@ class Position(BaseModel):
     location: Optional[str]
     started_on: str
     finished_on: Optional[str]
+    # Pre-formateado para render (ReportLab Paragraph). Se setea en la etapa de "fix".
+    subtitle_html: Optional[str] = None
 
     @property
     def text_title(self) -> str:

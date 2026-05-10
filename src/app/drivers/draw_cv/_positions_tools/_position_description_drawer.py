@@ -1,11 +1,14 @@
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph
 
+from src.app.drivers.draw_cv.reportlab_tools import ParagraphBlockDrawer
 from src.core.entities import DrawCVConfig, PositionsDrawCfg, PositionsLayoutDTO
-from src.core.hardcoded_config import JOB_DESCRIPTION_FALLBACK
 
 
 class PositionDescriptionDrawer:
+    def __init__(self, paragraph_block_drawer: ParagraphBlockDrawer | None = None) -> None:
+        self.paragraph_block_drawer = paragraph_block_drawer or ParagraphBlockDrawer()
+
     def draw(
         self,
         *,
@@ -13,10 +16,17 @@ class PositionDescriptionDrawer:
         cfg: PositionsDrawCfg,
         draw_config: DrawCVConfig,
         layout: PositionsLayoutDTO,
-        description_text: str,
+        text: str,
         y_cursor: float,
     ) -> float:
-        desc = Paragraph(description_text or JOB_DESCRIPTION_FALLBACK, cfg.styles["JobDesc"])
-        _, desc_height = desc.wrap(layout.body_width, layout.usable_height)
-        desc.drawOn(c, layout.body_x, y_cursor - desc_height)
-        return y_cursor - desc_height - draw_config.spacer_height
+        paragraph = Paragraph(text, cfg.styles["JobDesc"])
+        y_cursor = self.paragraph_block_drawer.draw(
+            c=c,
+            paragraph=paragraph,
+            x=layout.body_x,
+            width=layout.body_width,
+            available_height=layout.usable_height,
+            y_cursor=y_cursor,
+            spacing_after=draw_config.spacer_height,
+        )
+        return y_cursor

@@ -1,6 +1,6 @@
 from reportlab.pdfgen.canvas import Canvas
 
-from src.app.drivers.draw_cv._image_title import ImageTitleDrawer
+from src.app.drivers.draw_cv.reportlab_tools import ImageTitleDrawer
 from src.core.constants import PATH_PYTHON_ICON
 from src.core.entities import DrawCVConfig, ImageTitleDrawCfg, PositionsDrawCfg, PositionsLayoutDTO
 from src.core.hardcoded_config import format_job_title_html
@@ -26,7 +26,7 @@ class PositionTitleWithIconDrawer:
             img_size=layout.icon_size_pt,
             image_to_title_dist=draw_config.dist_python_icon_to_title,
         )
-        return self.image_title_drawer.draw_title_row_at_cursor(
+        y_icon = self.image_title_drawer.draw_title_row_at_cursor(
             c=c,
             cfg=title_cfg,
             style=cfg.styles["JobTitle"],
@@ -35,3 +35,4 @@ class PositionTitleWithIconDrawer:
             available_width=layout.body_width,
             available_height=layout.usable_height,
         )
+        return y_icon

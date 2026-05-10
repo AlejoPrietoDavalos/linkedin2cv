@@ -1,11 +1,14 @@
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph
 
+from src.app.drivers.draw_cv.reportlab_tools import ParagraphBlockDrawer
 from src.core.entities import DrawCVConfig, PositionsDrawCfg, PositionsLayoutDTO
-from src.core.hardcoded_config import format_job_subtitle_html
 
 
 class PositionSubtitleDrawer:
+    def __init__(self, paragraph_block_drawer: ParagraphBlockDrawer | None = None) -> None:
+        self.paragraph_block_drawer = paragraph_block_drawer or ParagraphBlockDrawer()
+
     def draw(
         self,
         *,
@@ -13,10 +16,17 @@ class PositionSubtitleDrawer:
         cfg: PositionsDrawCfg,
         draw_config: DrawCVConfig,
         layout: PositionsLayoutDTO,
-        subtitle_text: str,
+        text: str,
         y_cursor: float,
     ) -> float:
-        subtitle = Paragraph(format_job_subtitle_html(subtitle=subtitle_text), cfg.styles["JobSubTitle"])
-        _, subtitle_height = subtitle.wrap(layout.body_width, layout.usable_height)
-        subtitle.drawOn(c, layout.body_x, y_cursor - subtitle_height)
-        return y_cursor - subtitle_height - draw_config.line_thickness
+        paragraph = Paragraph(text, cfg.styles["JobSubTitle"])
+        y_cursor = self.paragraph_block_drawer.draw(
+            c=c,
+            paragraph=paragraph,
+            x=layout.body_x,
+            width=layout.body_width,
+            available_height=layout.usable_height,
+            y_cursor=y_cursor,
+            spacing_after=draw_config.line_thickness,
+        )
+        return y_cursor
