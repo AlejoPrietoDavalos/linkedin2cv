@@ -21,9 +21,9 @@ class KeywordTextFormatter(CoreKeywordTextFormatter):
 
         out = text
         for keyword_cfg in sorted(keywords.keywords, key=lambda item: len(item.keyword), reverse=True):
-            pattern = re.compile(rf"(?<!\\w)({re.escape(keyword_cfg.keyword)})(?!\\w)")
+            pattern = re.compile(rf"(?<!\w)({re.escape(keyword_cfg.keyword)})(?!\w)")
 
             if keyword_cfg.formatter == "bold":
-                out = pattern.sub(r"<b>\1</b>", out)
+                out = pattern.sub(lambda m: f"<b>{m.group(1)}</b>", out)
 
         return out
