@@ -9,13 +9,12 @@ from src.app.configure_logging import configure_logging
 configure_logging()
 
 from src.app.drivers.build_cv.service import BuildCVService
-from src.app.drivers.fix_linkedin_data import FixLinkedinData
 from src.app.drivers.font_loader import FontLoader
 from src.app.drivers.ghostscript import GhostScript
-from src.app.drivers.keyword_text_formatter import KeywordTextFormatter
+from src.app.drivers.linkedin_data.fix.service import FixLinkedinDataService
 from src.core.constants import get_path_pdf_output
 from src.core.entities import PersonalInformation
-from src.app.drivers.linkedin_csv_repository import LinkedinCSVRepository
+from src.app.drivers.linkedin_data.csv_repository import LinkedinCSVRepository
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +31,7 @@ def main(*, personal_information: PersonalInformation, compress: bool = True) ->
 
     linkedin_data_repository = LinkedinCSVRepository()
     linkedin_data = linkedin_data_repository.load_linkedin_data()
-    FixLinkedinData().fix(linkedin_data)
+    linkedin_data = FixLinkedinDataService().fix(linkedin_data)
 
     builder_cv = BuildCVService()
     path_pdf = get_path_pdf_output(linkedin_data.profile.full_name)

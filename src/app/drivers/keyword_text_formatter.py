@@ -2,6 +2,7 @@
 
 import json
 import re
+from typing import Literal
 
 from src.core.constants import PATH_KEYWORDS
 from src.core.drivers.keyword_text_formatter import (
@@ -27,3 +28,8 @@ class KeywordTextFormatter(CoreKeywordTextFormatter):
                 out = pattern.sub(lambda m: f"<b>{m.group(1)}</b>", out)
 
         return out
+
+    def format_bracketed(self, text: str, formatter: Literal["bold"]) -> str:
+        if formatter != "bold":
+            raise ValueError(f"Formatter no soportado: {formatter}")
+        return re.sub(r"(\[[^\]]+\])", r"<b>\1</b>", text)

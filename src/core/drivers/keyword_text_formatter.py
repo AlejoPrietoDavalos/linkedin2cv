@@ -25,3 +25,8 @@ class CoreKeywordTextFormatter(ABC):
     def format_text(self, text: str, keywords: KeywordsConfig) -> str:
         """Aplica formato al texto usando las keywords provistas."""
         raise NotImplementedError
+
+    @abstractmethod
+    def format_bracketed(self, text: str, formatter: Literal["bold"]) -> str:
+        """Aplica formato a bloques entre corchetes, p. ej. [texto]."""
+        raise NotImplementedError
