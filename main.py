@@ -21,12 +21,11 @@ logger = logging.getLogger(__name__)
 def _compress_pdf(path_pdf: Path) -> None:
     ghostscript = GhostScript()
     ghostscript.compress_pdf(path_pdf)
-    logger.info(f"~ Export PDF: {path_pdf}")
+    logger.info(f">>>>>Export PDF: {path_pdf}")
 
 
 
 def main(*, personal_information: PersonalInformation, compress: bool = True) -> None:
-    logger.info("==================== Iniciando ====================")
     ensure_data_structure()
     FontLoader().load_font_from_env()
 

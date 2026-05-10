@@ -35,14 +35,14 @@ class FixLinkedinDataService:
             fixes=fixes
             or {
                 "translate_position_dates_to_spanish": FixTranslatePositionDatesLinkedinData(),
-                "normalize_freelance_position": FixFreelanceAdjustmentsLinkedinData(formatter=formatter),
-                "highlight_keywords_in_text": FixKeywordsFormatLinkedinData(formatter=formatter),
+                "normalize_freelance_position": FixFreelanceAdjustmentsLinkedinData(),
+                "highlight_keywords_in_text": FixKeywordsFormatLinkedinData(),
             }
         )
 
     def fix(self, linkedin_data: LinkedinData) -> LinkedinData:
         logger.info("==================== FIX LinkedIn Data ====================")
         for fix_name, fix in self.pipeline.fixes.items():
-            logger.info(f"===== fix.start={fix_name} =====")
+            logger.info(f">>>>> fix.start={fix_name} =====")
             fix.apply(linkedin_data)
         return linkedin_data

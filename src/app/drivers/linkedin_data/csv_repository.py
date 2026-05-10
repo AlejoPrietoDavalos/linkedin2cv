@@ -8,6 +8,7 @@ from src.core.entities.linkedin_data import Profile, Position, Education, Linked
 from src.core.entities.job_ids import JobIdsConfig
 from src.core.constants import (
     PATH_JOB_IDS,
+    PATH_FOLDER_DATA,
     PATH_LINKEDIN_PROFILE,
     PATH_LINKEDIN_POSITIONS,
     PATH_LINKEDIN_EDUCATION,
@@ -91,7 +92,7 @@ class _LinkedinJobIdAttacher:
         removed_company_names = sorted({p.company_name for p in positions if p.job_id is None})
         if removed_company_names:
             for company_name in removed_company_names:
-                logger.warning(f"~ (SKIP JOB) job_id no configurado: '{company_name}'")
+                logger.warning(f">>>>> (SKIP JOB) job_id no configurado: '{company_name}'")
             
             positions[:] = [p for p in positions if p.job_id is not None]
 
@@ -129,7 +130,8 @@ class LinkedinCSVRepository(CoreLinkedinCSVRepository):
             positions=self._load_positions(),
             educations=self._load_educations(),
         )
-        logger.info("==================== LinkedIn Data ====================")
-        logger.info(f"~ positions={len(linkedin_data.positions)}")
-        logger.info(f"~ educations={len(linkedin_data.educations)}")
+        logger.info(f"==================== LinkedIn Data ====================")
+        logger.info(f">>>>> Path data: {PATH_FOLDER_DATA}")
+        logger.info(f">>>>> len(positions)={len(linkedin_data.positions)}")
+        logger.info(f">>>>> len(educations)={len(linkedin_data.educations)}")
         return linkedin_data

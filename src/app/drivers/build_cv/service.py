@@ -110,7 +110,7 @@ class BuildCVService(CoreBuilderCV):
             draw_config=draw_config,
         )
         canvas.save()
-        logger.info(f"~ Export PDF: {path_pdf}")
+        logger.info(f">>>>> Export PDF: {path_pdf}")
         return positions_result
 
     def draw_lines(
@@ -131,7 +131,7 @@ class BuildCVService(CoreBuilderCV):
         # FIXME: Desactivado temporalmente. Las líneas salen rojas y fuera de posición.
         flag = False
         if not flag:
-            logger.warning(">>>>> BUG: Desactivado `draw_lines` (líneas rojas/fuera de posición).")
+            logger.warning(">>>>>  BUG: Desactivado `draw_lines` (líneas rojas/fuera de posición).")
         else:
             doc = fitz.open(path_pdf)
             if len(doc) != 1:
