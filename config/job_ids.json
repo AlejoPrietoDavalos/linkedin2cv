@@ -1,9 +1,0 @@
-{
-  "jobs": [
-    {"company_name": "Bidcom", "job_id": "bidcom"},
-    {"company_name": "Profesional independiente", "job_id": "freelance"},
-    {"company_name": "CICAP", "job_id": "cicap"},
-    {"company_name": "Aeroterra", "job_id": "aeroterra"},
-    {"company_name": "Universidad Nacional de Hurlingham (UNAHUR)", "job_id": "unahur"}
-  ]
-}

@@ -4,7 +4,7 @@ import json
 import re
 from typing import Literal
 
-from src.core.constants import PATH_KEYWORDS
+from src.core.constants import PATH_KEYWORDS, ensure_runtime_config_file
 from src.core.drivers.keyword_text_formatter import (
     CoreKeywordTextFormatter,
     KeywordsConfig,
@@ -13,7 +13,8 @@ from src.core.drivers.keyword_text_formatter import (
 
 class KeywordTextFormatter(CoreKeywordTextFormatter):
     def load_keywords(self) -> KeywordsConfig:
-        raw = json.loads(PATH_KEYWORDS.read_text(encoding="utf-8"))
+        path_keywords = ensure_runtime_config_file(PATH_KEYWORDS.name)
+        raw = json.loads(path_keywords.read_text(encoding="utf-8"))
         return KeywordsConfig.model_validate(raw)
 
     def format_text(self, text: str, keywords: KeywordsConfig) -> str:

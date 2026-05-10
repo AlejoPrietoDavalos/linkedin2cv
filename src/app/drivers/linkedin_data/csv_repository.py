@@ -7,10 +7,11 @@ import pandas as pd
 from src.core.entities.linkedin_data import Profile, Position, Education, LinkedinData
 from src.core.entities.job_ids import JobIdsConfig
 from src.core.constants import (
+    PATH_JOB_IDS,
     PATH_LINKEDIN_PROFILE,
     PATH_LINKEDIN_POSITIONS,
     PATH_LINKEDIN_EDUCATION,
-    PATH_JOB_IDS,
+    ensure_runtime_config_file,
 )
 from src.core.drivers.linkedin_csv_repository import CoreLinkedinCSVRepository
 from src.core.hardcoded_config import (
@@ -65,9 +66,8 @@ def _pick_model_fields(data: Dict[str, Any], model_cls: Type) -> Dict[str, Any]:
 class _LinkedinJobIdAttacher:
     @staticmethod
     def _load_job_ids_config() -> JobIdsConfig:
-        if not PATH_JOB_IDS.exists():
-            raise RuntimeError(f"Archivo requerido no encontrado: {PATH_JOB_IDS}")
-        raw = json.loads(PATH_JOB_IDS.read_text(encoding="utf-8"))
+        path_job_ids = ensure_runtime_config_file(PATH_JOB_IDS.name)
+        raw = json.loads(path_job_ids.read_text(encoding="utf-8"))
         config = JobIdsConfig.model_validate(raw)
         _LinkedinJobIdAttacher._validate_unique_job_ids(config)
         return config
