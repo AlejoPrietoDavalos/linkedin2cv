@@ -20,7 +20,6 @@ from src.core.entities import (
     DrawPositionsResult,
     LinkedinData,
     PersonalInformation,
-    PhotoDrawCfg,
     PositionsDrawCfg,
     SidebarDrawCfg,
     SizesCV,
@@ -81,20 +80,12 @@ class BuildCVService(CoreBuilderCV):
             cfg=SidebarDrawCfg(
                 linkedin_data=linkedin_data,
                 personal_information=personal_information,
+                path_photo=PATH_PHOTO,
+                is_photo_circle=cfg_builder.is_photo_circle,
                 sizes_cv=sizes_cv,
                 style_cv=style_cv,
                 styles=styles,
                 page_height=page_height,
-            ),
-            draw_config=draw_config,
-        )
-        self.draw_cv_service.draw_photo(
-            c=canvas,
-            cfg=PhotoDrawCfg(
-                path_photo=PATH_PHOTO,
-                sizes_cv=sizes_cv,
-                page_height=page_height,
-                is_photo_circle=cfg_builder.is_photo_circle,
             ),
             draw_config=draw_config,
         )

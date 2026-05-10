@@ -7,7 +7,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Frame, Paragraph, Spacer
 
 from src.app.drivers.draw_cv._image import ImageDrawer
-from src.core.entities import DrawCVConfig, ImageDrawCfg, PhotoDrawCfg, SidebarDrawCfg, SidebarSection, SidebarSections
+from src.core.entities import DrawCVConfig, ImageDrawCfg, SidebarDrawCfg, SidebarSection, SidebarSections
 from src.core.hardcoded_config import (
     LABEL_AGE,
     LABEL_GITHUB,
@@ -95,8 +95,8 @@ class _SidebarSectionTextDrawer:
 
 
 class _SidebarSectionsContentDrawer:
-    def __init__(self, section_text_drawer: _SidebarSectionTextDrawer) -> None:
-        self.section_text_drawer = section_text_drawer
+    def __init__(self, section_text_drawer: _SidebarSectionTextDrawer | None = None) -> None:
+        self.section_text_drawer = section_text_drawer or _SidebarSectionTextDrawer()
 
     def _build_sections(self, *, cfg: SidebarDrawCfg) -> SidebarSections:
         if SUMMARY_TECH_STACK_LABEL not in cfg.linkedin_data.profile.summary:
@@ -145,27 +145,11 @@ class _SidebarFrameBuilder:
         )
 
 
-class SidebarDrawer:
+class _SidebarPhotoDrawer:
+    def __init__(self, image_drawer: ImageDrawer | None = None) -> None:
+        self.image_drawer = image_drawer or ImageDrawer()
 
-    def __init__(
-        self,
-        image_drawer: ImageDrawer,
-        background_drawer: _SidebarBackgroundDrawer | None = None,
-        header_content_drawer: _SidebarHeaderContentDrawer | None = None,
-        personal_info_drawer: _SidebarPersonalInfoContentDrawer | None = None,
-        sections_content_drawer: _SidebarSectionsContentDrawer | None = None,
-        frame_builder: _SidebarFrameBuilder | None = None,
-    ) -> None:
-        self.image_drawer = image_drawer
-        self.background_drawer = background_drawer or _SidebarBackgroundDrawer()
-        self.header_content_drawer = header_content_drawer or _SidebarHeaderContentDrawer()
-        self.personal_info_drawer = personal_info_drawer or _SidebarPersonalInfoContentDrawer()
-        self.sections_content_drawer = sections_content_drawer or _SidebarSectionsContentDrawer(
-            section_text_drawer=_SidebarSectionTextDrawer()
-        )
-        self.frame_builder = frame_builder or _SidebarFrameBuilder()
-
-    def _build_photo_image_cfg(self, *, cfg: PhotoDrawCfg, x: float, y: float) -> ImageDrawCfg:
+    def _build_photo_image_cfg(self, *, cfg: SidebarDrawCfg, x: float, y: float) -> ImageDrawCfg:
         return ImageDrawCfg(
             path_img=cfg.path_photo,
             x=x,
@@ -175,17 +159,29 @@ class SidebarDrawer:
             is_circle=cfg.is_photo_circle,
         )
 
-    def draw_photo(
-        self,
-        *,
-        c: Canvas,
-        cfg: PhotoDrawCfg,
-        draw_config: DrawCVConfig,
-    ) -> None:
-        if cfg.path_photo and cfg.path_photo.exists():
+    def draw(self, *, c: Canvas, cfg: SidebarDrawCfg, draw_config: DrawCVConfig) -> None:
+        if cfg.path_photo.exists():
             x = cfg.sizes_cv.margin_left_pt + (cfg.sizes_cv.column_left_width_pt - cfg.sizes_cv.photo_size_pt) / 2
             y = cfg.page_height - cfg.sizes_cv.photo_size_pt - draw_config.photo_top_padding_mm * mm
             self.image_drawer.draw_image(c=c, cfg=self._build_photo_image_cfg(cfg=cfg, x=x, y=y))
+
+
+class SidebarDrawer:
+    def __init__(
+        self,
+        background_drawer: _SidebarBackgroundDrawer | None = None,
+        photo_drawer: _SidebarPhotoDrawer | None = None,
+        header_content_drawer: _SidebarHeaderContentDrawer | None = None,
+        personal_info_drawer: _SidebarPersonalInfoContentDrawer | None = None,
+        sections_content_drawer: _SidebarSectionsContentDrawer | None = None,
+        frame_builder: _SidebarFrameBuilder | None = None,
+    ) -> None:
+        self.background_drawer = background_drawer or _SidebarBackgroundDrawer()
+        self.photo_drawer = photo_drawer or _SidebarPhotoDrawer()
+        self.header_content_drawer = header_content_drawer or _SidebarHeaderContentDrawer()
+        self.personal_info_drawer = personal_info_drawer or _SidebarPersonalInfoContentDrawer()
+        self.sections_content_drawer = sections_content_drawer or _SidebarSectionsContentDrawer()
+        self.frame_builder = frame_builder or _SidebarFrameBuilder()
 
     def draw_sidebar(
         self,
@@ -195,6 +191,7 @@ class SidebarDrawer:
         draw_config: DrawCVConfig,
     ) -> None:
         self.background_drawer.draw(c=c, cfg=cfg)
+        self.photo_drawer.draw(c=c, cfg=cfg, draw_config=draw_config)
         content = self.header_content_drawer.build(cfg=cfg, draw_config=draw_config)
         content.extend(self.personal_info_drawer.build(cfg=cfg, draw_config=draw_config))
         content.extend(self.sections_content_drawer.build(cfg=cfg, draw_config=draw_config))

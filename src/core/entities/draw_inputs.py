@@ -17,18 +17,13 @@ class BackgroundDrawCfg(BaseModel):
     page_height: float
 
 
-class PhotoDrawCfg(BaseModel):
-    path_photo: Optional[Path]
-    sizes_cv: SizesCV
-    page_height: float
-    is_photo_circle: bool = True
-
-
 class SidebarDrawCfg(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
     linkedin_data: LinkedinData
     personal_information: PersonalInformation
+    path_photo: Path
+    is_photo_circle: bool = True
     sizes_cv: SizesCV
     style_cv: StyleCV
     styles: StyleSheet1

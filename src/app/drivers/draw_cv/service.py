@@ -12,7 +12,6 @@ from src.core.entities import (
     BackgroundDrawCfg,
     DrawCVConfig,
     DrawPositionsResult,
-    PhotoDrawCfg,
     PositionsDrawCfg,
     SidebarDrawCfg,
 )
@@ -27,17 +26,12 @@ class DrawCVService(CoreDrawCVService):
         sidebar_drawer: SidebarDrawer | None = None,
         positions_drawer: PositionsDrawer | None = None,
     ) -> None:
-        image_drawer = ImageDrawer()
-        image_title_drawer = ImageTitleDrawer(image_drawer=image_drawer)
         self.background_drawer = background_drawer or BackgroundDrawer()
-        self.sidebar_drawer = sidebar_drawer or SidebarDrawer(image_drawer=image_drawer)
-        self.positions_drawer = positions_drawer or PositionsDrawer(image_title_drawer=image_title_drawer)
+        self.sidebar_drawer = sidebar_drawer or SidebarDrawer()
+        self.positions_drawer = positions_drawer or PositionsDrawer()
 
     def draw_background(self, *, c: Canvas, cfg: BackgroundDrawCfg) -> None:
         self.background_drawer.draw_background(c=c, cfg=cfg)
-
-    def draw_photo(self, *, c: Canvas, cfg: PhotoDrawCfg, draw_config: DrawCVConfig) -> None:
-        self.sidebar_drawer.draw_photo(c=c, cfg=cfg, draw_config=draw_config)
 
     def draw_sidebar(self, *, c: Canvas, cfg: SidebarDrawCfg, draw_config: DrawCVConfig) -> None:
         self.sidebar_drawer.draw_sidebar(c=c, cfg=cfg, draw_config=draw_config)

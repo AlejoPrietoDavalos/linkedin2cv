@@ -7,7 +7,6 @@ from src.core.entities import (
     BackgroundDrawCfg,
     DrawCVConfig,
     DrawPositionsResult,
-    PhotoDrawCfg,
     SidebarDrawCfg,
     PositionsDrawCfg,
 )
@@ -19,17 +18,6 @@ class CoreDrawCVService(ABC):
     @abstractmethod
     def draw_background(self, *, c: Canvas, cfg: BackgroundDrawCfg) -> None:
         """Dibuja el fondo del CV."""
-        pass
-    
-    @abstractmethod
-    def draw_photo(
-        self,
-        *,
-        c: Canvas,
-        cfg: PhotoDrawCfg,
-        draw_config: DrawCVConfig,
-    ) -> None:
-        """Dibuja la foto de perfil."""
         pass
     
     @abstractmethod

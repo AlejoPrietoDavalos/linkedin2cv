@@ -16,7 +16,6 @@ from src.core.entities.draw_inputs import (
     PositionsLayoutDTO,
     ImageDrawCfg,
     ImageTitleDrawCfg,
-    PhotoDrawCfg,
     SidebarDrawCfg,
     PositionsDrawCfg,
 )
@@ -41,7 +40,6 @@ __all__ = [
     "PositionsLayoutDTO",
     "ImageDrawCfg",
     "ImageTitleDrawCfg",
-    "PhotoDrawCfg",
     "SidebarDrawCfg",
     "PositionsDrawCfg",
 ]
