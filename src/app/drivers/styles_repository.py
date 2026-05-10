@@ -3,7 +3,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, StyleSheet
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.core.constants import ensure_runtime_config_file
-from src.core.entities.config import LayoutConfig, SpacingConfig
+from src.core.entities.config import LayoutConfig, SidebarSectionsCfg, SpacingConfig
 from src.core.entities.styles_config import Alignment, StylesConfig
 
 
@@ -67,3 +67,10 @@ class SpacingRepository:
     def load() -> SpacingConfig:
         path = ensure_runtime_config_file("spacing.json")
         return SpacingConfig.model_validate_json(path.read_text())
+
+
+class SidebarSectionsRepository:
+    @staticmethod
+    def load() -> SidebarSectionsCfg:
+        path = ensure_runtime_config_file("sidebar_sections.json")
+        return SidebarSectionsCfg.model_validate_json(path.read_text())

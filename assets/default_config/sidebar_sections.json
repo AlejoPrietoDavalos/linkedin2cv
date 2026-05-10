@@ -1,0 +1,25 @@
+{
+    "sections": {
+        "about_me": {
+            "title": "Sobre mi",
+            "text": null
+        },
+        "goal": {
+            "title": "Objetivo profesional",
+            "text": null
+        },
+        "tech_summary": {
+            "title": "Resumen técnico",
+            "text": null
+        },
+        "personal_projects": {
+            "title": "Proyectos personales",
+            "text": null
+        },
+        "tech_stack": {
+            "title": "Stack tecnológico",
+            "text": null
+        }
+    },
+    "sections_order": ["about_me", "goal", "tech_summary", "personal_projects", "tech_stack"]
+}

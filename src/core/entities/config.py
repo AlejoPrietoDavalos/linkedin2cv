@@ -5,6 +5,16 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 
 
+class SidebarSectionCfg(BaseModel):
+    title: str
+    text: str | None = None
+
+
+class SidebarSectionsCfg(BaseModel):
+    sections: dict[str, SidebarSectionCfg]
+    sections_order: list[str]
+
+
 class SpacingConfig(BaseModel):
     dist_between_title_sidebar_to_text: int = 5
     dist_python_icon_to_title: int = 4

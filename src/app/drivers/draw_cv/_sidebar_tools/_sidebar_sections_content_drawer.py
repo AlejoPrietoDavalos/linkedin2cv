@@ -1,55 +1,71 @@
 from typing import List
 
-from pydantic import BaseModel
 from reportlab.lib.styles import StyleSheet1
 from reportlab.platypus import Paragraph, Spacer
 
 from src.app.drivers.draw_cv._sidebar_tools._sidebar_section_text_drawer import SidebarSectionTextDrawer
-from src.core.entities.config import SpacingConfig
+from src.app.drivers.keyword_text_formatter import KeywordTextFormatter
+from src.app.drivers.linkedin_data.fix._fix_visible_text_format_linkedin_data import FixVisibleTextFormatLinkedinData
+from src.app.drivers.styles_repository import SidebarSectionsRepository
+from src.core.constants import PATH_SECTIONS_DIR
+from src.core.drivers.keyword_text_formatter import CoreKeywordTextFormatter
+from src.core.entities.config import SidebarSectionCfg, SidebarSectionsCfg, SpacingConfig
 from src.core.entities.linkedin_data import LinkedInData
-from src.core.hardcoded_config import (
-    SECTION_ABOUT_ME_TEXT,
-    SECTION_ABOUT_ME_TITLE,
-    SECTION_GOAL_TEXT,
-    SECTION_GOAL_TITLE,
-    SECTION_PROJECTS_TEXT,
-    SECTION_PROJECTS_TITLE,
-    SECTION_STACK_TITLE,
-    SECTION_TECH_SUMMARY_TITLE,
-    SUMMARY_TECH_STACK_LABEL,
-)
+from src.core.hardcoded_config import format_tech_stack_split_label
 
-
-class SidebarSection(BaseModel):
-    title: str
-    text: str
-
-
-class SidebarSections(BaseModel):
-    items: list[SidebarSection]
+# Maps section_id → index in the LinkedIn summary split (tech_summary | tech_stack).
+_SUMMARY_SPLIT_IDX: dict[str, int] = {
+    "tech_summary": 0,
+    "tech_stack": 1,
+}
 
 
 class SidebarSectionsContentDrawer:
-    def __init__(self, section_text_drawer: SidebarSectionTextDrawer | None = None) -> None:
+    def __init__(
+        self,
+        section_text_drawer: SidebarSectionTextDrawer | None = None,
+        sections_cfg: SidebarSectionsCfg | None = None,
+        keyword_formatter: CoreKeywordTextFormatter | None = None,
+        visible_text_formatter: FixVisibleTextFormatLinkedinData | None = None,
+    ) -> None:
         self.section_text_drawer = section_text_drawer or SidebarSectionTextDrawer()
+        self.sections_cfg = sections_cfg or SidebarSectionsRepository.load()
+        self.keyword_formatter = keyword_formatter or KeywordTextFormatter()
+        self.visible_text_formatter = visible_text_formatter or FixVisibleTextFormatLinkedinData()
 
-    def _build_sections(self, *, linkedin_data: LinkedInData) -> SidebarSections:
-        if SUMMARY_TECH_STACK_LABEL not in linkedin_data.profile.summary:
-            raise ValueError(f"El texto '{SUMMARY_TECH_STACK_LABEL}' no está en summary.")
-        summary_parts = [p.strip() for p in linkedin_data.profile.summary.split(SUMMARY_TECH_STACK_LABEL)]
-        return SidebarSections(
-            items=[
-                SidebarSection(title=SECTION_ABOUT_ME_TITLE, text=SECTION_ABOUT_ME_TEXT),
-                SidebarSection(title=SECTION_GOAL_TITLE, text=SECTION_GOAL_TEXT),
-                SidebarSection(title=SECTION_TECH_SUMMARY_TITLE, text=summary_parts[0]),
-                SidebarSection(title=SECTION_PROJECTS_TITLE, text=SECTION_PROJECTS_TEXT),
-                SidebarSection(title=SECTION_STACK_TITLE, text=summary_parts[1]),
-            ]
-        )
+    def _load_section_from_file(self, section_id: str) -> str:
+        path = PATH_SECTIONS_DIR / f"{section_id}.txt"
+        if not path.exists():
+            raise FileNotFoundError(f"No se encontró el archivo de sección: {path}")
+        text = path.read_text(encoding="utf-8").strip()
+        text = text.replace("\n", "<br/>")
+        return self.visible_text_formatter.format_visible_text(text)
+
+    def _split_summary_into_tech_sections(self, linkedin_data: LinkedInData) -> dict[str, str]:
+        split_label = format_tech_stack_split_label(self.sections_cfg.sections["tech_stack"].title)
+        if split_label not in linkedin_data.profile.summary:
+            raise ValueError(f"El texto '{split_label}' no está en summary.")
+        parts = linkedin_data.profile.summary.split(split_label)
+        return {section_id: parts[idx].strip() for section_id, idx in _SUMMARY_SPLIT_IDX.items()}
+
+    def _fill_sections(self, linkedin_data: LinkedInData) -> list[SidebarSectionCfg]:
+        linkedin_texts = self._split_summary_into_tech_sections(linkedin_data)
+        keywords = self.keyword_formatter.load_keywords()
+        sections = []
+        for section_id in self.sections_cfg.sections_order:
+            section = self.sections_cfg.sections[section_id]
+            if section_id in _SUMMARY_SPLIT_IDX:
+                text = self.visible_text_formatter.format_visible_text(linkedin_texts[section_id])
+            else:
+                text = self.keyword_formatter.format_text(
+                    self._load_section_from_file(section_id), keywords
+                )
+            sections.append(SidebarSectionCfg(title=section.title, text=text))
+        return sections
 
     def build(self, *, linkedin_data: LinkedInData, styles: StyleSheet1, spacing: SpacingConfig) -> List[Paragraph | Spacer]:
         content: List[Paragraph | Spacer] = []
-        for section in self._build_sections(linkedin_data=linkedin_data).items:
+        for section in self._fill_sections(linkedin_data):
             content.append(Spacer(1, spacing.dist_between_title_text_sidebar))
             content.extend(
                 self.section_text_drawer.build(

@@ -2,9 +2,6 @@
 
 from typing import Optional
 
-SECTION_STACK_TITLE = "Stack tecnológico"
-SUMMARY_TECH_STACK_LABEL = f"● {SECTION_STACK_TITLE}:"
-
 REPLACE_BULLET_ARROW = (" ➣", "<br/>➣")
 REPLACE_BULLET_DOT = (" ●", "<br/><br/>●")
 REPLACE_BULLET_SQUARE = (" ■", "<br/>■")
@@ -22,41 +19,15 @@ LABEL_EXTERNAL_LINK = " Link"
 
 
 
-SECTION_ABOUT_ME_TITLE = "Sobre mi"
-SECTION_ABOUT_ME_TEXT = (
-    "Programo soluciones end-to-end en Python, soy resolutivo y me motivan mucho los desafíos.<br/>"
-    "Con gran interés en colaborar en proyectos de software/datos junto a otros profesionales."
-)
-
-
-
-
-SECTION_GOAL_TITLE = "Objetivo profesional"
-SECTION_GOAL_TEXT = (
-    "Poder aplicar Python en todo, siempre dispuesto a aprender nuevas tecnologías, "
-    "especialmente en Ciencia de Datos."
-)
-
-
-
-SECTION_TECH_SUMMARY_TITLE = "Resumen técnico"
-SECTION_PROJECTS_TITLE = "Proyectos personales"
-SECTION_PROJECTS_TEXT = (
-    "● Teledetección de barcos para pesca ilegal.<br/>"
-    "➣ Análisis de imágenes satelitales SAR.<br/>"
-    "➣ Deep Learning para detección de objetos.<br/><br/>"
-    "● Sistema de procesamiento de datos geoespaciales.<br/>"
-    "➣ Resuelve problemáticas comunes para éste tipo de dato.<br/>"
-)
-
-
-
-
 JOB_SUBTITLE_PREFIX = "➤➤"
 LABEL_CURRENTLY = "Actualidad"
 
 FINAL_CREDIT_URL = "https://alejoprietodavalos.github.io/portfolio-es/posts/linkedin-to-cv/"
 FINAL_CREDIT_TEXT = "Curriculum programado/generado por mí a partir de los datos extraídos de LinkedIn."
+
+
+def format_tech_stack_split_label(stack_title: str) -> str:
+    return f"● {stack_title}:"
 
 
 def format_sidebar_info_line(label: str, value: str) -> str:
