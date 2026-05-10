@@ -1,82 +1,21 @@
-from typing import List, Dict, Any, Type, TypeVar
+from typing import List
 from pathlib import Path
 import logging
-import json
 
 import pandas as pd
-from pydantic import BaseModel
 
 from src.core.entities.linkedin_data import Profile, Position, Education, LinkedinData
-from src.core.entities.job_ids import JobIdsConfig
 from src.core.constants import (
-    PATH_JOB_IDS,
     PATH_FOLDER_DATA,
     PATH_LINKEDIN_PROFILE,
     PATH_LINKEDIN_POSITIONS,
     PATH_LINKEDIN_EDUCATION,
-    ensure_runtime_config_file,
 )
 from src.core.drivers.linkedin_csv_repository import CoreLinkedinCSVRepository
+from src.app.drivers.linkedin_data._csv_row_formatter import LinkedinCSVRowFormatter
+from src.app.drivers.linkedin_data._job_id_attacher import LinkedinJobIdAttacher
 
 logger = logging.getLogger(__name__)
-TModel = TypeVar("TModel", bound=BaseModel)
-
-
-def _nan2none(v):
-    return None if pd.isna(v) else v
-
-
-class LinkedinCSVRowFormatter:
-    def format_key(self, key: str) -> str:
-        return key.lower().replace(" ", "_")
-
-    def format_row(self, *, row: pd.Series) -> Dict[str, Any]:
-        row_dict: Dict[str, Any] = row.to_dict()
-        return {self.format_key(k): _nan2none(v) for k, v in row_dict.items()}
-
-    def _pick_model_fields(
-        self, *, data: Dict[str, Any], model_cls: Type[TModel]
-    ) -> Dict[str, Any]:
-        return {k: v for k, v in data.items() if k in model_cls.model_fields}
-
-    def build_model_from_row(self, *, row: pd.Series, model_cls: Type[TModel]) -> TModel:
-        data = self.format_row(row=row)
-        return model_cls(**self._pick_model_fields(data=data, model_cls=model_cls))
-
-    def build_models_from_dataframe(
-        self, *, df: pd.DataFrame, model_cls: Type[TModel]
-    ) -> List[TModel]:
-        return [self.build_model_from_row(row=row, model_cls=model_cls) for _, row in df.iterrows()]
-
-
-class LinkedinJobIdAttacher:
-    def _load_job_ids_config(self) -> JobIdsConfig:
-        path_job_ids = ensure_runtime_config_file(PATH_JOB_IDS.name)
-        raw = json.loads(path_job_ids.read_text(encoding="utf-8"))
-        config = JobIdsConfig.model_validate(raw)
-        self._validate_unique_job_ids(config)
-        return config
-
-    def _validate_unique_job_ids(self, config: JobIdsConfig) -> None:
-        all_job_ids = [entry.job_id for entry in config.jobs]
-        duplicates = sorted({job_id for job_id in all_job_ids if all_job_ids.count(job_id) > 1})
-        if duplicates:
-            raise RuntimeError(f"job_id duplicados en config/job_ids.json: {duplicates}")
-
-    def attach(self, positions: List[Position]) -> None:
-        logger.info(f">>>>> Attach JobId: {PATH_JOB_IDS}")
-        config = self._load_job_ids_config()
-        company_to_job_id = {job.company_name: job.job_id for job in config.jobs}
-
-        for position in positions:
-            position.job_id = company_to_job_id.get(position.company_name)
-
-        removed_company_names = sorted({p.company_name for p in positions if p.job_id is None})
-        if removed_company_names:
-            for company_name in removed_company_names:
-                logger.warning(f">>>>> (SKIP JOB) job_id no configurado: '{company_name}'")
-            
-            positions[:] = [p for p in positions if p.job_id is not None]
 
 
 class LinkedinCSVRepository(CoreLinkedinCSVRepository):
