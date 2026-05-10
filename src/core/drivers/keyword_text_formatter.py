@@ -5,10 +5,11 @@ from typing import List, Literal
 
 from pydantic import BaseModel, Field
 
+_KeywordFormatter = Literal["bold"]
 
 class KeywordFormat(BaseModel):
     keyword: str
-    formatter: Literal["bold"] = "bold"
+    formatter: _KeywordFormatter = "bold"
 
 
 class KeywordsConfig(BaseModel):
@@ -19,14 +20,14 @@ class CoreKeywordTextFormatter(ABC):
     @abstractmethod
     def load_keywords(self) -> KeywordsConfig:
         """Carga keywords desde la fuente configurada."""
-        raise NotImplementedError
+        ...
 
     @abstractmethod
     def format_text(self, text: str, keywords: KeywordsConfig) -> str:
         """Aplica formato al texto usando las keywords provistas."""
-        raise NotImplementedError
+        ...
 
     @abstractmethod
-    def format_bracketed(self, text: str, formatter: Literal["bold"]) -> str:
+    def format_bracketed(self, text: str, formatter: _KeywordFormatter) -> str:
         """Aplica formato a bloques entre corchetes, p. ej. [texto]."""
-        raise NotImplementedError
+        ...
