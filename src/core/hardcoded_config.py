@@ -2,8 +2,8 @@
 
 from typing import Optional
 
-
-SUMMARY_TECH_STACK_LABEL = "● Stack tecnológico:"
+SECTION_STACK_TITLE = "Stack tecnológico"
+SUMMARY_TECH_STACK_LABEL = f"● {SECTION_STACK_TITLE}:"
 
 REPLACE_BULLET_ARROW = (" ➣", "<br/>➣")
 REPLACE_BULLET_DOT = (" ●", "<br/><br/>●")
@@ -43,7 +43,6 @@ SECTION_PROJECTS_TEXT = (
     "➣ Desarrollé un juego en Python con interacción.<br/>"
     "➣ Scripting para resolver tareas repetitivas.<br/>"
 )
-SECTION_STACK_TITLE = "Stack tecnológico"
 
 JOB_SUBTITLE_PREFIX = "➤➤"
 LABEL_CURRENTLY = "Actualidad"
@@ -75,7 +74,7 @@ def format_position_subtitle(*, company_name: str, started_on: str, finished_on:
 
 
 def format_final_credit_html(*, url: str = FINAL_CREDIT_URL, text: str = FINAL_CREDIT_TEXT) -> str:
-    return f"""<br/><br/><br/><br/><br/><a href="{url}"><i><b>{text}</b></i></a>"""
+    return f"""<br/><br/><br/><br/><a href="{url}"><i><b>{text}</b></i></a>"""
 
 
 def format_job_title_html(*, title: str) -> str:

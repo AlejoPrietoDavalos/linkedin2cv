@@ -8,7 +8,6 @@ PATH_FONTS = PATH_ASSETS_DIR / "fonts"
 PATH_PLOTS_DIR = PATH_ASSETS_DIR / "plots"
 
 PATH_PYTHON_ICON = PATH_IMAGES_DIR / "python_icon.png"
-PDF_EXTENSION = ".pdf"
 ENV_FOLDER_DATA = "FOLDER_DATA"
 ENV_PHOTO_NAME = "PHOTO_NAME"
 
@@ -28,4 +27,5 @@ PATH_LINKEDIN_EDUCATION = PATH_FOLDER_DATA / "Education.csv"
 PATH_PHOTO = PATH_IMAGES_DIR / PHOTO_NAME
 PATH_PDF_BASENAME = PATH_FOLDER_DATA.stem
 
-PATH_PDF_OUTPUT = PATH_DATA_DIR / f"{PATH_FOLDER_DATA.stem}{PDF_EXTENSION}"
+def get_path_pdf_output(full_name: str) -> Path:
+    return PATH_DATA_DIR / f"Curriculum - {full_name}.pdf"
