@@ -6,7 +6,7 @@ from src.core.entities.config import (
     SizesCV,
     LinkedinDataToCVConfig,
 )
-from src.core.entities.style import StyleCV
+from src.core.entities.styles_config import ParagraphStyleParams, StylesConfig
 from src.core.entities.personal_information import PersonalInformation
 from src.core.entities.sidebar_sections import SidebarSection, SidebarSections
 from src.core.entities.draw_inputs import (
@@ -29,8 +29,9 @@ __all__ = [
     "BuilderCVConfig",
     "DrawCVConfig",
     "LinkedinDataToCVConfig",
-    "StyleCV",
     "SizesCV",
+    "ParagraphStyleParams",
+    "StylesConfig",
     "PersonalInformation",
     "SidebarSection",
     "SidebarSections",

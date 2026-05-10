@@ -8,7 +8,6 @@ from reportlab.lib.units import mm
 from src.core.entities.config import DrawCVConfig, SizesCV
 from src.core.entities.linkedin_data import LinkedinData
 from src.core.entities.personal_information import PersonalInformation
-from src.core.entities.style import StyleCV
 
 
 class BackgroundDrawCfg(BaseModel):
@@ -25,7 +24,7 @@ class SidebarDrawCfg(BaseModel):
     path_photo: Path
     is_photo_circle: bool = True
     sizes_cv: SizesCV
-    style_cv: StyleCV
+    sidebar_panel_color: tuple[float, float, float]
     styles: StyleSheet1
     page_height: float
 

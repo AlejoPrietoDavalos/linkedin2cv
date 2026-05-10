@@ -10,6 +10,7 @@ from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.build_cv._pdf_line_drawer import PDFLineDrawer
 from src.app.drivers.draw_cv.service import DrawCVService
+from src.app.drivers.styles_repository import StylesRepository
 from src.core.constants import PATH_PHOTO
 from src.core.drivers.builder import CoreBuilderCV
 from src.core.entities import (
@@ -23,7 +24,6 @@ from src.core.entities import (
     PositionsDrawCfg,
     SidebarDrawCfg,
     SizesCV,
-    StyleCV,
 )
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,6 @@ class BuildCVService(CoreBuilderCV):
         path_pdf: Path,
         personal_information: PersonalInformation,
         linkedin_data: LinkedinData,
-        style_cv: Optional[StyleCV] = None,
         sizes_cv: Optional[SizesCV] = None,
         cfg_builder: Optional[BuilderCVConfig] = None,
     ) -> DrawPositionsResult:
@@ -55,22 +54,19 @@ class BuildCVService(CoreBuilderCV):
         if not PATH_PHOTO.exists():
             raise FileNotFoundError(f"No existe la foto de perfil: {PATH_PHOTO}")
 
-        style_cv = style_cv or StyleCV()
         sizes_cv = sizes_cv or SizesCV()
         cfg_builder = cfg_builder or BuilderCVConfig()
         draw_config = DrawCVConfig()
         page_width, page_height = cfg_builder.page_size
         canvas = Canvas(str(path_pdf), pagesize=cfg_builder.page_size)
-        styles: StyleSheet1 = style_cv.get_styles()
+
+        styles_config = StylesRepository.load()
+        styles: StyleSheet1 = StylesRepository.build_stylesheet(styles_config)
 
         self.draw_cv_service.draw_background(
             c=canvas,
             cfg=BackgroundDrawCfg(
-                color=(
-                    style_cv.background.red,
-                    style_cv.background.green,
-                    style_cv.background.blue,
-                ),
+                color=styles_config.background,
                 page_width=page_width,
                 page_height=page_height,
             ),
@@ -83,7 +79,7 @@ class BuildCVService(CoreBuilderCV):
                 path_photo=PATH_PHOTO,
                 is_photo_circle=cfg_builder.is_photo_circle,
                 sizes_cv=sizes_cv,
-                style_cv=style_cv,
+                sidebar_panel_color=styles_config.sidebar_panel,
                 styles=styles,
                 page_height=page_height,
             ),
