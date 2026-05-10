@@ -1,9 +1,9 @@
 """Compresión de PDFs con Ghostscript. Reduce tamaño de currículos generados."""
 
 import subprocess
-import os
 import shutil
 import logging
+import tempfile
 from pathlib import Path
 from typing import Union
 
@@ -34,7 +34,13 @@ class GhostScript(CoreGhostScript):
             return
 
         path_pdf = Path(path_pdf)
-        path_tmp = path_pdf.with_name(f'{path_pdf.stem}_temp.pdf')
+        with tempfile.NamedTemporaryFile(
+            suffix=".pdf",
+            prefix=f"{path_pdf.stem}_",
+            dir=path_pdf.parent,
+            delete=False,
+        ) as tmp:
+            path_tmp = Path(tmp.name)
         
         subprocess.run([
             self._GS_COMMAND,
