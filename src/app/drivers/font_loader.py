@@ -1,5 +1,7 @@
 """Adaptador de carga de fuentes para la capa de aplicación."""
 
+import os
+import logging
 from typing import List
 
 from reportlab.pdfbase import pdfmetrics
@@ -9,9 +11,19 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 from src.core.constants import PATH_FONTS
 from src.core.drivers.font_loader import CoreFontLoader, FontLoaderConfig, PairNamePathFont
 
+logger = logging.getLogger(__name__)
+
 
 class FontLoader(CoreFontLoader):
     """Carga fuentes usando la configuración central del core."""
+
+    @staticmethod
+    def load_font_from_env() -> None:
+        font_name = os.getenv("FONT_NAME")
+        if not font_name:
+            raise ValueError("FONT_NAME environment variable is required")
+        logger.info(f"~ Cargando fuente de texto '{font_name}'.")
+        FontLoader().load_fonts(FontLoaderConfig(base_name=font_name))
 
     def load_fonts(self, cfg: FontLoaderConfig) -> None:
         self._register_font_family(cfg)
