@@ -6,6 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+from src.app.configure_logging import configure_logging
+configure_logging()
+
 from src.app.drivers.build_cv.service import BuildCVService
 from src.app.drivers.font_loader import FontLoader, FontLoaderConfig
 from src.app.drivers.ghostscript import GhostScript
@@ -13,12 +16,7 @@ from src.core.constants import PATH_PDF_OUTPUT
 from src.core.entities import PersonalInformation
 from src.app.drivers.linkedin_csv_repository import LinkedinCSVRepository
 
-
-def _load_fonts() -> None:
-    FONT_NAME = os.getenv("FONT_NAME")
-    if not FONT_NAME:
-        raise ValueError("FONT_NAME environment variable is required")
-    FontLoader().load_fonts(FontLoaderConfig(base_name=FONT_NAME))
+logger = logging.getLogger(__name__)
 
 
 def main(*, path_pdf: Path, personal_information: PersonalInformation) -> None:
@@ -30,7 +28,10 @@ def main(*, path_pdf: Path, personal_information: PersonalInformation) -> None:
         linkedin_data=linkedin_data,
     )
 
+    logger.info("==================== Líneas divisorias posición ====================")
+    builder_cv.draw_lines(path_pdf=path_pdf, lines=positions_result.divider_lines)
 
+    logger.info(f"==================== Copy, compress and export PDF ====================")
 
 if __name__ == "__main__":
     personal_information = PersonalInformation()

@@ -1,5 +1,6 @@
 from typing import Optional, List, Dict, Any
 import re
+import logging
 
 import pandas as pd
 
@@ -15,6 +16,8 @@ from src.core.hardcoded_config import (
     REPLACE_BULLET_DOT,
     REPLACE_BULLET_SQUARE,
 )
+
+logger = logging.getLogger(__name__)
 
 
 def _nan2none(v):
@@ -136,6 +139,9 @@ class _HardcodedLinkedinDataProcessor:
 
 
 class LinkedinCSVRepository(CoreLinkedinCSVRepository):
+    def __init__(self) -> None:
+        ...
+
     def _load_profile(self) -> Profile:
         row = _read_dataframe(PATH_LINKEDIN_PROFILE).iloc[0]
         return Profile(**_LinkedinRowFormatter.format_row(row=row))
@@ -157,4 +163,7 @@ class LinkedinCSVRepository(CoreLinkedinCSVRepository):
             educations=self._load_educations(),
         )
         _HardcodedLinkedinDataProcessor().process(linkedin_data)
+        logger.info("==================== LinkedIn Data ====================")
+        logger.info(f"~ positions={len(linkedin_data.positions)}")
+        logger.info(f"~ educations={len(linkedin_data.educations)}")
         return linkedin_data

@@ -24,6 +24,8 @@ from src.core.entities import (
     StyleCV,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class BuildCVService(CoreBuilderCV):
     """Orquesta la construcción y guardado del CV."""
@@ -48,7 +50,8 @@ class BuildCVService(CoreBuilderCV):
         style_cv: Optional[StyleCV] = None,
         sizes_cv: Optional[SizesCV] = None,
         cfg_builder: Optional[BuilderCVConfig] = None,
-    ) -> None:
+    ) -> DrawPositionsResult:
+        logger.info("==================== Creando CV ====================")
         if not PATH_PHOTO.exists():
             raise FileNotFoundError(f"No existe la foto de perfil: {PATH_PHOTO}")
 
@@ -105,10 +108,9 @@ class BuildCVService(CoreBuilderCV):
             ),
             draw_config=draw_config,
         )
-        self.divider_lines = positions_result.divider_lines
-        self.line_anchor_x = positions_result.line_anchor_x
-
         canvas.save()
+        logger.info(f"~ Export PDF: {path_pdf}")
+        return positions_result
 
     def draw_lines(
         self,
