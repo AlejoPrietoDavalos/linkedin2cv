@@ -3,8 +3,6 @@
 from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.draw_cv._background import BackgroundDrawer
-from src.app.drivers.draw_cv._image import ImageDrawer
-from src.app.drivers.draw_cv._image_title import ImageTitleDrawer
 from src.app.drivers.draw_cv._positions import PositionsDrawer
 from src.app.drivers.draw_cv._sidebar import SidebarDrawer
 from src.core.drivers.draw import CoreDrawCVService
