@@ -1,5 +1,8 @@
 """Render de sidebar y foto del CV."""
 
+from typing import List
+from reportlab.platypus import Paragraph, Spacer
+
 from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.draw_cv._sidebar_tools import (
@@ -39,7 +42,8 @@ class SidebarDrawer:
     ) -> None:
         self.background_drawer.draw(c=c, cfg=cfg)
         self.photo_drawer.draw(c=c, cfg=cfg, draw_config=draw_config)
-        content = self.header_content_drawer.build(cfg=cfg, draw_config=draw_config)
+        content: List[Paragraph | Spacer] = []
+        content.extend(self.header_content_drawer.build(cfg=cfg, draw_config=draw_config))
         content.extend(self.personal_info_drawer.build(cfg=cfg, draw_config=draw_config))
         content.extend(self.sections_content_drawer.build(cfg=cfg, draw_config=draw_config))
         frame = self.frame_builder.build(cfg=cfg, draw_config=draw_config)
