@@ -1,7 +1,7 @@
 from typing import Optional, List
 
 from pydantic import BaseModel
-from src.core.hardcoded_config import format_position_subtitle
+from src.core.hardcoded_config import format_full_name, format_full_name_inverted, format_position_subtitle
 
 
 class Profile(BaseModel):
@@ -12,7 +12,11 @@ class Profile(BaseModel):
 
     @property
     def full_name(self) -> str:
-        return f"{self.first_name} {self.last_name}"
+        return format_full_name(first_name=self.first_name, last_name=self.last_name)
+
+    @property
+    def full_name_inverted(self) -> str:
+        return format_full_name_inverted(first_name=self.first_name, last_name=self.last_name)
 
 
 class Position(BaseModel):
@@ -21,6 +25,7 @@ class Position(BaseModel):
     description: str
     location: Optional[str]
     started_on: str
+    finished_on: Optional[str]
 
     @property
     def text_title(self) -> str:
@@ -31,6 +36,7 @@ class Position(BaseModel):
         return format_position_subtitle(
             company_name=self.company_name,
             started_on=self.started_on,
+            finished_on=self.finished_on,
         )
 
 

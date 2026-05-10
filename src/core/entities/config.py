@@ -2,6 +2,7 @@ from typing import Tuple
 
 from pydantic import BaseModel, Field
 from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
 
 
 class StyleCVConfig(BaseModel):
@@ -33,6 +34,29 @@ class DrawCVConfig(BaseModel):
     spacer_height: int = 15
     frame_margin_left_mm: int = 1
     frame_margin_right_mm: int = 1
+
+
+class SizesCV(BaseModel):
+    margin: int = 5
+    margin_left: int = 5
+    column_left_width: int = 70
+    photo_size: int = 30
+
+    @property
+    def margin_pt(self) -> float:
+        return self.margin * mm
+
+    @property
+    def margin_left_pt(self) -> float:
+        return self.margin_left * mm
+
+    @property
+    def column_left_width_pt(self) -> float:
+        return self.column_left_width * mm
+
+    @property
+    def photo_size_pt(self) -> float:
+        return self.photo_size * mm
 
 
 class LinkedinDataToCVConfig(BaseModel):

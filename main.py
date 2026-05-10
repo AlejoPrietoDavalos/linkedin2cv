@@ -1,43 +1,54 @@
-import shutil
-import os
+from pathlib import Path
+import logging
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-from src.app.drivers.builder import BuilderCV
-from src.app.drivers.font_loader import FontLoader, FontLoaderConfig
+from src.app.configure_logging import configure_logging
+configure_logging()
+
+from src.app.drivers.build_cv.service import BuildCVService
+from src.app.drivers.font_loader import FontLoader
 from src.app.drivers.ghostscript import GhostScript
+from src.app.drivers.linkedin_data.fix.service import FixLinkedinDataService
+from src.core.constants import get_path_pdf_output
 from src.core.entities import PersonalInformation
-from src.app.drivers.linkedin_csv_repository import LinkedinCSVRepository
+from src.app.drivers.linkedin_data.csv_repository import LinkedinCSVRepository
+
+logger = logging.getLogger(__name__)
+
+def _compress_pdf(path_pdf: Path) -> None:
+    ghostscript = GhostScript()
+    ghostscript.compress_pdf(path_pdf)
+    logger.info(f"~ Export PDF: {path_pdf}")
 
 
-def load_fonts() -> None:
-    FONT_NAME = os.getenv("FONT_NAME")
-    if not FONT_NAME:
-        raise ValueError("FONT_NAME environment variable is required")
-    FontLoader().load_fonts(FontLoaderConfig(base_name=FONT_NAME))
 
-
-def main(*, personal_information: PersonalInformation) -> None:
-    load_fonts()
+def main(*, personal_information: PersonalInformation, compress: bool = True) -> None:
+    logger.info("==================== Iniciando ====================")
+    FontLoader.load_font_from_env()
 
     linkedin_data_repository = LinkedinCSVRepository()
     linkedin_data = linkedin_data_repository.load_linkedin_data()
+    linkedin_data = FixLinkedinDataService().fix(linkedin_data)
 
-    builder_cv = BuilderCV(
+    builder_cv = BuildCVService()
+    path_pdf = get_path_pdf_output(linkedin_data.profile.full_name)
+    positions_result = builder_cv.build_and_save(
+        path_pdf=path_pdf,
         personal_information=personal_information,
         linkedin_data=linkedin_data,
     )
-    builder_cv.build_and_save()
 
-    path_pdf_final = builder_cv.path_pdf.with_name(f'Curriculum - {builder_cv.linkedin_data.profile.full_name}.pdf')
-    shutil.copy(builder_cv.path_pdf, path_pdf_final)
+    logger.info("==================== Líneas divisorias posición ====================")
+    builder_cv.draw_lines(path_pdf=path_pdf, lines=positions_result.divider_lines)
 
-    ghostscript = GhostScript()
-    ghostscript.compress_pdf(path_pdf_final)
-
+    if compress:
+        logger.info("==================== Compress and export PDF ====================")
+        _compress_pdf(path_pdf=path_pdf)
 
 if __name__ == "__main__":
+    COMPRESS = True
     personal_information = PersonalInformation()
-    main(personal_information=personal_information)
+    main(personal_information=personal_information, compress=COMPRESS)
