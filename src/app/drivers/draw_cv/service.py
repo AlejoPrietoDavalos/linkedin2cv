@@ -1,5 +1,6 @@
 """Servicio principal de dibujo de CV, compuesto por sub-servicios."""
 
+from reportlab.lib.styles import StyleSheet1
 from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.draw_cv._background import BackgroundDrawer
@@ -31,8 +32,8 @@ class DrawCVService(CoreDrawCVService):
     def draw_background(self, *, c: Canvas, cfg: BackgroundDrawCfg) -> None:
         self.background_drawer.draw_background(c=c, cfg=cfg)
 
-    def draw_sidebar(self, *, c: Canvas, cfg: SidebarDrawCfg, draw_config: DrawCVConfig) -> None:
-        self.sidebar_drawer.draw_sidebar(c=c, cfg=cfg, draw_config=draw_config)
+    def draw_sidebar(self, *, c: Canvas, cfg: SidebarDrawCfg, styles: StyleSheet1, draw_config: DrawCVConfig) -> None:
+        self.sidebar_drawer.draw_sidebar(c=c, cfg=cfg, styles=styles, draw_config=draw_config)
 
-    def draw_positions(self, *, c: Canvas, cfg: PositionsDrawCfg, draw_config: DrawCVConfig) -> DrawPositionsResult:
-        return self.positions_drawer.draw_positions(c=c, cfg=cfg, draw_config=draw_config)
+    def draw_positions(self, *, c: Canvas, cfg: PositionsDrawCfg, styles: StyleSheet1, draw_config: DrawCVConfig) -> DrawPositionsResult:
+        return self.positions_drawer.draw_positions(c=c, cfg=cfg, styles=styles, draw_config=draw_config)

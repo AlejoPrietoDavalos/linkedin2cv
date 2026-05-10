@@ -47,6 +47,7 @@ class BuildCVService(CoreBuilderCV):
         path_pdf: Path,
         personal_information: PersonalInformation,
         linkedin_data: LinkedinData,
+        font_name: str,
         sizes_cv: Optional[SizesCV] = None,
         cfg_builder: Optional[BuilderCVConfig] = None,
     ) -> DrawPositionsResult:
@@ -61,7 +62,7 @@ class BuildCVService(CoreBuilderCV):
         canvas = Canvas(str(path_pdf), pagesize=cfg_builder.page_size)
 
         styles_config = StylesRepository.load()
-        styles: StyleSheet1 = StylesRepository.build_stylesheet(styles_config)
+        styles: StyleSheet1 = StylesRepository.build_stylesheet(styles_config, font_name)
 
         self.draw_cv_service.draw_background(
             c=canvas,
@@ -80,9 +81,9 @@ class BuildCVService(CoreBuilderCV):
                 is_photo_circle=cfg_builder.is_photo_circle,
                 sizes_cv=sizes_cv,
                 sidebar_panel_color=_hex_to_rgb(styles_config.sidebar_panel),
-                styles=styles,
                 page_height=page_height,
             ),
+            styles=styles,
             draw_config=draw_config,
         )
         positions_result = self.draw_cv_service.draw_positions(
@@ -90,10 +91,10 @@ class BuildCVService(CoreBuilderCV):
             cfg=PositionsDrawCfg(
                 linkedin_data=linkedin_data,
                 sizes_cv=sizes_cv,
-                styles=styles,
                 page_width=page_width,
                 page_height=page_height,
             ),
+            styles=styles,
             draw_config=draw_config,
         )
         canvas.save()

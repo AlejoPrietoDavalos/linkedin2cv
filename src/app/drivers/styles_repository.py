@@ -1,6 +1,6 @@
 from reportlab.lib.colors import Color
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, StyleSheet1
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.core.constants import ensure_runtime_config_file
 from src.core.entities.styles_config import Alignment, StylesConfig
@@ -15,16 +15,18 @@ def _hex_to_rgb(hex_color: str) -> tuple[float, float, float]:
 
 
 class _ParagraphStyleKwargs(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     name: str
-    fontName: str
-    fontSize: float
+    font_name: str = Field(alias="fontName")
+    font_size: float = Field(alias="fontSize")
     leading: float
-    textColor: tuple[float, float, float]
+    text_color: tuple[float, float, float] = Field(alias="textColor")
     alignment: Alignment | None = None
-    spaceAfter: float | None = None
+    space_after: float | None = Field(None, alias="spaceAfter")
 
     def to_kwargs(self) -> dict:
-        data = self.model_dump(exclude_none=True)
+        data = self.model_dump(by_alias=True, exclude_none=True)
         data["textColor"] = Color(*data["textColor"])
         return data
 
@@ -36,12 +38,12 @@ class StylesRepository:
         return StylesConfig.model_validate_json(path.read_text())
 
     @staticmethod
-    def build_stylesheet(config: StylesConfig) -> StyleSheet1:
+    def build_stylesheet(config: StylesConfig, font_name: str) -> StyleSheet1:
         styles = getSampleStyleSheet()
         for style in config.paragraph_styles:
             kwargs = _ParagraphStyleKwargs(
                 name=style.name,
-                fontName=config.font_name,
+                fontName=font_name,
                 fontSize=style.font_size,
                 leading=style.leading,
                 textColor=_hex_to_rgb(style.text_color),

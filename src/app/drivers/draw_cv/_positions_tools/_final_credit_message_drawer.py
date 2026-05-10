@@ -1,8 +1,9 @@
+from reportlab.lib.styles import StyleSheet1
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph
 
 from src.app.drivers.draw_cv.reportlab_tools import ParagraphBlockDrawer
-from src.core.entities import PositionsDrawCfg, PositionsLayoutDTO
+from src.core.entities import PositionsLayoutDTO
 from src.core.hardcoded_config import format_final_credit_html
 
 
@@ -14,11 +15,11 @@ class FinalCreditMessageDrawer:
         self,
         *,
         c: Canvas,
-        cfg: PositionsDrawCfg,
+        styles: StyleSheet1,
         layout: PositionsLayoutDTO,
         y_cursor: float,
     ) -> None:
-        final_text = Paragraph(format_final_credit_html(), cfg.styles["JobDesc"])
+        final_text = Paragraph(format_final_credit_html(), styles["JobDesc"])
         self.paragraph_block_drawer.draw(
             c=c,
             paragraph=final_text,

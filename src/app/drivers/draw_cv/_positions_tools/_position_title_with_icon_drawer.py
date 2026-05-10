@@ -1,3 +1,4 @@
+from reportlab.lib.styles import StyleSheet1
 from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.draw_cv.reportlab_tools import ImageTitleDrawer
@@ -14,7 +15,7 @@ class PositionTitleWithIconDrawer:
         self,
         *,
         c: Canvas,
-        cfg: PositionsDrawCfg,
+        styles: StyleSheet1,
         draw_config: DrawCVConfig,
         layout: PositionsLayoutDTO,
         position_title: str,
@@ -29,7 +30,7 @@ class PositionTitleWithIconDrawer:
         y_icon = self.image_title_drawer.draw_title_row_at_cursor(
             c=c,
             cfg=title_cfg,
-            style=cfg.styles["JobTitle"],
+            style=styles["JobTitle"],
             x=layout.body_x,
             y_cursor=y_cursor,
             available_width=layout.body_width,

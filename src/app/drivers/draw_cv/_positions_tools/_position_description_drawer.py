@@ -1,8 +1,9 @@
+from reportlab.lib.styles import StyleSheet1
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph
 
 from src.app.drivers.draw_cv.reportlab_tools import ParagraphBlockDrawer
-from src.core.entities import DrawCVConfig, PositionsDrawCfg, PositionsLayoutDTO
+from src.core.entities import DrawCVConfig, PositionsLayoutDTO
 
 
 class PositionDescriptionDrawer:
@@ -13,13 +14,13 @@ class PositionDescriptionDrawer:
         self,
         *,
         c: Canvas,
-        cfg: PositionsDrawCfg,
+        styles: StyleSheet1,
         draw_config: DrawCVConfig,
         layout: PositionsLayoutDTO,
         text: str,
         y_cursor: float,
     ) -> float:
-        paragraph = Paragraph(text, cfg.styles["JobDesc"])
+        paragraph = Paragraph(text, styles["JobDesc"])
         y_cursor = self.paragraph_block_drawer.draw(
             c=c,
             paragraph=paragraph,

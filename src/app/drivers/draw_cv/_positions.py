@@ -1,5 +1,6 @@
 """Render de posiciones/experiencia del CV."""
 
+from reportlab.lib.styles import StyleSheet1
 from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.draw_cv._positions_tools import (
@@ -37,6 +38,7 @@ class PositionsDrawer:
         *,
         c: Canvas,
         cfg: PositionsDrawCfg,
+        styles: StyleSheet1,
         draw_config: DrawCVConfig,
     ) -> DrawPositionsResult:
         layout = PositionsLayoutDTO.from_positions_and_draw_config(
@@ -49,7 +51,7 @@ class PositionsDrawer:
         for idx, position in enumerate(cfg.linkedin_data.positions):
             y_icon = self.position_title_with_icon_drawer.draw(
                 c=c,
-                cfg=cfg,
+                styles=styles,
                 draw_config=draw_config,
                 layout=layout,
                 position_title=position.text_title,
@@ -57,7 +59,7 @@ class PositionsDrawer:
             )
             y_cursor = self.position_subtitle_drawer.draw(
                 c=c,
-                cfg=cfg,
+                styles=styles,
                 draw_config=draw_config,
                 layout=layout,
                 text=position.subtitle_html or position.text_sub_title,
@@ -65,7 +67,7 @@ class PositionsDrawer:
             )
             y_cursor = self.position_description_drawer.draw(
                 c=c,
-                cfg=cfg,
+                styles=styles,
                 draw_config=draw_config,
                 layout=layout,
                 text=position.description,
@@ -83,7 +85,7 @@ class PositionsDrawer:
 
         self.final_credit_message_drawer.draw(
             c=c,
-            cfg=cfg,
+            styles=styles,
             layout=layout,
             y_cursor=y_cursor,
         )

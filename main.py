@@ -27,7 +27,7 @@ def _compress_pdf(path_pdf: Path) -> None:
 
 def main(*, personal_information: PersonalInformation, compress: bool = True) -> None:
     ensure_data_structure()
-    FontLoader().load_font_from_env()
+    font_name = FontLoader().load_font_from_env()
 
     linkedin_data_repository = LinkedinCSVRepository()
     linkedin_data = linkedin_data_repository.load_linkedin_data()
@@ -39,6 +39,7 @@ def main(*, personal_information: PersonalInformation, compress: bool = True) ->
         path_pdf=path_pdf,
         personal_information=personal_information,
         linkedin_data=linkedin_data,
+        font_name=font_name,
     )
 
     logger.info("==================== Líneas divisorias posición ====================")

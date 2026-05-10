@@ -44,10 +44,11 @@ class FontLoader(CoreFontLoader):
             self._path_font_folder = PATH_FONTS / self.font_name
         return self._path_font_folder
 
-    def load_font_from_env(self) -> None:
+    def load_font_from_env(self) -> str:
         logger.info(f"==================== Font Loader ====================")
         logger.info(f">>>>> Font folder: {self.path_font_folder}")
         self._load_fonts(FontLoaderConfig(base_name=self.font_name))
+        return self.font_name
 
     def _load_fonts(self, cfg: FontLoaderConfig) -> None:
         self._register_font_family(cfg)

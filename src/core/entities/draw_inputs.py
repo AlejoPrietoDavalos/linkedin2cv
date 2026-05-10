@@ -1,8 +1,7 @@
 from pathlib import Path
 from typing import Optional
 
-from pydantic import BaseModel, ConfigDict
-from reportlab.lib.styles import StyleSheet1
+from pydantic import BaseModel
 from reportlab.lib.units import mm
 
 from src.core.entities.config import DrawCVConfig, SizesCV
@@ -17,24 +16,18 @@ class BackgroundDrawCfg(BaseModel):
 
 
 class SidebarDrawCfg(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
     linkedin_data: LinkedinData
     personal_information: PersonalInformation
     path_photo: Path
     is_photo_circle: bool = True
     sizes_cv: SizesCV
     sidebar_panel_color: tuple[float, float, float]
-    styles: StyleSheet1
     page_height: float
 
 
 class PositionsDrawCfg(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
     linkedin_data: LinkedinData
     sizes_cv: SizesCV
-    styles: StyleSheet1
     page_width: float
     page_height: float
 

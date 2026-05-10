@@ -1,5 +1,6 @@
 from typing import List
 
+from reportlab.lib.styles import StyleSheet1
 from reportlab.platypus import Paragraph, Spacer
 
 from src.core.entities import DrawCVConfig, SidebarDrawCfg
@@ -40,9 +41,9 @@ class SidebarPersonalInfoContentDrawer:
             info_lines.append(format_link_line(label=LABEL_LINKEDIN, url=cfg.personal_information.url_linkedin))
         return info_lines
 
-    def build(self, *, cfg: SidebarDrawCfg, draw_config: DrawCVConfig) -> List[Paragraph | Spacer]:
+    def build(self, *, cfg: SidebarDrawCfg, styles: StyleSheet1, draw_config: DrawCVConfig) -> List[Paragraph | Spacer]:
         content: List[Paragraph | Spacer] = []
         for line in self._build_info_lines(cfg=cfg):
-            content.append(Paragraph(line, cfg.styles["SidebarLinks"]))
+            content.append(Paragraph(line, styles["SidebarLinks"]))
             content.append(Spacer(1, draw_config.dist_between_links))
         return content

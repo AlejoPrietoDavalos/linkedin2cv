@@ -21,7 +21,6 @@ class ParagraphStyleParams(BaseModel):
 
 
 class StylesConfig(BaseModel):
-    font_name: str
     sidebar_panel: str
     background: str
     paragraph_styles: list[ParagraphStyleParams]
