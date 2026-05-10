@@ -5,6 +5,7 @@ from src.core.entities.linkedin_data import LinkedinData
 
 
 class FixTranslatePositionDatesLinkedinData(CoreLinkedinDataFix):
+    """Itera en todas las posiciones del LinkedinData y traduce las fechas de inicio y fin al español."""
     def apply(self, linkedin_data: LinkedinData) -> None:
         for position in linkedin_data.positions:
             position.started_on = self._translate_date(position.started_on)

@@ -20,6 +20,7 @@ class Profile(BaseModel):
 
 
 class Position(BaseModel):
+    job_id: Optional[str] = None
     company_name: str
     title: str
     description: str

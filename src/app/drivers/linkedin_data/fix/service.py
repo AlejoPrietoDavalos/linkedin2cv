@@ -9,9 +9,6 @@ from src.app.drivers.linkedin_data.fix._fix_freelance_adjustments_linkedin_data 
 from src.app.drivers.linkedin_data.fix._fix_keywords_format_linkedin_data import (
     FixKeywordsFormatLinkedinData,
 )
-from src.app.drivers.linkedin_data.fix._fix_strip_last_position_linkedin_data import (
-    FixStripLastPositionLinkedinData,
-)
 from src.app.drivers.linkedin_data.fix._fix_translate_position_dates_linkedin_data import (
     FixTranslatePositionDatesLinkedinData,
 )
@@ -37,7 +34,6 @@ class FixLinkedinDataService:
         self.pipeline = FixesPipelineDTO(
             fixes=fixes
             or {
-                "strip_last_position": FixStripLastPositionLinkedinData(),
                 "translate_position_dates_to_spanish": FixTranslatePositionDatesLinkedinData(),
                 "normalize_freelance_position": FixFreelanceAdjustmentsLinkedinData(formatter=formatter),
                 "highlight_keywords_in_text": FixKeywordsFormatLinkedinData(formatter=formatter),

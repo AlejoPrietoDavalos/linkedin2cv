@@ -1,13 +1,16 @@
 from typing import Optional, List, Dict, Any, Type
 import logging
+import json
 
 import pandas as pd
 
 from src.core.entities.linkedin_data import Profile, Position, Education, LinkedinData
+from src.core.entities.job_ids import JobIdsConfig
 from src.core.constants import (
     PATH_LINKEDIN_PROFILE,
     PATH_LINKEDIN_POSITIONS,
     PATH_LINKEDIN_EDUCATION,
+    PATH_JOB_IDS,
 )
 from src.core.drivers.linkedin_csv_repository import CoreLinkedinCSVRepository
 from src.core.hardcoded_config import (
@@ -59,6 +62,40 @@ def _pick_model_fields(data: Dict[str, Any], model_cls: Type) -> Dict[str, Any]:
     return {k: v for k, v in data.items() if k in model_cls.model_fields}
 
 
+class _LinkedinJobIdAttacher:
+    @staticmethod
+    def _load_job_ids_config() -> JobIdsConfig:
+        if not PATH_JOB_IDS.exists():
+            raise RuntimeError(f"Archivo requerido no encontrado: {PATH_JOB_IDS}")
+        raw = json.loads(PATH_JOB_IDS.read_text(encoding="utf-8"))
+        config = JobIdsConfig.model_validate(raw)
+        _LinkedinJobIdAttacher._validate_unique_job_ids(config)
+        return config
+
+    @staticmethod
+    def _validate_unique_job_ids(config: JobIdsConfig) -> None:
+        all_job_ids = [entry.job_id for entry in config.jobs]
+        duplicates = sorted({job_id for job_id in all_job_ids if all_job_ids.count(job_id) > 1})
+        if duplicates:
+            raise RuntimeError(f"job_id duplicados en config/job_ids.json: {duplicates}")
+
+    @staticmethod
+    def attach(positions: List[Position]) -> None:
+        config = _LinkedinJobIdAttacher._load_job_ids_config()
+        company_to_job_id = {entry.company_name: entry.job_id for entry in config.jobs}
+
+        for position in positions:
+            position.job_id = company_to_job_id.get(position.company_name)
+
+        removed_company_names = sorted({p.company_name for p in positions if p.job_id is None})
+        if removed_company_names:
+            logger.warning(
+                "Se eliminan posiciones sin job_id configurado: "
+                + ", ".join(removed_company_names)
+            )
+            positions[:] = [p for p in positions if p.job_id is not None]
+
+
 class LinkedinCSVRepository(CoreLinkedinCSVRepository):
     def __init__(self) -> None:
         ...
@@ -70,10 +107,12 @@ class LinkedinCSVRepository(CoreLinkedinCSVRepository):
 
     def _load_positions(self) -> List[Position]:
         df = _read_dataframe(PATH_LINKEDIN_POSITIONS)
-        return [
+        positions = [
             Position(**_pick_model_fields(_LinkedinRowFormatter.format_row(row=row), Position))
             for _, row in df.iterrows()
         ]
+        _LinkedinJobIdAttacher.attach(positions)
+        return positions
 
     def _load_educations(self) -> List[Education]:
         df = _read_dataframe(PATH_LINKEDIN_EDUCATION)
