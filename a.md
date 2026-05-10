@@ -1,2 +1,0 @@
-format_job_subtitle_html(subtitle=position.text_sub_title)
-esto de aca asi como esta meterlo en un metodoprivado dentro de una clase de Fix para fixear el subtitle de positions, acomoda el codigo para no hacerlo en positions q es donde se hace hoy, q se haga en la etapara de fix
