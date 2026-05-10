@@ -9,6 +9,9 @@ from src.app.drivers.linkedin_data.fix._fix_freelance_adjustments_linkedin_data 
 from src.app.drivers.linkedin_data.fix._fix_keywords_format_linkedin_data import (
     FixKeywordsFormatLinkedinData,
 )
+from src.app.drivers.linkedin_data.fix._fix_sanitize_profile_summary_linkedin_data import (
+    FixSanitizeProfileSummaryLinkedinData,
+)
 from src.app.drivers.linkedin_data.fix._fix_translate_position_dates_linkedin_data import (
     FixTranslatePositionDatesLinkedinData,
 )
@@ -35,6 +38,7 @@ class FixLinkedinDataService:
             fixes=fixes
             or {
                 "translate_position_dates_to_spanish": FixTranslatePositionDatesLinkedinData(),
+                "sanitize_profile_summary": FixSanitizeProfileSummaryLinkedinData(),
                 "normalize_freelance_position": FixFreelanceAdjustmentsLinkedinData(),
                 "highlight_keywords_in_text": FixKeywordsFormatLinkedinData(),
             }

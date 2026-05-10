@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 def _compress_pdf(path_pdf: Path) -> None:
     ghostscript = GhostScript()
     ghostscript.compress_pdf(path_pdf)
-    logger.info(f">>>>>Export PDF: {path_pdf}")
+    logger.info(f">>>>> Export PDF: {path_pdf}")
 
 
 

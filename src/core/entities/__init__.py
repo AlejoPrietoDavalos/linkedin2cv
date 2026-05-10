@@ -8,6 +8,7 @@ from src.core.entities.config import (
 )
 from src.core.entities.style import StyleCV
 from src.core.entities.personal_information import PersonalInformation
+from src.core.entities.sidebar_sections import SidebarSection, SidebarSections
 from src.core.entities.draw_inputs import (
     BackgroundDrawCfg,
     DividerLine,
@@ -32,6 +33,8 @@ __all__ = [
     "StyleCV",
     "SizesCV",
     "PersonalInformation",
+    "SidebarSection",
+    "SidebarSections",
     "BackgroundDrawCfg",
     "DividerLine",
     "DrawPositionsResult",

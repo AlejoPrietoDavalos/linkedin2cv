@@ -15,8 +15,9 @@ LABEL_MAIL = "Mail:"
 LABEL_WEBSITE_HEADER = "➤➤ Porfolio de proyectos ➤➤"
 LABEL_WEBSITE_ES = " Español"
 LABEL_WEBSITE_EN = " Inglés"
-LABEL_GITHUB = "➤➤ GitHub"
-LABEL_LINKEDIN = "➤➤ LinkedIn"
+LABEL_GITHUB = "➤➤ GitHub ➤➤"
+LABEL_LINKEDIN = "➤➤ LinkedIn ➤➤"
+LABEL_EXTERNAL_LINK = " Link"
 
 
 
@@ -72,7 +73,7 @@ def format_website_line(*, url_es: str, url_en: str) -> str:
 
 
 def format_link_line(*, label: str, url: str) -> str:
-    return f"<b><a href='{url}'>{label}</a></b>"
+    return f"<b>{label}</b><a href='{url}'>{LABEL_EXTERNAL_LINK}</a>"
 
 
 def format_position_subtitle(*, company_name: str, started_on: str, finished_on: Optional[str]) -> str:

@@ -6,7 +6,6 @@ from src.app.drivers.draw_cv._background import BackgroundDrawer
 from src.app.drivers.draw_cv._image import ImageDrawer
 from src.app.drivers.draw_cv._image_title import ImageTitleDrawer
 from src.app.drivers.draw_cv._positions import PositionsDrawer
-from src.app.drivers.draw_cv._shared import SharedDrawUtils
 from src.app.drivers.draw_cv._sidebar import SidebarDrawer
 from src.core.drivers.draw import CoreDrawCVService
 from src.core.entities import (
@@ -29,10 +28,9 @@ class DrawCVService(CoreDrawCVService):
         positions_drawer: PositionsDrawer | None = None,
     ) -> None:
         image_drawer = ImageDrawer()
-        shared_utils = SharedDrawUtils()
         image_title_drawer = ImageTitleDrawer(image_drawer=image_drawer)
         self.background_drawer = background_drawer or BackgroundDrawer()
-        self.sidebar_drawer = sidebar_drawer or SidebarDrawer(shared_utils=shared_utils, image_drawer=image_drawer)
+        self.sidebar_drawer = sidebar_drawer or SidebarDrawer(image_drawer=image_drawer)
         self.positions_drawer = positions_drawer or PositionsDrawer(image_title_drawer=image_title_drawer)
 
     def draw_background(self, *, c: Canvas, cfg: BackgroundDrawCfg) -> None:

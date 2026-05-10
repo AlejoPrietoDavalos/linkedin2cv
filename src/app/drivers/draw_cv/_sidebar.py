@@ -1,14 +1,15 @@
 """Render de sidebar y foto del CV."""
 
+import re
 from typing import List
 
 from reportlab.lib.units import mm
+from reportlab.lib.styles import StyleSheet1
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Frame, Paragraph, Spacer
 
 from src.app.drivers.draw_cv._image import ImageDrawer
-from src.app.drivers.draw_cv._shared import SharedDrawUtils
-from src.core.entities import DrawCVConfig, ImageDrawCfg, PhotoDrawCfg, SidebarDrawCfg
+from src.core.entities import DrawCVConfig, ImageDrawCfg, PhotoDrawCfg, SidebarDrawCfg, SidebarSection, SidebarSections
 from src.core.hardcoded_config import (
     LABEL_AGE,
     LABEL_GITHUB,
@@ -31,9 +32,28 @@ from src.core.hardcoded_config import (
 
 
 class SidebarDrawer:
-    def __init__(self, shared_utils: SharedDrawUtils, image_drawer: ImageDrawer) -> None:
-        self.shared_utils = shared_utils
+    def __init__(self, image_drawer: ImageDrawer) -> None:
         self.image_drawer = image_drawer
+
+    @staticmethod
+    def _clean_text(text: str) -> str:
+        cleaned_text = text.strip()
+        cleaned_text = re.sub(r"^<br/>|<br/>$", "", cleaned_text)
+        return cleaned_text
+
+    def _draw_title_text_sidebar(
+        self,
+        *,
+        title: str,
+        text: str,
+        styles: StyleSheet1,
+        dist_between_title_sidebar_to_text: int,
+    ) -> List[Paragraph | Spacer]:
+        return [
+            Paragraph(f"<b>{title}</b>", styles["SidebarTitle"]),
+            Spacer(1, dist_between_title_sidebar_to_text),
+            Paragraph(self._clean_text(text), styles["SidebarText"]),
+        ]
 
     def _build_photo_image_cfg(self, *, cfg: PhotoDrawCfg, x: float, y: float) -> ImageDrawCfg:
         return ImageDrawCfg(
@@ -96,19 +116,24 @@ class SidebarDrawer:
             content.append(Paragraph(line, cfg.styles["SidebarLinks"]))
             content.append(Spacer(1, draw_config.dist_between_links))
 
-    def _build_sidebar_sections(self, *, cfg: SidebarDrawCfg) -> list[tuple[str, str]]:
+    def _build_sidebar_sections(self, *, cfg: SidebarDrawCfg) -> SidebarSections:
         if SUMMARY_TECH_STACK_LABEL not in cfg.linkedin_data.profile.summary:
             raise ValueError(f"El texto '{SUMMARY_TECH_STACK_LABEL}' no está en summary.")
 
         summary_parts = cfg.linkedin_data.profile.summary.split(SUMMARY_TECH_STACK_LABEL)
         summary_parts = [p.strip() for p in summary_parts]
-        return [
-            (SECTION_ABOUT_ME_TITLE, SECTION_ABOUT_ME_TEXT),
-            (SECTION_GOAL_TITLE, SECTION_GOAL_TEXT),
-            (SECTION_TECH_SUMMARY_TITLE, self.shared_utils.sanitize_tech_summary(summary_parts[0])),
-            (SECTION_PROJECTS_TITLE, SECTION_PROJECTS_TEXT),
-            (SECTION_STACK_TITLE, summary_parts[1]),
-        ]
+        return SidebarSections(
+            items=[
+                SidebarSection(title=SECTION_ABOUT_ME_TITLE, text=SECTION_ABOUT_ME_TEXT),
+                SidebarSection(title=SECTION_GOAL_TITLE, text=SECTION_GOAL_TEXT),
+                SidebarSection(
+                    title=SECTION_TECH_SUMMARY_TITLE,
+                    text=summary_parts[0],
+                ),
+                SidebarSection(title=SECTION_PROJECTS_TITLE, text=SECTION_PROJECTS_TEXT),
+                SidebarSection(title=SECTION_STACK_TITLE, text=summary_parts[1]),
+            ]
+        )
 
     def _append_sidebar_sections_content(
         self,
@@ -117,12 +142,13 @@ class SidebarDrawer:
         cfg: SidebarDrawCfg,
         draw_config: DrawCVConfig,
     ) -> None:
-        for title, text in self._build_sidebar_sections(cfg=cfg):
+        sections = self._build_sidebar_sections(cfg=cfg)
+        for section in sections.items:
             content.append(Spacer(1, draw_config.dist_between_title_text_sidebar))
             content.extend(
-                self.shared_utils.draw_title_text_sidebar(
-                    title=title,
-                    text=text,
+                self._draw_title_text_sidebar(
+                    title=section.title,
+                    text=section.text,
                     styles=cfg.styles,
                     dist_between_title_sidebar_to_text=draw_config.dist_between_title_sidebar_to_text,
                 )
