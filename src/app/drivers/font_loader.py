@@ -3,6 +3,7 @@
 import os
 import logging
 from typing import List
+from pathlib import Path
 from enum import Enum
 
 from reportlab.pdfbase import pdfmetrics
@@ -24,26 +25,59 @@ class FontType(Enum):
 
 class FontLoader(CoreFontLoader):
     """Carga fuentes usando la configuración central del core."""
+    def __init__(self):
+        super().__init__()
+        self._font_name: str = None
+        self._path_font_folder: Path = None
 
-    @staticmethod
-    def load_font_from_env() -> None:
-        font_name = os.getenv("FONT_NAME")
-        if not font_name:
+    @property
+    def font_name(self) -> str:
+        if self._font_name is None:
+            self._font_name = os.getenv("FONT_NAME")
+        if not self._font_name:
             raise ValueError("FONT_NAME environment variable is required")
-        logger.info(f"~ Cargando fuente de texto '{font_name}'.")
-        FontLoader().load_fonts(FontLoaderConfig(base_name=font_name))
+        return self._font_name
 
-    def load_fonts(self, cfg: FontLoaderConfig) -> None:
+    @property
+    def path_font_folder(self) -> Path:
+        if self._path_font_folder is None:
+            self._path_font_folder = PATH_FONTS / self.font_name
+        return self._path_font_folder
+
+    def load_font_from_env(self) -> None:
+        logger.info(f"==================== Font Loader - {self.path_font_folder} ====================")
+        self._load_fonts(FontLoaderConfig(base_name=self.font_name))
+
+    def _load_fonts(self, cfg: FontLoaderConfig) -> None:
         self._register_font_family(cfg)
 
     def _font_pairs(self, cfg: FontLoaderConfig) -> List[PairNamePathFont]:
-        folder = PATH_FONTS / cfg.base_name
         return [
-            PairNamePathFont(name=cfg.base_name, path=None, font_type=FontType.FAMILY.value),
-            PairNamePathFont(name=cfg.base_name, path=folder / f"{cfg.base_name}-Regular.ttf", font_type=FontType.NORMAL.value),
-            PairNamePathFont(name=f"{cfg.base_name}-Bold", path=folder / f"{cfg.base_name}-Bold.ttf", font_type=FontType.BOLD.value),
-            PairNamePathFont(name=f"{cfg.base_name}-Italic", path=folder / f"{cfg.base_name}-Italic.ttf", font_type=FontType.ITALIC.value),
-            PairNamePathFont(name=f"{cfg.base_name}-BoldItalic", path=folder / f"{cfg.base_name}-BoldItalic.ttf", font_type=FontType.BOLD_ITALIC.value),
+            PairNamePathFont(
+                name=cfg.base_name,
+                path=None,
+                font_type=FontType.FAMILY.value
+            ),
+            PairNamePathFont(
+                name=cfg.base_name,
+                path=self.path_font_folder / f"{cfg.base_name}-Regular.ttf",
+                font_type=FontType.NORMAL.value
+            ),
+            PairNamePathFont(
+                name=f"{cfg.base_name}-Bold",
+                path=self.path_font_folder / f"{cfg.base_name}-Bold.ttf",
+                font_type=FontType.BOLD.value
+            ),
+            PairNamePathFont(
+                name=f"{cfg.base_name}-Italic",
+                path=self.path_font_folder / f"{cfg.base_name}-Italic.ttf",
+                font_type=FontType.ITALIC.value
+            ),
+            PairNamePathFont(
+                name=f"{cfg.base_name}-BoldItalic",
+                path=self.path_font_folder / f"{cfg.base_name}-BoldItalic.ttf",
+                font_type=FontType.BOLD_ITALIC.value
+            ),
         ]
 
     def _font_family_kwargs(self, cfg: FontLoaderConfig) -> dict:

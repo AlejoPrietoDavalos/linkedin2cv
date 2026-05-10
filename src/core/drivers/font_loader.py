@@ -21,6 +21,6 @@ class CoreFontLoader(ABC):
     """Interfaz para cargar fuentes requeridas por el sistema."""
 
     @abstractmethod
-    def load_fonts(self, cfg: FontLoaderConfig) -> None:
+    def load_font_from_env(self) -> None:
         """Carga las fuentes definidas en la configuración."""
         pass

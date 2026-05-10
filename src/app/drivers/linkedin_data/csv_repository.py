@@ -81,6 +81,7 @@ class _LinkedinJobIdAttacher:
 
     @staticmethod
     def attach(positions: List[Position]) -> None:
+        logger.info(f"==================== Attach JobId - {PATH_JOB_IDS} ====================")
         config = _LinkedinJobIdAttacher._load_job_ids_config()
         company_to_job_id = {entry.company_name: entry.job_id for entry in config.jobs}
 
@@ -89,10 +90,9 @@ class _LinkedinJobIdAttacher:
 
         removed_company_names = sorted({p.company_name for p in positions if p.job_id is None})
         if removed_company_names:
-            logger.warning(
-                "Se eliminan posiciones sin job_id configurado: "
-                + ", ".join(removed_company_names)
-            )
+            for company_name in removed_company_names:
+                logger.warning(f"~ (SKIP JOB) job_id no configurado: '{company_name}'")
+            
             positions[:] = [p for p in positions if p.job_id is not None]
 
 

@@ -12,7 +12,7 @@ from src.app.drivers.build_cv.service import BuildCVService
 from src.app.drivers.font_loader import FontLoader
 from src.app.drivers.ghostscript import GhostScript
 from src.app.drivers.linkedin_data.fix.service import FixLinkedinDataService
-from src.core.constants import get_path_pdf_output
+from src.core.constants import ensure_data_structure, get_path_pdf_output
 from src.core.entities import PersonalInformation
 from src.app.drivers.linkedin_data.csv_repository import LinkedinCSVRepository
 
@@ -27,7 +27,8 @@ def _compress_pdf(path_pdf: Path) -> None:
 
 def main(*, personal_information: PersonalInformation, compress: bool = True) -> None:
     logger.info("==================== Iniciando ====================")
-    FontLoader.load_font_from_env()
+    ensure_data_structure()
+    FontLoader().load_font_from_env()
 
     linkedin_data_repository = LinkedinCSVRepository()
     linkedin_data = linkedin_data_repository.load_linkedin_data()
