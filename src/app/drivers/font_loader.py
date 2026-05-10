@@ -3,6 +3,7 @@
 import os
 import logging
 from typing import List
+from enum import Enum
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -12,6 +13,13 @@ from src.core.constants import PATH_FONTS
 from src.core.drivers.font_loader import CoreFontLoader, FontLoaderConfig, PairNamePathFont
 
 logger = logging.getLogger(__name__)
+
+class FontType(Enum):
+    FAMILY = "family"
+    NORMAL = "normal"
+    BOLD = "bold"
+    ITALIC = "italic"
+    BOLD_ITALIC = "boldItalic"
 
 
 class FontLoader(CoreFontLoader):
@@ -31,11 +39,11 @@ class FontLoader(CoreFontLoader):
     def _font_pairs(self, cfg: FontLoaderConfig) -> List[PairNamePathFont]:
         folder = PATH_FONTS / cfg.base_name
         return [
-            PairNamePathFont(name=cfg.base_name, path=None, font_type="family"),
-            PairNamePathFont(name=cfg.base_name, path=folder / f"{cfg.base_name}-Regular.ttf", font_type="normal"),
-            PairNamePathFont(name=f"{cfg.base_name}-Bold", path=folder / f"{cfg.base_name}-Bold.ttf", font_type="bold"),
-            PairNamePathFont(name=f"{cfg.base_name}-Italic", path=folder / f"{cfg.base_name}-Italic.ttf", font_type="italic"),
-            PairNamePathFont(name=f"{cfg.base_name}-BoldItalic", path=folder / f"{cfg.base_name}-BoldItalic.ttf", font_type="boldItalic"),
+            PairNamePathFont(name=cfg.base_name, path=None, font_type=FontType.FAMILY.value),
+            PairNamePathFont(name=cfg.base_name, path=folder / f"{cfg.base_name}-Regular.ttf", font_type=FontType.NORMAL.value),
+            PairNamePathFont(name=f"{cfg.base_name}-Bold", path=folder / f"{cfg.base_name}-Bold.ttf", font_type=FontType.BOLD.value),
+            PairNamePathFont(name=f"{cfg.base_name}-Italic", path=folder / f"{cfg.base_name}-Italic.ttf", font_type=FontType.ITALIC.value),
+            PairNamePathFont(name=f"{cfg.base_name}-BoldItalic", path=folder / f"{cfg.base_name}-BoldItalic.ttf", font_type=FontType.BOLD_ITALIC.value),
         ]
 
     def _font_family_kwargs(self, cfg: FontLoaderConfig) -> dict:
