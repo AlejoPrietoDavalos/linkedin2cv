@@ -1,12 +1,12 @@
 from typing import Optional
 
 from src.app.drivers.linkedin_data.fix._core import CoreLinkedinDataFix
-from src.core.entities.linkedin_data import LinkedinData
+from src.core.entities.linkedin_data import LinkedInData
 
 
 class FixTranslatePositionDatesLinkedinData(CoreLinkedinDataFix):
-    """Itera en todas las posiciones del LinkedinData y traduce las fechas de inicio y fin al español."""
-    def apply(self, linkedin_data: LinkedinData) -> None:
+    """Itera en todas las posiciones del LinkedInData y traduce las fechas de inicio y fin al español."""
+    def apply(self, linkedin_data: LinkedInData) -> None:
         for position in linkedin_data.positions:
             position.started_on = self._translate_date(position.started_on)
             position.finished_on = self._translate_date(position.finished_on)

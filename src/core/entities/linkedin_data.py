@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from src.core.hardcoded_config import format_full_name, format_full_name_inverted, format_position_subtitle
 
 
-class Profile(BaseModel):
+class ProfileLinkedInData(BaseModel):
     first_name: str
     last_name: str
     headline: str
@@ -19,7 +19,7 @@ class Profile(BaseModel):
         return format_full_name_inverted(first_name=self.first_name, last_name=self.last_name)
 
 
-class Position(BaseModel):
+class PositionLinkedInData(BaseModel):
     job_id: Optional[str] = None
     company_name: str
     title: str
@@ -43,7 +43,7 @@ class Position(BaseModel):
         )
 
 
-class Education(BaseModel):
+class EducationLinkedInData(BaseModel):
     school_name: str
     start_date: str
     end_date: Optional[str]
@@ -52,7 +52,7 @@ class Education(BaseModel):
     activities: Optional[str]
 
 
-class LinkedinData(BaseModel):
-    profile: Profile
-    positions: List[Position]
-    educations: List[Education]
+class LinkedInData(BaseModel):
+    profile: ProfileLinkedInData
+    positions: List[PositionLinkedInData]
+    educations: List[EducationLinkedInData]

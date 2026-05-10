@@ -2,7 +2,7 @@ from typing import List
 import logging
 import json
 
-from src.core.entities.linkedin_data import Position
+from src.core.entities.linkedin_data import PositionLinkedInData
 from src.core.entities.job_ids import JobIdsConfig
 from src.core.constants import PATH_JOB_IDS, ensure_runtime_config_file
 
@@ -23,7 +23,7 @@ class LinkedinJobIdAttacher:
         if duplicates:
             raise RuntimeError(f"job_id duplicados en config/job_ids.json: {duplicates}")
 
-    def attach(self, positions: List[Position]) -> None:
+    def attach(self, positions: List[PositionLinkedInData]) -> None:
         logger.info(f">>>>> Attach JobId: {PATH_JOB_IDS}")
         config = self._load_job_ids_config()
         company_to_job_id = {job.company_name: job.job_id for job in config.jobs}

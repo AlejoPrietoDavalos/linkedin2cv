@@ -4,7 +4,7 @@ import logging
 
 import pandas as pd
 
-from src.core.entities.linkedin_data import Profile, Position, Education, LinkedinData
+from src.core.entities.linkedin_data import ProfileLinkedInData, PositionLinkedInData, EducationLinkedInData, LinkedInData
 from src.core.constants import (
     PATH_FOLDER_DATA,
     PATH_LINKEDIN_PROFILE,
@@ -33,23 +33,23 @@ class LinkedinCSVRepository(CoreLinkedinCSVRepository):
         # avoids pandas inferring ints (e.g. 2015) that later fail strict Pydantic validation.
         return pd.read_csv(path_csv, dtype=str)
 
-    def _load_profile(self) -> Profile:
+    def _load_profile(self) -> ProfileLinkedInData:
         row = self._read_dataframe(PATH_LINKEDIN_PROFILE).iloc[0]
-        return self.row_formatter.build_model_from_row(row=row, model_cls=Profile)
+        return self.row_formatter.build_model_from_row(row=row, model_cls=ProfileLinkedInData)
 
-    def _load_positions(self) -> List[Position]:
+    def _load_positions(self) -> List[PositionLinkedInData]:
         df = self._read_dataframe(PATH_LINKEDIN_POSITIONS)
-        positions = self.row_formatter.build_models_from_dataframe(df=df, model_cls=Position)
+        positions = self.row_formatter.build_models_from_dataframe(df=df, model_cls=PositionLinkedInData)
         self.job_id_attacher.attach(positions)
         return positions
 
-    def _load_educations(self) -> List[Education]:
+    def _load_educations(self) -> List[EducationLinkedInData]:
         df = self._read_dataframe(PATH_LINKEDIN_EDUCATION)
-        return self.row_formatter.build_models_from_dataframe(df=df, model_cls=Education)
+        return self.row_formatter.build_models_from_dataframe(df=df, model_cls=EducationLinkedInData)
 
-    def load_linkedin_data(self) -> LinkedinData:
+    def load_linkedin_data(self) -> LinkedInData:
         logger.info(f"==================== LinkedIn Data ====================")
-        linkedin_data = LinkedinData(
+        linkedin_data = LinkedInData(
             profile=self._load_profile(),
             positions=self._load_positions(),
             educations=self._load_educations(),

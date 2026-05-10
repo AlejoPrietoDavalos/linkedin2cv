@@ -4,19 +4,20 @@ from abc import ABC, abstractmethod
 from reportlab.pdfgen.canvas import Canvas
 
 from src.core.entities import (
-    BackgroundDrawCfg,
     DrawCVConfig,
     DrawPositionsResult,
     SidebarDrawCfg,
     PositionsDrawCfg,
 )
+from src.core.entities.config import SizesCV
+from src.core.entities.styles_config import StylesConfig
 
 
 class CoreDrawCVService(ABC):
     """Interfaz para servicio de dibujo de CV."""
-    
+
     @abstractmethod
-    def draw_background(self, *, c: Canvas, cfg: BackgroundDrawCfg) -> None:
+    def draw_background(self, *, c: Canvas, styles_config: StylesConfig, sizes_cv: SizesCV) -> None:
         """Dibuja el fondo del CV."""
         pass
     

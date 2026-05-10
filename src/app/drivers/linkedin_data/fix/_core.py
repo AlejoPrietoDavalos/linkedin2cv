@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from src.core.entities.linkedin_data import LinkedinData
+from src.core.entities.linkedin_data import LinkedInData
 
 
 class CoreLinkedinDataFix(ABC):
     @abstractmethod
-    def apply(self, linkedin_data: LinkedinData) -> None:
+    def apply(self, linkedin_data: LinkedInData) -> None:
         ...

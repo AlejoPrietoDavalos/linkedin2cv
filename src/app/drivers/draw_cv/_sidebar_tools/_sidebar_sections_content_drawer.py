@@ -1,10 +1,11 @@
 from typing import List
 
+from pydantic import BaseModel
 from reportlab.lib.styles import StyleSheet1
 from reportlab.platypus import Paragraph, Spacer
 
 from src.app.drivers.draw_cv._sidebar_tools._sidebar_section_text_drawer import SidebarSectionTextDrawer
-from src.core.entities import DrawCVConfig, SidebarDrawCfg, SidebarSection, SidebarSections
+from src.core.entities import DrawCVConfig, SidebarDrawCfg
 from src.core.hardcoded_config import (
     SECTION_ABOUT_ME_TEXT,
     SECTION_ABOUT_ME_TITLE,
@@ -16,6 +17,15 @@ from src.core.hardcoded_config import (
     SECTION_TECH_SUMMARY_TITLE,
     SUMMARY_TECH_STACK_LABEL,
 )
+
+
+class SidebarSection(BaseModel):
+    title: str
+    text: str
+
+
+class SidebarSections(BaseModel):
+    items: list[SidebarSection]
 
 
 class SidebarSectionsContentDrawer:

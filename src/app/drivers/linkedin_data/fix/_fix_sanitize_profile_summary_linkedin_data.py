@@ -2,7 +2,7 @@ import re
 
 from src.app.drivers.linkedin_data.fix._fix_common import LinkedinDataFixCommon
 from src.app.drivers.linkedin_data.fix._core import CoreLinkedinDataFix
-from src.core.entities.linkedin_data import LinkedinData
+from src.core.entities.linkedin_data import LinkedInData
 
 
 class FixSanitizeProfileSummaryLinkedinData(CoreLinkedinDataFix):
@@ -21,7 +21,7 @@ class FixSanitizeProfileSummaryLinkedinData(CoreLinkedinDataFix):
     def __init__(self, common: LinkedinDataFixCommon = None) -> None:
         self.common = common or LinkedinDataFixCommon()
 
-    def apply(self, linkedin_data: LinkedinData) -> None:
+    def apply(self, linkedin_data: LinkedInData) -> None:
         summary = linkedin_data.profile.summary
         summary, replaced_count = self._PROFILE_WEBSITE_PATTERN.subn(" ", summary)
         if replaced_count == 0:

@@ -43,7 +43,7 @@ class SidebarDrawer:
         draw_config: DrawCVConfig,
     ) -> None:
         self.background_drawer.draw(c=c, cfg=cfg)
-        self.photo_drawer.draw(c=c, cfg=cfg, draw_config=draw_config)
+        self.photo_drawer.draw(c=c, cfg=cfg)
         content: List[Paragraph | Spacer] = []
         content.extend(self.header_content_drawer.build(cfg=cfg, styles=styles, draw_config=draw_config))
         content.extend(self.personal_info_drawer.build(cfg=cfg, styles=styles, draw_config=draw_config))

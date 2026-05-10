@@ -10,20 +10,17 @@ from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.build_cv._pdf_line_drawer import PDFLineDrawer
 from src.app.drivers.draw_cv.service import DrawCVService
-from src.app.drivers.styles_repository import StylesRepository, _hex_to_rgb
+from src.app.drivers.styles_repository import StylesRepository
 from src.core.constants import PATH_PHOTO
 from src.core.drivers.builder import CoreBuilderCV
 from src.core.entities import (
-    BackgroundDrawCfg,
     BuilderCVConfig,
     DividerLine,
-    DrawCVConfig,
     DrawPositionsResult,
-    LinkedinData,
+    LinkedInData,
     PersonalInformation,
     PositionsDrawCfg,
     SidebarDrawCfg,
-    SizesCV,
 )
 
 logger = logging.getLogger(__name__)
@@ -46,31 +43,24 @@ class BuildCVService(CoreBuilderCV):
         *,
         path_pdf: Path,
         personal_information: PersonalInformation,
-        linkedin_data: LinkedinData,
+        linkedin_data: LinkedInData,
         font_name: str,
-        sizes_cv: Optional[SizesCV] = None,
         cfg_builder: Optional[BuilderCVConfig] = None,
     ) -> DrawPositionsResult:
         logger.info("==================== Creando CV ====================")
         if not PATH_PHOTO.exists():
             raise FileNotFoundError(f"No existe la foto de perfil: {PATH_PHOTO}")
 
-        sizes_cv = sizes_cv or SizesCV()
         cfg_builder = cfg_builder or BuilderCVConfig()
-        draw_config = DrawCVConfig()
-        page_width, page_height = cfg_builder.page_size
-        canvas = Canvas(str(path_pdf), pagesize=cfg_builder.page_size)
+        canvas = Canvas(str(path_pdf), pagesize=cfg_builder.sizes.page_size)
 
         styles_config = StylesRepository.load()
         styles: StyleSheet1 = StylesRepository.build_stylesheet(styles_config, font_name)
 
         self.draw_cv_service.draw_background(
             c=canvas,
-            cfg=BackgroundDrawCfg(
-                color=_hex_to_rgb(styles_config.background),
-                page_width=page_width,
-                page_height=page_height,
-            ),
+            styles_config=styles_config,
+            sizes_cv=cfg_builder.sizes,
         )
         self.draw_cv_service.draw_sidebar(
             c=canvas,
@@ -78,24 +68,21 @@ class BuildCVService(CoreBuilderCV):
                 linkedin_data=linkedin_data,
                 personal_information=personal_information,
                 path_photo=PATH_PHOTO,
-                is_photo_circle=cfg_builder.is_photo_circle,
-                sizes_cv=sizes_cv,
-                sidebar_panel_color=_hex_to_rgb(styles_config.sidebar_panel),
-                page_height=page_height,
+                is_photo_circle=cfg_builder.draw.is_photo_circle,
+                sizes_cv=cfg_builder.sizes,
+                styles_config=styles_config,
             ),
             styles=styles,
-            draw_config=draw_config,
+            draw_config=cfg_builder.draw,
         )
         positions_result = self.draw_cv_service.draw_positions(
             c=canvas,
             cfg=PositionsDrawCfg(
                 linkedin_data=linkedin_data,
-                sizes_cv=sizes_cv,
-                page_width=page_width,
-                page_height=page_height,
+                sizes_cv=cfg_builder.sizes,
             ),
             styles=styles,
-            draw_config=draw_config,
+            draw_config=cfg_builder.draw,
         )
         canvas.save()
         logger.info(f">>>>> Export PDF: {path_pdf}")

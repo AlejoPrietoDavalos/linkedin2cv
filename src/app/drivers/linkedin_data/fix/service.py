@@ -23,7 +23,7 @@ from src.app.drivers.linkedin_data.fix._fix_translate_position_dates_linkedin_da
     FixTranslatePositionDatesLinkedinData,
 )
 from src.core.drivers.keyword_text_formatter import CoreKeywordTextFormatter
-from src.core.entities.linkedin_data import LinkedinData
+from src.core.entities.linkedin_data import LinkedInData
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ class FixLinkedinDataService:
             }
         )
 
-    def fix(self, linkedin_data: LinkedinData) -> LinkedinData:
+    def fix(self, linkedin_data: LinkedInData) -> LinkedInData:
         logger.info("==================== FIX LinkedIn Data ====================")
         for fix_name, fix in self.pipeline.fixes.items():
             logger.info(f">>>>> fix.start={fix_name} =====")

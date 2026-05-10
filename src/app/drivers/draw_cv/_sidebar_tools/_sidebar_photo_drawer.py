@@ -1,8 +1,7 @@
-from reportlab.lib.units import mm
 from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.draw_cv.reportlab_tools import ImageDrawer
-from src.core.entities import DrawCVConfig, ImageDrawCfg, SidebarDrawCfg
+from src.core.entities import ImageDrawCfg, SidebarDrawCfg
 
 
 class SidebarPhotoDrawer:
@@ -19,8 +18,11 @@ class SidebarPhotoDrawer:
             is_circle=cfg.is_photo_circle,
         )
 
-    def draw(self, *, c: Canvas, cfg: SidebarDrawCfg, draw_config: DrawCVConfig) -> None:
+    def draw(self, *, c: Canvas, cfg: SidebarDrawCfg) -> None:
         if cfg.path_photo.exists():
-            x = cfg.sizes_cv.margin_left_pt + (cfg.sizes_cv.column_left_width_pt - cfg.sizes_cv.photo_size_pt) / 2
-            y = cfg.page_height - cfg.sizes_cv.photo_size_pt - draw_config.photo_top_padding_mm * mm
-            self.image_drawer.draw_image(c=c, cfg=self._build_photo_image_cfg(cfg=cfg, x=x, y=y))
+            cfg_image = self._build_photo_image_cfg(
+                cfg=cfg,
+                x=cfg.sizes_cv.photo_x,
+                y=cfg.sizes_cv.photo_y
+            )
+            self.image_drawer.draw_image(c=c, cfg=cfg_image)
