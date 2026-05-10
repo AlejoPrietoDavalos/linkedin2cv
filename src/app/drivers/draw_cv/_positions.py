@@ -10,12 +10,9 @@ from src.app.drivers.draw_cv._positions_tools import (
     PositionSubtitleDrawer,
     PositionTitleWithIconDrawer,
 )
-from src.core.entities import (
-    DrawCVConfig,
-    DrawPositionsResult,
-    PositionsDrawCfg,
-    PositionsLayoutDTO
-)
+from src.core.entities import DrawPositionsResult, PositionsLayoutDTO
+from src.core.entities.config import LayoutConfig, SpacingConfig
+from src.core.entities.linkedin_data import LinkedInData
 
 
 class PositionsDrawer:
@@ -37,48 +34,46 @@ class PositionsDrawer:
         self,
         *,
         c: Canvas,
-        cfg: PositionsDrawCfg,
+        linkedin_data: LinkedInData,
+        layout_cfg: LayoutConfig,
         styles: StyleSheet1,
-        draw_config: DrawCVConfig,
+        spacing: SpacingConfig,
     ) -> DrawPositionsResult:
-        layout = PositionsLayoutDTO.from_positions_and_draw_config(
-            positions_cfg=cfg,
-            draw_config=draw_config,
-        )
-        y_cursor = layout.body_start_y
+        positions_layout = PositionsLayoutDTO.from_config(layout_cfg=layout_cfg, spacing=spacing)
+        y_cursor = positions_layout.body_start_y
         divider_lines = []
 
-        for idx, position in enumerate(cfg.linkedin_data.positions):
+        for idx, position in enumerate(linkedin_data.positions):
             y_icon = self.position_title_with_icon_drawer.draw(
                 c=c,
                 styles=styles,
-                draw_config=draw_config,
-                layout=layout,
+                spacing_config=spacing,
+                layout=positions_layout,
                 position_title=position.text_title,
                 y_cursor=y_cursor,
             )
             y_cursor = self.position_subtitle_drawer.draw(
                 c=c,
                 styles=styles,
-                draw_config=draw_config,
-                layout=layout,
+                spacing_config=spacing,
+                layout=positions_layout,
                 text=position.subtitle_html or position.text_sub_title,
-                y_cursor=y_icon - draw_config.line_thickness,
+                y_cursor=y_icon - spacing.line_thickness,
             )
             y_cursor = self.position_description_drawer.draw(
                 c=c,
                 styles=styles,
-                draw_config=draw_config,
-                layout=layout,
+                spacing_config=spacing,
+                layout=positions_layout,
                 text=position.description,
                 y_cursor=y_cursor,
             )
 
-            if idx < len(cfg.linkedin_data.positions) - 1:
+            if idx < len(linkedin_data.positions) - 1:
                 divider_line = self.divider_line_builder.build(
-                    cfg=cfg,
-                    draw_config=draw_config,
-                    layout=layout,
+                    layout_cfg=layout_cfg,
+                    spacing=spacing,
+                    positions_layout=positions_layout,
                     y_line=y_icon,
                 )
                 divider_lines.append(divider_line)
@@ -86,8 +81,8 @@ class PositionsDrawer:
         self.final_credit_message_drawer.draw(
             c=c,
             styles=styles,
-            layout=layout,
+            layout=positions_layout,
             y_cursor=y_cursor,
         )
 
-        return DrawPositionsResult(divider_lines=divider_lines, line_anchor_x=layout.line_anchor_x)
+        return DrawPositionsResult(divider_lines=divider_lines, line_anchor_x=positions_layout.line_anchor_x)

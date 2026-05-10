@@ -3,7 +3,8 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph
 
 from src.app.drivers.draw_cv.reportlab_tools import ParagraphBlockDrawer
-from src.core.entities import DrawCVConfig, PositionsLayoutDTO
+from src.core.entities import PositionsLayoutDTO
+from src.core.entities.config import SpacingConfig
 
 
 class PositionDescriptionDrawer:
@@ -15,7 +16,7 @@ class PositionDescriptionDrawer:
         *,
         c: Canvas,
         styles: StyleSheet1,
-        draw_config: DrawCVConfig,
+        spacing_config: SpacingConfig,
         layout: PositionsLayoutDTO,
         text: str,
         y_cursor: float,
@@ -28,6 +29,6 @@ class PositionDescriptionDrawer:
             width=layout.body_width,
             available_height=layout.usable_height,
             y_cursor=y_cursor,
-            spacing_after=draw_config.spacer_height,
+            spacing_after=spacing_config.spacer_height,
         )
         return y_cursor

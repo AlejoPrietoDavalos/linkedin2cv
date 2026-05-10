@@ -3,6 +3,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, StyleSheet
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.core.constants import ensure_runtime_config_file
+from src.core.entities.config import LayoutConfig, SpacingConfig
 from src.core.entities.styles_config import Alignment, StylesConfig
 
 
@@ -52,3 +53,17 @@ class StylesRepository:
             )
             styles.add(ParagraphStyle(**kwargs.to_kwargs()))
         return styles
+
+
+class LayoutRepository:
+    @staticmethod
+    def load() -> LayoutConfig:
+        path = ensure_runtime_config_file("layout.json")
+        return LayoutConfig.model_validate_json(path.read_text())
+
+
+class SpacingRepository:
+    @staticmethod
+    def load() -> SpacingConfig:
+        path = ensure_runtime_config_file("spacing.json")
+        return SpacingConfig.model_validate_json(path.read_text())

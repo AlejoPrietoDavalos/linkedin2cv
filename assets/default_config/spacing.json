@@ -1,0 +1,17 @@
+{
+    "dist_between_title_sidebar_to_text": 5,
+    "dist_python_icon_to_title": 4,
+    "dist_between_links": 1,
+    "dist_full_name_to_headline": 8,
+    "dist_headline_to_links": 4,
+    "dist_line_spacing_left_mm": 3,
+    "dist_line_spacing_right_mm": 3,
+    "line_thickness": 0.5,
+    "dist_between_title_text_sidebar": 9,
+    "len_python_icon_mm": 3,
+    "sidebar_to_body_gap_mm": 2,
+    "spacer_height": 15,
+    "frame_margin_left_mm": 1,
+    "frame_margin_right_mm": 1,
+    "is_photo_circle": true
+}

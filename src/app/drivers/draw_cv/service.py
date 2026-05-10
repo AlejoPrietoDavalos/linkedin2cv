@@ -7,13 +7,10 @@ from src.app.drivers.draw_cv._background import BackgroundDrawer
 from src.app.drivers.draw_cv._positions import PositionsDrawer
 from src.app.drivers.draw_cv._sidebar import SidebarDrawer
 from src.core.drivers.draw import CoreDrawCVService
-from src.core.entities import (
-    DrawCVConfig,
-    DrawPositionsResult,
-    PositionsDrawCfg,
-    SidebarDrawCfg,
-)
-from src.core.entities.config import SizesCV
+from src.core.entities import DrawPositionsResult
+from src.core.entities.config import LayoutConfig, SpacingConfig
+from src.core.entities.linkedin_data import LinkedInData
+from src.core.entities.personal_information import PersonalInformation
 from src.core.entities.styles_config import StylesConfig
 
 
@@ -30,11 +27,43 @@ class DrawCVService(CoreDrawCVService):
         self.sidebar_drawer = sidebar_drawer or SidebarDrawer()
         self.positions_drawer = positions_drawer or PositionsDrawer()
 
-    def draw_background(self, *, c: Canvas, styles_config: StylesConfig, sizes_cv: SizesCV) -> None:
-        self.background_drawer.draw_background(c=c, styles_config=styles_config, sizes_cv=sizes_cv)
+    def draw_background(self, *, c: Canvas, styles_config: StylesConfig, layout_cfg: LayoutConfig) -> None:
+        self.background_drawer.draw_background(c=c, styles_config=styles_config, layout_cfg=layout_cfg)
 
-    def draw_sidebar(self, *, c: Canvas, cfg: SidebarDrawCfg, styles: StyleSheet1, draw_config: DrawCVConfig) -> None:
-        self.sidebar_drawer.draw_sidebar(c=c, cfg=cfg, styles=styles, draw_config=draw_config)
+    def draw_sidebar(
+        self,
+        *,
+        c: Canvas,
+        linkedin_data: LinkedInData,
+        personal_information: PersonalInformation,
+        layout_cfg: LayoutConfig,
+        styles_config: StylesConfig,
+        styles: StyleSheet1,
+        spacing: SpacingConfig,
+    ) -> None:
+        self.sidebar_drawer.draw_sidebar(
+            c=c,
+            linkedin_data=linkedin_data,
+            personal_information=personal_information,
+            layout_cfg=layout_cfg,
+            styles_config=styles_config,
+            styles=styles,
+            spacing=spacing,
+        )
 
-    def draw_positions(self, *, c: Canvas, cfg: PositionsDrawCfg, styles: StyleSheet1, draw_config: DrawCVConfig) -> DrawPositionsResult:
-        return self.positions_drawer.draw_positions(c=c, cfg=cfg, styles=styles, draw_config=draw_config)
+    def draw_positions(
+        self,
+        *,
+        c: Canvas,
+        linkedin_data: LinkedInData,
+        layout_cfg: LayoutConfig,
+        styles: StyleSheet1,
+        spacing: SpacingConfig,
+    ) -> DrawPositionsResult:
+        return self.positions_drawer.draw_positions(
+            c=c,
+            linkedin_data=linkedin_data,
+            layout_cfg=layout_cfg,
+            styles=styles,
+            spacing=spacing,
+        )

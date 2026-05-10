@@ -1,27 +1,9 @@
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel
 from reportlab.lib.units import mm
 
-from src.core.entities.config import DrawCVConfig, SizesCV
-from src.core.entities.linkedin_data import LinkedInData
-from src.core.entities.personal_information import PersonalInformation
-from src.core.entities.styles_config import StylesConfig
-
-
-class SidebarDrawCfg(BaseModel):
-    linkedin_data: LinkedInData
-    personal_information: PersonalInformation
-    path_photo: Path
-    is_photo_circle: bool = True
-    sizes_cv: SizesCV
-    styles_config: StylesConfig
-
-
-class PositionsDrawCfg(BaseModel):
-    linkedin_data: LinkedInData
-    sizes_cv: SizesCV
+from src.core.entities.config import LayoutConfig, SpacingConfig
 
 
 class PositionsLayoutDTO(BaseModel):
@@ -33,16 +15,16 @@ class PositionsLayoutDTO(BaseModel):
     icon_size_pt: float
 
     @classmethod
-    def from_positions_and_draw_config(cls, *, positions_cfg: PositionsDrawCfg, draw_config: DrawCVConfig) -> "PositionsLayoutDTO":
-        body_x = positions_cfg.sizes_cv.margin_left_pt + positions_cfg.sizes_cv.column_left_width_pt + draw_config.sidebar_to_body_gap_mm * mm
-        body_start_y = positions_cfg.sizes_cv.page_height - positions_cfg.sizes_cv.margin_pt
+    def from_config(cls, *, layout_cfg: LayoutConfig, spacing: SpacingConfig) -> "PositionsLayoutDTO":
+        body_x = layout_cfg.margin_left_pt + layout_cfg.column_left_width_pt + spacing.sidebar_to_body_gap_mm * mm
+        body_start_y = layout_cfg.page_height - layout_cfg.margin_pt
         return cls(
             body_x=body_x,
-            line_anchor_x=body_x + draw_config.dist_line_spacing_left_mm * mm,
-            body_width=positions_cfg.sizes_cv.page_width - body_x - positions_cfg.sizes_cv.margin_pt,
+            line_anchor_x=body_x + spacing.dist_line_spacing_left_mm * mm,
+            body_width=layout_cfg.page_width - body_x - layout_cfg.margin_pt,
             body_start_y=body_start_y,
-            usable_height=body_start_y - positions_cfg.sizes_cv.margin_pt,
-            icon_size_pt=draw_config.len_python_icon_mm * mm,
+            usable_height=body_start_y - layout_cfg.margin_pt,
+            icon_size_pt=spacing.len_python_icon_mm * mm,
         )
 
 

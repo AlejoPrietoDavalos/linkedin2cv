@@ -1,26 +1,21 @@
 """Servicio de construcción del CV en PDF."""
 
 from pathlib import Path
-from typing import Optional
 import logging
 
 import fitz
-from reportlab.lib.styles import StyleSheet1
 from reportlab.pdfgen.canvas import Canvas
 
 from src.app.drivers.build_cv._pdf_line_drawer import PDFLineDrawer
 from src.app.drivers.draw_cv.service import DrawCVService
-from src.app.drivers.styles_repository import StylesRepository
+from src.app.drivers.styles_repository import LayoutRepository, SpacingRepository, StylesRepository
 from src.core.constants import PATH_PHOTO
 from src.core.drivers.builder import CoreBuilderCV
 from src.core.entities import (
-    BuilderCVConfig,
     DividerLine,
     DrawPositionsResult,
     LinkedInData,
     PersonalInformation,
-    PositionsDrawCfg,
-    SidebarDrawCfg,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,8 +27,8 @@ class BuildCVService(CoreBuilderCV):
     def __init__(
         self,
         *,
-        draw_cv_service: Optional[DrawCVService] = None,
-        pdf_line_drawer: Optional[PDFLineDrawer] = None,
+        draw_cv_service: DrawCVService | None = None,
+        pdf_line_drawer: PDFLineDrawer | None = None,
     ):
         self.draw_cv_service = draw_cv_service or DrawCVService()
         self.pdf_line_drawer = pdf_line_drawer or PDFLineDrawer()
@@ -45,44 +40,34 @@ class BuildCVService(CoreBuilderCV):
         personal_information: PersonalInformation,
         linkedin_data: LinkedInData,
         font_name: str,
-        cfg_builder: Optional[BuilderCVConfig] = None,
     ) -> DrawPositionsResult:
         logger.info("==================== Creando CV ====================")
         if not PATH_PHOTO.exists():
             raise FileNotFoundError(f"No existe la foto de perfil: {PATH_PHOTO}")
 
-        cfg_builder = cfg_builder or BuilderCVConfig()
-        canvas = Canvas(str(path_pdf), pagesize=cfg_builder.sizes.page_size)
-
+        layout_cfg = LayoutRepository.load()
+        spacing = SpacingRepository.load()
         styles_config = StylesRepository.load()
-        styles: StyleSheet1 = StylesRepository.build_stylesheet(styles_config, font_name)
+        styles = StylesRepository.build_stylesheet(styles_config, font_name)
 
-        self.draw_cv_service.draw_background(
-            c=canvas,
-            styles_config=styles_config,
-            sizes_cv=cfg_builder.sizes,
-        )
+        canvas = Canvas(str(path_pdf), pagesize=layout_cfg.page_size)
+
+        self.draw_cv_service.draw_background(c=canvas, styles_config=styles_config, layout_cfg=layout_cfg)
         self.draw_cv_service.draw_sidebar(
             c=canvas,
-            cfg=SidebarDrawCfg(
-                linkedin_data=linkedin_data,
-                personal_information=personal_information,
-                path_photo=PATH_PHOTO,
-                is_photo_circle=cfg_builder.draw.is_photo_circle,
-                sizes_cv=cfg_builder.sizes,
-                styles_config=styles_config,
-            ),
+            linkedin_data=linkedin_data,
+            personal_information=personal_information,
+            layout_cfg=layout_cfg,
+            styles_config=styles_config,
             styles=styles,
-            draw_config=cfg_builder.draw,
+            spacing=spacing,
         )
         positions_result = self.draw_cv_service.draw_positions(
             c=canvas,
-            cfg=PositionsDrawCfg(
-                linkedin_data=linkedin_data,
-                sizes_cv=cfg_builder.sizes,
-            ),
+            linkedin_data=linkedin_data,
+            layout_cfg=layout_cfg,
             styles=styles,
-            draw_config=cfg_builder.draw,
+            spacing=spacing,
         )
         canvas.save()
         logger.info(f">>>>> Export PDF: {path_pdf}")

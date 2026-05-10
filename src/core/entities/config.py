@@ -1,11 +1,11 @@
 from typing import Tuple
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 
 
-class DrawCVConfig(BaseModel):
+class SpacingConfig(BaseModel):
     dist_between_title_sidebar_to_text: int = 5
     dist_python_icon_to_title: int = 4
     dist_between_links: int = 1
@@ -23,7 +23,7 @@ class DrawCVConfig(BaseModel):
     is_photo_circle: bool = True
 
 
-class SizesCV(BaseModel):
+class LayoutConfig(BaseModel):
     page_size: Tuple[float, float] = A4
     margin: int = 5
     margin_left: int = 5
@@ -62,8 +62,3 @@ class SizesCV(BaseModel):
     @property
     def photo_y(self) -> float:
         return self.page_height - self.photo_size_pt - self.photo_top_padding_mm * mm
-
-
-class BuilderCVConfig(BaseModel):
-    draw: DrawCVConfig = Field(default_factory=DrawCVConfig)
-    sizes: SizesCV = Field(default_factory=SizesCV)

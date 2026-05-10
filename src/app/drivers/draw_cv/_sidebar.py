@@ -14,7 +14,10 @@ from src.app.drivers.draw_cv._sidebar_tools import (
     SidebarPhotoDrawer,
     SidebarSectionsContentDrawer,
 )
-from src.core.entities import DrawCVConfig, SidebarDrawCfg
+from src.core.entities.config import LayoutConfig, SpacingConfig
+from src.core.entities.linkedin_data import LinkedInData
+from src.core.entities.personal_information import PersonalInformation
+from src.core.entities.styles_config import StylesConfig
 
 
 class SidebarDrawer:
@@ -38,15 +41,18 @@ class SidebarDrawer:
         self,
         *,
         c: Canvas,
-        cfg: SidebarDrawCfg,
+        linkedin_data: LinkedInData,
+        personal_information: PersonalInformation,
+        layout_cfg: LayoutConfig,
+        styles_config: StylesConfig,
         styles: StyleSheet1,
-        draw_config: DrawCVConfig,
+        spacing: SpacingConfig,
     ) -> None:
-        self.background_drawer.draw(c=c, cfg=cfg)
-        self.photo_drawer.draw(c=c, cfg=cfg)
+        self.background_drawer.draw(c=c, layout_cfg=layout_cfg, styles_config=styles_config)
+        self.photo_drawer.draw(c=c, layout_cfg=layout_cfg, spacing=spacing)
         content: List[Paragraph | Spacer] = []
-        content.extend(self.header_content_drawer.build(cfg=cfg, styles=styles, draw_config=draw_config))
-        content.extend(self.personal_info_drawer.build(cfg=cfg, styles=styles, draw_config=draw_config))
-        content.extend(self.sections_content_drawer.build(cfg=cfg, styles=styles, draw_config=draw_config))
-        frame = self.frame_builder.build(cfg=cfg, draw_config=draw_config)
+        content.extend(self.header_content_drawer.build(linkedin_data=linkedin_data, styles=styles, spacing=spacing))
+        content.extend(self.personal_info_drawer.build(personal_information=personal_information, styles=styles, spacing=spacing))
+        content.extend(self.sections_content_drawer.build(linkedin_data=linkedin_data, styles=styles, spacing=spacing))
+        frame = self.frame_builder.build(layout_cfg=layout_cfg, spacing=spacing)
         frame.addFromList(content, c)
