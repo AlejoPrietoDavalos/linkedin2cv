@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Optional
+import logging
 
 import fitz
 from reportlab.lib.styles import StyleSheet1
@@ -14,7 +15,9 @@ from src.core.drivers.builder import CoreBuilderCV
 from src.core.entities import (
     BackgroundDrawCfg,
     BuilderCVConfig,
+    DividerLine,
     DrawCVConfig,
+    DrawPositionsResult,
     LinkedinData,
     PersonalInformation,
     PhotoDrawCfg,
@@ -38,8 +41,6 @@ class BuildCVService(CoreBuilderCV):
     ):
         self.draw_cv_service = draw_cv_service or DrawCVService()
         self.pdf_line_drawer = pdf_line_drawer or PDFLineDrawer()
-        self.divider_lines = []
-        self.line_anchor_x: float | None = None
 
     def build_and_save(
         self,
@@ -116,6 +117,7 @@ class BuildCVService(CoreBuilderCV):
         self,
         *,
         path_pdf: Path,
+        lines: list[DividerLine],
         color: tuple[float, float, float] = (1, 0, 0),
         width: float = 1.0,
     ) -> None:
@@ -127,12 +129,15 @@ class BuildCVService(CoreBuilderCV):
           durante la etapa de render de posiciones.
         """
         # FIXME: Desactivado temporalmente. Las líneas salen rojas y fuera de posición.
-        # doc = fitz.open(path_pdf)
-        # if len(doc) != 1:
-        #     doc.close()
-        #     raise ValueError(f"Se esperaba un PDF de 1 página para dibujar líneas, pero se encontraron {len(doc)}.")
-        # page = doc[0]
-        # self.pdf_line_drawer.draw_lines(page=page, lines=self.divider_lines, color=color, width=width)
-        # doc.saveIncr()
-        # doc.close()
-        _ = (path_pdf, color, width)
+        flag = False
+        if not flag:
+            logger.warning(">>>>> BUG: Desactivado `draw_lines` (líneas rojas/fuera de posición).")
+        else:
+            doc = fitz.open(path_pdf)
+            if len(doc) != 1:
+                doc.close()
+                raise ValueError(f"Se esperaba un PDF de 1 página para dibujar líneas, pero se encontraron {len(doc)}.")
+            page = doc[0]
+            self.pdf_line_drawer.draw_lines(page=page, lines=lines, color=color, width=width)
+            doc.saveIncr()
+            doc.close()

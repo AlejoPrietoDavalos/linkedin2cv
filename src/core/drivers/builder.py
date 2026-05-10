@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional
 
-from src.core.entities import BuilderCVConfig, LinkedinData, PersonalInformation, SizesCV, StyleCV
+from src.core.entities import BuilderCVConfig, DividerLine, DrawPositionsResult, LinkedinData, PersonalInformation, SizesCV, StyleCV
 
 
 class CoreBuilderCV(ABC):
@@ -20,7 +20,7 @@ class CoreBuilderCV(ABC):
         style_cv: Optional[StyleCV] = None,
         sizes_cv: Optional[SizesCV] = None,
         cfg_builder: Optional[BuilderCVConfig] = None,
-    ) -> None:
+    ) -> DrawPositionsResult:
         """Construye y guarda el CV en PDF."""
         pass
     
@@ -29,6 +29,7 @@ class CoreBuilderCV(ABC):
         self,
         *,
         path_pdf: Path,
+        lines: list[DividerLine],
         color: tuple[float, float, float] = (1, 0, 0),
         width: float = 1.0,
     ) -> None:
