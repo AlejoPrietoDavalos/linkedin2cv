@@ -1,8 +1,10 @@
-from typing import Optional, List, Dict, Any, Type
+from typing import List, Dict, Any, Type, TypeVar
+from pathlib import Path
 import logging
 import json
 
 import pandas as pd
+from pydantic import BaseModel
 
 from src.core.entities.linkedin_data import Profile, Position, Education, LinkedinData
 from src.core.entities.job_ids import JobIdsConfig
@@ -15,76 +17,56 @@ from src.core.constants import (
     ensure_runtime_config_file,
 )
 from src.core.drivers.linkedin_csv_repository import CoreLinkedinCSVRepository
-from src.core.hardcoded_config import (
-    REPLACE_BULLET_ARROW,
-    REPLACE_BULLET_DOT,
-    REPLACE_BULLET_SQUARE,
-)
 
 logger = logging.getLogger(__name__)
+TModel = TypeVar("TModel", bound=BaseModel)
 
 
 def _nan2none(v):
     return None if pd.isna(v) else v
 
 
-def _read_dataframe(path_csv):
-    return pd.read_csv(path_csv)
-
-
-def _apply_visible_text_replacements(value: Optional[str]) -> Optional[str]:
-    if not isinstance(value, str):
-        return value
-    value = value.replace(*REPLACE_BULLET_ARROW)
-    value = value.replace(*REPLACE_BULLET_DOT)
-    value = value.replace(*REPLACE_BULLET_SQUARE)
-    return value
-
-
-class _LinkedinRowFormatter:
-    @staticmethod
-    def format_key(key: str) -> str:
+class LinkedinCSVRowFormatter:
+    def format_key(self, key: str) -> str:
         return key.lower().replace(" ", "_")
 
-    @staticmethod
-    def format_value(v: Optional[str]) -> Optional[str]:
-        v = _nan2none(v)
-        return _apply_visible_text_replacements(v)
-
-    @staticmethod
-    def format_row(*, row: pd.Series) -> Dict[str, Any]:
+    def format_row(self, *, row: pd.Series) -> Dict[str, Any]:
         row_dict: Dict[str, Any] = row.to_dict()
-        return {
-            _LinkedinRowFormatter.format_key(k): _LinkedinRowFormatter.format_value(v)
-            for k, v in row_dict.items()
-        }
+        return {self.format_key(k): _nan2none(v) for k, v in row_dict.items()}
+
+    def _pick_model_fields(
+        self, *, data: Dict[str, Any], model_cls: Type[TModel]
+    ) -> Dict[str, Any]:
+        return {k: v for k, v in data.items() if k in model_cls.model_fields}
+
+    def build_model_from_row(self, *, row: pd.Series, model_cls: Type[TModel]) -> TModel:
+        data = self.format_row(row=row)
+        return model_cls(**self._pick_model_fields(data=data, model_cls=model_cls))
+
+    def build_models_from_dataframe(
+        self, *, df: pd.DataFrame, model_cls: Type[TModel]
+    ) -> List[TModel]:
+        return [self.build_model_from_row(row=row, model_cls=model_cls) for _, row in df.iterrows()]
 
 
-def _pick_model_fields(data: Dict[str, Any], model_cls: Type) -> Dict[str, Any]:
-    return {k: v for k, v in data.items() if k in model_cls.model_fields}
-
-
-class _LinkedinJobIdAttacher:
-    @staticmethod
-    def _load_job_ids_config() -> JobIdsConfig:
+class LinkedinJobIdAttacher:
+    def _load_job_ids_config(self) -> JobIdsConfig:
         path_job_ids = ensure_runtime_config_file(PATH_JOB_IDS.name)
         raw = json.loads(path_job_ids.read_text(encoding="utf-8"))
         config = JobIdsConfig.model_validate(raw)
-        _LinkedinJobIdAttacher._validate_unique_job_ids(config)
+        self._validate_unique_job_ids(config)
         return config
 
-    @staticmethod
-    def _validate_unique_job_ids(config: JobIdsConfig) -> None:
+    def _validate_unique_job_ids(self, config: JobIdsConfig) -> None:
         all_job_ids = [entry.job_id for entry in config.jobs]
         duplicates = sorted({job_id for job_id in all_job_ids if all_job_ids.count(job_id) > 1})
         if duplicates:
             raise RuntimeError(f"job_id duplicados en config/job_ids.json: {duplicates}")
 
-    @staticmethod
-    def attach(positions: List[Position]) -> None:
-        logger.info(f"==================== Attach JobId - {PATH_JOB_IDS} ====================")
-        config = _LinkedinJobIdAttacher._load_job_ids_config()
-        company_to_job_id = {entry.company_name: entry.job_id for entry in config.jobs}
+    def attach(self, positions: List[Position]) -> None:
+        logger.info(f">>>>> Attach JobId: {PATH_JOB_IDS}")
+        config = self._load_job_ids_config()
+        company_to_job_id = {job.company_name: job.job_id for job in config.jobs}
 
         for position in positions:
             position.job_id = company_to_job_id.get(position.company_name)
@@ -98,39 +80,41 @@ class _LinkedinJobIdAttacher:
 
 
 class LinkedinCSVRepository(CoreLinkedinCSVRepository):
-    def __init__(self) -> None:
-        ...
+    def __init__(
+        self,
+        row_formatter: LinkedinCSVRowFormatter = None,
+        job_id_attacher: LinkedinJobIdAttacher = None,
+    ) -> None:
+        self.row_formatter = row_formatter or LinkedinCSVRowFormatter()
+        self.job_id_attacher = job_id_attacher or LinkedinJobIdAttacher()
+
+    @staticmethod
+    def _read_dataframe(path_csv: Path):
+        # LinkedIn exports are consumed by string-based domain models; reading as text
+        # avoids pandas inferring ints (e.g. 2015) that later fail strict Pydantic validation.
+        return pd.read_csv(path_csv, dtype=str)
 
     def _load_profile(self) -> Profile:
-        row = _read_dataframe(PATH_LINKEDIN_PROFILE).iloc[0]
-        data = _LinkedinRowFormatter.format_row(row=row)
-        return Profile(**_pick_model_fields(data, Profile))
+        row = self._read_dataframe(PATH_LINKEDIN_PROFILE).iloc[0]
+        return self.row_formatter.build_model_from_row(row=row, model_cls=Profile)
 
     def _load_positions(self) -> List[Position]:
-        df = _read_dataframe(PATH_LINKEDIN_POSITIONS)
-        positions = [
-            Position(**_pick_model_fields(_LinkedinRowFormatter.format_row(row=row), Position))
-            for _, row in df.iterrows()
-        ]
-        _LinkedinJobIdAttacher.attach(positions)
+        df = self._read_dataframe(PATH_LINKEDIN_POSITIONS)
+        positions = self.row_formatter.build_models_from_dataframe(df=df, model_cls=Position)
+        self.job_id_attacher.attach(positions)
         return positions
 
     def _load_educations(self) -> List[Education]:
-        df = _read_dataframe(PATH_LINKEDIN_EDUCATION)
-        df["Start Date"] = df["Start Date"].apply(lambda t: None if pd.isna(t) else str(int(t)))
-        df["End Date"] = df["End Date"].apply(lambda t: None if pd.isna(t) else str(int(t)))
-        return [
-            Education(**_pick_model_fields(_LinkedinRowFormatter.format_row(row=row), Education))
-            for _, row in df.iterrows()
-        ]
+        df = self._read_dataframe(PATH_LINKEDIN_EDUCATION)
+        return self.row_formatter.build_models_from_dataframe(df=df, model_cls=Education)
 
     def load_linkedin_data(self) -> LinkedinData:
+        logger.info(f"==================== LinkedIn Data ====================")
         linkedin_data = LinkedinData(
             profile=self._load_profile(),
             positions=self._load_positions(),
             educations=self._load_educations(),
         )
-        logger.info(f"==================== LinkedIn Data ====================")
         logger.info(f">>>>> Path data: {PATH_FOLDER_DATA}")
         logger.info(f">>>>> len(positions)={len(linkedin_data.positions)}")
         logger.info(f">>>>> len(educations)={len(linkedin_data.educations)}")

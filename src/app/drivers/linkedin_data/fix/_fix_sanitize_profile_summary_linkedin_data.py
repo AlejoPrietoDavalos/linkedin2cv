@@ -1,5 +1,6 @@
 import re
 
+from src.app.drivers.linkedin_data.fix._fix_common import LinkedinDataFixCommon
 from src.app.drivers.linkedin_data.fix._core import CoreLinkedinDataFix
 from src.core.entities.linkedin_data import LinkedinData
 
@@ -17,6 +18,9 @@ class FixSanitizeProfileSummaryLinkedinData(CoreLinkedinDataFix):
         flags=re.IGNORECASE,
     )
 
+    def __init__(self, common: LinkedinDataFixCommon = None) -> None:
+        self.common = common or LinkedinDataFixCommon()
+
     def apply(self, linkedin_data: LinkedinData) -> None:
         summary = linkedin_data.profile.summary
         summary, replaced_count = self._PROFILE_WEBSITE_PATTERN.subn(" ", summary)
@@ -24,4 +28,4 @@ class FixSanitizeProfileSummaryLinkedinData(CoreLinkedinDataFix):
             raise ValueError(
                 "No se encontró el patrón esperado de 'Mi página web' en profile.summary."
             )
-        linkedin_data.profile.summary = summary.strip()
+        linkedin_data.profile.summary = self.common.trim_html_break_edges(summary)
